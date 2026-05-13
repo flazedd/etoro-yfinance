@@ -1,0 +1,76 @@
+# docker-compose for ibkr-portfolio-connect on a Raspberry Pi (arm64) or
+# any amd64 host. Two services:
+#
+#   ibeam       — long-running gateway with headless auto-login.
+#   rebalancer  — oneshot triggered by host cron.
+#
+# Bring up the gateway once:
+#     docker compose up -d ibeam
+#
+# Run the rebalancer (cron does this monthly):
+#     docker compose run --rm rebalancer
+#
+# Add a dry-run flag the first few times:
+#     docker compose run --rm rebalancer --dry-run
+
+services:
+  ibeam:
+    image: voyz/ibeam:latest
+    container_name: ibeam
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # ---------------------------------------------------------------
+      # NOTE: IBeam's exact environment-variable names have changed
+      # between releases. The mapping below reflects IBeam 0.5.x as of
+      # late 2024 — VERIFY against the IBeam README that ships with the
+      # tag you pin (https://github.com/Voyz/ibeam) before relying on a
+      # monthly cron. If a name is wrong, IBeam will log a clear error
+      # at startup; fix and `docker compose up -d ibeam` again.
+      # ---------------------------------------------------------------
+      IBEAM_ACCOUNT: ${IBKR_USERNAME}
+      IBEAM_PASSWORD: ${IBKR_PASSWORD}
+      # TOTP-based 2FA. IBeam's "GOOGLE_MSGR" handler consumes a base32
+      # TOTP secret. Variable name may be IBEAM_KEY or IBEAM_TOTP_SECRET
+      # depending on version; we set both to be safe.
+      IBEAM_TWO_FA_HANDLER: GOOGLE_MSGR
+      IBEAM_KEY: ${IBKR_TOTP_SECRET}
+      IBEAM_TOTP_SECRET: ${IBKR_TOTP_SECRET}
+      # Smoothing knobs — bump if your network is slow.
+      IBEAM_GATEWAY_STARTUP: 30
+      IBEAM_MAX_FAILED_AUTH: 3
+    ports:
+      # Local-only by default. Bind to 127.0.0.1 so nothing on your LAN
+      # can talk to the gateway directly.
+      - "127.0.0.1:5000:5000"
+    healthcheck:
+      # auth/status is POST; -X POST and -k for the self-signed cert.
+      test:
+        - "CMD-SHELL"
+        - "curl -fsSk -X POST https://localhost:5000/v1/api/iserver/auth/status > /dev/null"
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks: [ibkr]
+
+  rebalancer:
+    build:
+      context: .
+    image: ibkr-portfolio-connect:latest
+    env_file: .env
+    environment:
+      # Inside the compose network the gateway hostname is `ibeam`.
+      IBKR_GATEWAY_URL: https://ibeam:5000
+      IBKR_GATEWAY_VERIFY_SSL: "false"
+    depends_on:
+      ibeam:
+        condition: service_healthy
+    # Do NOT start automatically; cron triggers via `docker compose run`.
+    profiles: ["manual"]
+    restart: "no"
+    networks: [ibkr]
+
+networks:
+  ibkr:
+    driver: bridge

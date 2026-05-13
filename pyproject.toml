@@ -1,0 +1,98 @@
+[project]
+name = "ibkr-portfolio-connect"
+version = "0.1.0"
+description = "Monthly auto-rebalancer for an Interactive Brokers account against a target portfolio served as JSON over HTTP. Runs on a Raspberry Pi via docker-compose + cron."
+readme = "README.md"
+authors = [
+    { name = "Flazed", email = "35650338+flazedd@users.noreply.github.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "python-dotenv>=1.2.2",
+    "typer>=0.25.1",
+]
+
+[project.scripts]
+ibkr-portfolio-connect = "ibkr_portfolio_connect:main"
+
+[build-system]
+requires = ["uv_build>=0.9.2,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.152.6",
+    "mypy>=2.1.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-specific
+    "N",    # pep8-naming
+    "PT",   # flake8-pytest-style
+    "PTH",  # use pathlib
+    "RET",  # flake8-return
+    "TID",  # flake8-tidy-imports
+]
+ignore = [
+    "E501",  # line too long — formatter handles wrapping; long URLs/docstrings ok
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+    "S101",  # assert allowed in tests
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+warn_unused_ignores = true
+show_error_codes = true
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+# pytest's monkeypatch / fixtures are typed loosely; relax in test files only
+module = "tests.*"
+disallow_untyped_decorators = false
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+testpaths = ["tests"]
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/ibkr_portfolio_connect"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-05-12T12:00:00Z",
+  "base_currency": "USD",
+  "cash_buffer_pct": 0.5,
+  "positions": [
+    { "symbol": "VTI",  "exchange": "ARCA",   "asset_class": "STK", "weight_pct": 60.0 },
+    { "symbol": "VXUS", "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 30.0 },
+    { "symbol": "BND",  "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 9.5 }
+  ]
+}
