@@ -2,8 +2,10 @@
 
 Two modes:
   - dry_run=True  → return a summary marking every trade as DRY_RUN; no calls.
-  - dry_run=False → place each trade as MKT DAY, confirm any warning replies,
-                    poll order_status until terminal or timeout.
+  - dry_run=False → place each trade as MIDPRICE DAY, confirm any warning replies,
+                    poll order_status until terminal or timeout. On Filled,
+                    extract avg fill price + commission from the status blob
+                    so the slippage report can compare against reference.
 
 Per IBKR docs we never place a second order before the first has been fully
 acknowledged ("when no further warnings are received deferring to /reply").
@@ -17,6 +19,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from datetime import time as dtime
+from decimal import Decimal, InvalidOperation
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from .ibkr_client import IBKRClient, IBKRError, PlaceOrderReply
@@ -47,6 +51,10 @@ class TradeResult:
     order_id: str | None = None
     final_status: str | None = None
     error: str | None = None
+    # Populated after a Filled status. IBKR's order_status fields drift between
+    # versions; these may be None even on success if IBKR didn't surface them.
+    fill_price: Decimal | None = None
+    commission: Decimal | None = None
 
     @property
     def label(self) -> str:
@@ -148,7 +156,7 @@ def _execute_single(
     clock: Callable[[], float],
     sleeper: Callable[[float], None],
 ) -> TradeResult:
-    replies = client.place_market_day_order(
+    replies = client.place_midprice_day_order(
         account_id,
         conid=trade.conid,
         side=trade.side,
@@ -164,7 +172,7 @@ def _execute_single(
             error="reply chain produced neither order_id nor error",
         )
 
-    status, status_err = _poll_status(
+    status, status_err, last_blob = _poll_status(
         client=client,
         order_id=order_id,
         settle_timeout=settle_timeout,
@@ -172,8 +180,17 @@ def _execute_single(
         clock=clock,
         sleeper=sleeper,
     )
+    fill_price = _extract_fill_price(last_blob) if last_blob else None
+    commission = _extract_commission(last_blob) if last_blob else None
     if status == "Filled":
-        return TradeResult(trade=trade, success=True, order_id=order_id, final_status=status)
+        return TradeResult(
+            trade=trade,
+            success=True,
+            order_id=order_id,
+            final_status=status,
+            fill_price=fill_price,
+            commission=commission,
+        )
     if status in {"Cancelled", "Rejected", "Inactive"}:
         return TradeResult(
             trade=trade,
@@ -195,6 +212,8 @@ def _execute_single(
         success=True,
         order_id=order_id,
         final_status=status,
+        fill_price=fill_price,
+        commission=commission,
     )
 
 
@@ -238,12 +257,19 @@ def _poll_status(
     poll_interval: float,
     clock: Callable[[], float],
     sleeper: Callable[[float], None],
-) -> tuple[str | None, str | None]:
-    """Poll until a terminal status or timeout. Returns (status, error)."""
+) -> tuple[str | None, str | None, dict[str, Any] | None]:
+    """Poll until a terminal status or timeout.
+
+    Returns (status, error, last_blob). The last_blob is the most recent
+    order_status response we received and carries fill_price / commission
+    fields when the order has filled.
+    """
     deadline = clock() + settle_timeout
     last_status: str | None = None
+    last_blob: dict[str, Any] | None = None
     while True:
         blob = client.order_status(order_id)
+        last_blob = blob
         status = (
             str(
                 blob.get("order_status") or blob.get("status") or blob.get("order_ccp_status") or ""
@@ -254,7 +280,7 @@ def _poll_status(
             last_status = status
         if status in TERMINAL_STATUSES:
             err = str(blob.get("error", "")) or None if status != "Filled" else None
-            return status, err
+            return status, err, last_blob
         if clock() >= deadline:
             log.warning(
                 "order %s did not terminate within %.1fs (last status: %r)",
@@ -262,5 +288,36 @@ def _poll_status(
                 settle_timeout,
                 last_status,
             )
-            return last_status, None
+            return last_status, None, last_blob
         sleeper(poll_interval)
+
+
+def _extract_fill_price(blob: dict[str, Any]) -> Decimal | None:
+    """IBKR field name drift: try the known aliases for average fill price."""
+    for key in ("avg_price", "avgPrice", "average_price", "price"):
+        v = blob.get(key)
+        if v in (None, ""):
+            continue
+        try:
+            d = Decimal(str(v))
+        except (InvalidOperation, ValueError):
+            continue
+        if d > 0:
+            return d
+    return None
+
+
+def _extract_commission(blob: dict[str, Any]) -> Decimal | None:
+    """IBKR usually surfaces commission on the order_status response for
+    filled orders. Field names vary; this is best-effort. If None, the
+    slippage report shows commission as 'not reported.'
+    """
+    for key in ("commission", "comm", "commission_amount", "commissions"):
+        v = blob.get(key)
+        if v in (None, ""):
+            continue
+        try:
+            return Decimal(str(v))
+        except (InvalidOperation, ValueError):
+            continue
+    return None

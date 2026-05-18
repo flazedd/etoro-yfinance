@@ -1,5 +1,7 @@
 # ibkr-portfolio-connect
 
+[![CI](https://github.com/flazedd/ibkr-portfolio-connect/actions/workflows/ci.yml/badge.svg)](https://github.com/flazedd/ibkr-portfolio-connect/actions/workflows/ci.yml)
+
 Monthly auto-rebalancer for an Interactive Brokers account. A cron job on a
 Raspberry Pi fetches a target portfolio (JSON over HTTP), reads current IBKR
 positions, and places the minimal set of trades to bring the account in line
@@ -23,79 +25,200 @@ with the target.
             │   4. place market DAY orders     │
             │   5. notify success/failure      │
             └────────────┬─────────────────────┘
-                         │ HTTPS (localhost:5000)
-                         ▼
-            ┌──────────────────────────────────┐
-            │  IBeam (Dockerized)              │   long-running service
-            │  - headless Chrome auto-login    │
-            │  - hosts IBKR Client Portal      │
-            │    Gateway (cpapi-v1)            │
-            └────────────┬─────────────────────┘
-                         │ HTTPS
+                         │ HTTPS (OAuth 1.0a, signed)
                          ▼
                 Interactive Brokers
+                (api.ibkr.com / CP Web API v1)
 ```
+
+No long-running gateway or browser-based auto-login process is involved.
+The rebalancer signs every request with a private key it loads at startup
+and talks to IBKR directly.
 
 ## Key choices
 
 - **API:** IBKR Client Portal API v1 (cpapi-v1). Offline docs are mirrored
   under [`docs/ibkr/`](docs/ibkr/).
-- **Auth:** [IBeam](https://github.com/Voyz/ibeam) handles unattended login
-  (username + password + TOTP). Without it, sessions die and the cron job
-  fails silently.
+- **Auth:** OAuth 1.0a via [IBind](https://github.com/Voyz/ibind). One-time
+  enrollment generates a consumer key + access token tied to a local RSA
+  keypair; thereafter the rebalancer runs headlessly with no 2FA prompts
+  and no gateway process. (The earlier IBeam + TOTP design has been removed.)
 - **Rebalance mode:** diff-and-minimize — only buy/sell the deltas, never
   full liquidate.
 - **Order type:** market DAY (liquid ETFs, easy to reason about).
 - **Shares:** whole shares only in v1; leftover stays in the cash buffer.
 - **Notifications:** ntfy.sh push (set `NTFY_TOPIC` in `.env`). Failures
   always send `priority: high`.
-- **Stack:** Python 3.11, `uv`, `httpx`, `pydantic`, `typer`.
+- **Stack:** Python 3.11, `uv`, `httpx`, `pydantic`, `typer`, `ibind`.
 
-## Target portfolio schema
+## Target portfolio schema (v2)
 
 See [`examples/target-portfolio.example.json`](examples/target-portfolio.example.json)
 for the exact contract your producing service must satisfy. Summary:
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "generated_at": "<ISO-8601 UTC>",
   "base_currency": "USD",
   "cash_buffer_pct": 0.5,
   "positions": [
-    { "symbol": "...", "exchange": "...", "asset_class": "STK", "weight_pct": 99.5 }
+    {
+      "symbol": "...",
+      "exchange": "...",
+      "asset_class": "STK",
+      "weight_pct": 99.5,
+      "reference_price": 285.50,
+      "reference_price_at": "<ISO-8601 UTC>"
+    }
   ]
 }
 ```
 
-Rules: `sum(weight_pct) + cash_buffer_pct == 100`; v1 supports `STK` only
-(stocks + ETFs); `exchange` is the primary listing — the rebalancer resolves
-`symbol+exchange → conid` via the IBKR `secdef/search` endpoint and routes
-via SMART.
+Rules:
+
+- `sum(weight_pct) + cash_buffer_pct == 100`
+- `base_currency` must be `USD`
+- v2 supports `STK` only (stocks + ETFs)
+- `exchange` is the primary listing — the rebalancer resolves
+  `symbol+exchange → conid` via the IBKR `secdef/search` endpoint and routes
+  orders SMART
+- `reference_price` is the per-share price your producing service observed
+  when generating the target. The rebalancer uses it for share-count sizing
+  AND as the benchmark for slippage attribution. Use a recent price (this
+  morning's open / yesterday's close / whatever's freshest in your data).
+- `reference_price_at` is the timestamp the reference price was observed
+
+## Execution + slippage report
+
+Orders are placed as **MIDPRICE DAY** — IBKR pegs the order to the bid-ask
+midpoint and auto-adjusts as the market moves, giving you fills near mid on
+liquid ETFs without blind MKT slippage.
+
+After every run, the notification body includes a per-trade table and a
+total-cost summary line:
+
+```
+OK  BUY 5 VTI @ 285.42 slip +0.04%
+OK  BUY 3 BND @ 72.39 slip -0.01%
+total: $1.25 (0.01% of NAV)  slip $0.90  comm $0.35
+```
+
+Sign convention: positive slippage means "worse than reference" (paid more
+for a buy, received less for a sell); negative means savings. `total cost %
+of NAV` is your stated metric — what fraction of the account was spent on
+rebalancing (slippage + commissions).
 
 ## Configuration
 
 Copy [`.env.example`](.env.example) to `.env` and fill in. Never commit `.env`.
 
-The same `.env` file is consumed by both the rebalancer and IBeam.
+Required values fall into three groups:
+
+- **OAuth credentials** (`IBIND_OAUTH1A_*`) — see the [OAuth setup](#oauth-setup)
+  section below.
+- **Account** — `IBKR_ACCOUNT_ID` (paper `DUQxxxxxx` for testing, live
+  `Uxxxxxxx` for production).
+- **Target source** — `TARGET_PORTFOLIO_URL` and optional bearer token.
+
+### Multiple environment profiles (paper vs live)
+
+If you enroll OAuth separately for paper and live (recommended — paper is a
+separate enrollment per IBKR), you can keep two side-by-side profiles and
+toggle which one `.env` points at:
+
+```
+.env             # symlink → .env.live or .env.paper
+.env.live        # live OAuth credentials + Uxxxxxxx account
+.env.paper       # paper OAuth credentials + DUQxxxxxx account
+```
+
+Switch via the helper script:
+
+```bash
+uv run python scripts/use_env.py paper   # rebalancer now talks to paper
+uv run python scripts/use_env.py live    # rebalancer now talks to live
+uv run python scripts/use_env.py         # show current profile
+```
+
+All `.env.*` files are gitignored (only `.env.example` is tracked).
 
 ## Local development
 
 ```bash
 uv sync                                       # install deps
-uv run pytest -q                              # 144 tests, ~1 second
+uv run pytest -q                              # 129 tests, ~1 second
 uv run ruff check . && uv run ruff format --check .
 uv run mypy --strict src tests
 uv run ibkr-portfolio-connect --help          # CLI sanity check
 ```
 
-Run a real (non-dry) rebalance only after the gateway is up and you've
+Run a real (non-dry) rebalance only after OAuth is active and you've
 inspected `--dry-run` output:
 
 ```bash
 uv run ibkr-portfolio-connect --dry-run       # print planned trades, exit 0
 uv run ibkr-portfolio-connect                 # place orders
 ```
+
+## OAuth setup
+
+OAuth enrollment is a one-time process per IBKR account. Plan a week — IBKR
+activates new consumer keys on weekend server restarts and propagation can
+take several days.
+
+### 1. Generate keys locally
+
+```bash
+mkdir -p ~/ibkr-oauth && cd ~/ibkr-oauth
+openssl genrsa -out private_signature.pem 2048
+openssl rsa  -in private_signature.pem  -pubout -out public_signature.pem
+openssl genrsa -out private_encryption.pem 2048
+openssl rsa  -in private_encryption.pem -pubout -out public_encryption.pem
+openssl dhparam -out dhparam.pem 2048          # ~30s
+chmod 600 ~/ibkr-oauth/private_*.pem
+```
+
+### 2. Register at IBKR
+
+Open the OAuth self-service portal (force the US domain to avoid regional
+quirks):
+
+```
+https://ndcdyn.interactivebrokers.com/sso/Login?action=OAUTH&RL=1&ip2loc=US
+```
+
+- Invent a 9-character alphanumeric **Consumer Key** (e.g. via a password
+  generator). Store it in your password manager.
+- Upload `public_signature.pem`, `public_encryption.pem`, and `dhparam.pem`.
+- Submit — IBKR returns an **Access Token** and **Access Token Secret**.
+  Copy both into your password manager **immediately**; the page warns
+  they disappear on refresh.
+
+### 3. Extract the DH prime
+
+IBind wants the DH prime as a hex string, not the PEM file:
+
+```bash
+uv run python scripts/extract_dh_prime.py ~/ibkr-oauth/dhparam.pem
+```
+
+Paste the output into `IBIND_OAUTH1A_DH_PRIME` in `.env`.
+
+### 4. Wait for activation, then test
+
+```bash
+uv run python scripts/check_oauth.py
+```
+
+While IBKR is still propagating, you'll see:
+
+```
+{"error":"id: ...., error: invalid consumer","statusCode":401}
+```
+
+Once activation completes (typically next weekend) the same command prints
+your accounts and tickle response. That's the green light.
 
 ## Raspberry Pi deployment
 
@@ -113,28 +236,20 @@ sudo usermod -aG docker $USER
 git clone https://github.com/flazedd/ibkr-portfolio-connect.git
 cd ibkr-portfolio-connect
 cp .env.example .env
-$EDITOR .env                                  # fill in every blank
+$EDITOR .env                                  # fill in OAuth creds, account, target
 ```
 
-You'll need:
+### 3. Copy OAuth keys to the Pi
 
-- IBKR live username + password (NOT your paper username — use the live
-  trader name even if you point at a paper account).
-- The base32 TOTP secret you got when enrolling soft 2FA in the IBKR client
-  portal (IB Key → "I want to use a different method" → set up authenticator app).
-- The target portfolio URL your other service publishes.
-- A randomly-generated string for `NTFY_TOPIC` (anyone with the topic can
-  read your push, so make it long).
-
-### 3. Start the gateway
+The private keys generated on your dev machine in step 1 of [OAuth setup](#oauth-setup)
+need to live in `~/ibkr-oauth/` on the Pi (this path is referenced by
+`docker-compose.yml`):
 
 ```bash
-docker compose up -d ibeam
-docker compose logs -f ibeam                  # watch it log in
+# from your dev machine
+scp -r ~/ibkr-oauth pi@<pi-host>:~/ibkr-oauth
+ssh pi@<pi-host> 'chmod 600 ~/ibkr-oauth/private_*.pem'
 ```
-
-When you see `Client login succeeds` (or equivalent), the gateway is ready.
-The healthcheck should also turn green within ~90s.
 
 ### 4. Smoke-test the rebalancer
 
@@ -167,8 +282,7 @@ Notes:
   (`1`), or unrecoverable error (`2`). The ntfy push will already have told
   you which.
 - The job needs network access to (a) your target-portfolio URL and
-  (b) interactivebrokers.com (via the gateway). The Pi's clock must be
-  correct or the TOTP will fail — install `systemd-timesyncd` or `chrony`.
+  (b) `api.ibkr.com`.
 - For the first few months, run with `--dry-run` (edit the crontab line to
   add the flag) and confirm the proposed trades look sane before letting it
   loose.
@@ -185,6 +299,14 @@ service. Pick a random topic name and put it in `NTFY_TOPIC`:
 
 If `NTFY_TOPIC` is unset, the result is only logged — fine for testing,
 but you'll never know if a monthly run silently failed.
+
+To validate end-to-end delivery without running a full rebalance:
+
+```bash
+uv run python scripts/test_ntfy.py <topic>            # mixed success/failure
+uv run python scripts/test_ntfy.py <topic> --dry-run  # blue, normal priority
+uv run python scripts/test_ntfy.py <topic> --all-fail # red, priority: high
+```
 
 ## Offline API docs
 
@@ -205,14 +327,40 @@ src/ibkr_portfolio_connect/
 ├── pipeline.py        # orchestrator: fetch → read → compute → execute → notify
 ├── config.py          # pydantic-settings; reads .env
 ├── schema.py          # target portfolio + internal types (pydantic v2)
-├── ibkr_client.py     # cpapi-v1 wrapper (httpx; auth/orders/positions/market data)
+├── ibkr_client.py     # IBind+OAuth adapter (positions/orders/secdef/snapshots)
 ├── target.py          # HTTP-fetch the target JSON and validate
 ├── rebalance.py       # pure diff engine (whole-share, sorted SELL→BUY)
 ├── executor.py        # place orders, walk reply chain, poll status, dry-run
 └── notify.py          # ntfy.sh push notifier
+
+scripts/
+├── check_oauth.py        # standalone OAuth connectivity test
+├── extract_dh_prime.py   # one-off helper: dhparam.pem → hex string for .env
+├── place_trade.py        # ad-hoc one-shot trade against a chosen account
+├── test_ntfy.py          # send a fake push to validate ntfy setup
+├── test_target_fetch.py  # fetch + validate a local target portfolio
+└── use_env.py            # switch .env symlink between profiles (paper/live)
 ```
 
-## Known v1 limitations
+### Ad-hoc trade testing
+
+For one-off paper trades (independent of the monthly cron), use
+`scripts/place_trade.py`. Required: `--account` (paper `DUQxxxxxxx` is the
+safe default). Defaults to ARCA for conid resolution (works for most ETFs).
+
+```bash
+# Plan only, do not place:
+uv run python scripts/place_trade.py VOO BUY 1 --account DUQ970095 --dry-run
+
+# Place with confirmation prompt:
+uv run python scripts/place_trade.py VOO BUY 1 --account DUQ970095
+
+# For stocks on other listings:
+uv run python scripts/place_trade.py AAPL BUY 1 --account DUQ970095 --exchange NASDAQ
+```
+
+
+## Known limitations
 
 - **`base_currency` must be `USD`.** Multi-currency accounts are not supported.
 - **Stocks/ETFs only** (`asset_class: "STK"`). Options, futures, FX,
@@ -226,3 +374,6 @@ src/ibkr_portfolio_connect/
 - **No retry on individual trade failure.** If an order is rejected, the
   rebalancer reports the failure and continues with the remaining trades;
   the next month's run will pick up the slack.
+- **OAuth activation latency.** A freshly-registered consumer key only
+  works after IBKR's next weekend server restart (can be 1–2 weeks).
+  Plan accordingly.

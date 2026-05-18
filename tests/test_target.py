@@ -16,14 +16,35 @@ URL = "https://example.invalid/target.json"
 
 def _valid_body() -> dict[str, object]:
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": "2026-05-12T12:00:00Z",
         "base_currency": "USD",
         "cash_buffer_pct": 0.5,
         "positions": [
-            {"symbol": "VTI", "exchange": "ARCA", "asset_class": "STK", "weight_pct": 60.0},
-            {"symbol": "VXUS", "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 30.0},
-            {"symbol": "BND", "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 9.5},
+            {
+                "symbol": "VTI",
+                "exchange": "ARCA",
+                "asset_class": "STK",
+                "weight_pct": 60.0,
+                "reference_price": 285.50,
+                "reference_price_at": "2026-05-12T12:00:00Z",
+            },
+            {
+                "symbol": "VXUS",
+                "exchange": "NASDAQ",
+                "asset_class": "STK",
+                "weight_pct": 30.0,
+                "reference_price": 67.80,
+                "reference_price_at": "2026-05-12T12:00:00Z",
+            },
+            {
+                "symbol": "BND",
+                "exchange": "NASDAQ",
+                "asset_class": "STK",
+                "weight_pct": 9.5,
+                "reference_price": 72.40,
+                "reference_price_at": "2026-05-12T12:00:00Z",
+            },
         ],
     }
 
@@ -42,7 +63,7 @@ def test_fetch_ok() -> None:
         return httpx.Response(200, json=_valid_body())
 
     target = fetch_target_portfolio(URL, transport=_transport(handle))
-    assert target.schema_version == 1
+    assert target.schema_version == 2
     assert target.cash_buffer_pct == Decimal("0.5")
     assert target.generated_at == datetime(2026, 5, 12, 12, 0, 0, tzinfo=UTC)
     assert captured["url"] == URL
@@ -136,5 +157,5 @@ def test_canonical_example_file_validates() -> None:
         return httpx.Response(200, json=body)
 
     target = fetch_target_portfolio(URL, transport=_transport(handle))
-    assert target.schema_version == 1
+    assert target.schema_version == 2
     assert len(target.positions) >= 1

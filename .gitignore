@@ -129,6 +129,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -184,3 +186,4 @@ cython_debug/
 
 # Local env (never commit)
 .env
+.idea

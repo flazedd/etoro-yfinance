@@ -1,11 +1,32 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "generated_at": "2026-05-12T12:00:00Z",
   "base_currency": "USD",
   "cash_buffer_pct": 0.5,
   "positions": [
-    { "symbol": "VTI",  "exchange": "ARCA",   "asset_class": "STK", "weight_pct": 60.0 },
-    { "symbol": "VXUS", "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 30.0 },
-    { "symbol": "BND",  "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 9.5 }
+    {
+      "symbol": "VTI",
+      "exchange": "ARCA",
+      "asset_class": "STK",
+      "weight_pct": 60.0,
+      "reference_price": 285.50,
+      "reference_price_at": "2026-05-12T12:00:00Z"
+    },
+    {
+      "symbol": "VXUS",
+      "exchange": "NASDAQ",
+      "asset_class": "STK",
+      "weight_pct": 30.0,
+      "reference_price": 67.80,
+      "reference_price_at": "2026-05-12T12:00:00Z"
+    },
+    {
+      "symbol": "BND",
+      "exchange": "NASDAQ",
+      "asset_class": "STK",
+      "weight_pct": 9.5,
+      "reference_price": 72.40,
+      "reference_price_at": "2026-05-12T12:00:00Z"
+    }
   ]
 }

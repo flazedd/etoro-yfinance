@@ -11,7 +11,6 @@ so they can be unit-tested without spinning up a real gateway.
 from __future__ import annotations
 
 import logging
-import re
 import time
 from collections.abc import Callable
 from decimal import Decimal, InvalidOperation
@@ -20,11 +19,13 @@ from typing import Any
 import httpx
 
 from .config import Settings
-from .executor import ExecutionSummary, execute_trades
+from .cost import RebalanceReport, build_report, save_report
+from .executor import execute_trades
 from .ibkr_client import IBKRClient
 from .notify import Notifier, build_notifier
 from .rebalance import ResolvedTarget, compute_trades
-from .schema import CurrentPosition, TargetPortfolio, Trade
+from .safety import PreTradeSafetyError, check_safety
+from .schema import TargetPortfolio, Trade
 from .target import fetch_target_portfolio
 
 log = logging.getLogger(__name__)
@@ -36,49 +37,55 @@ NAV_FIELD_CANDIDATES: tuple[str, ...] = (
     "totalnetliquidation",
     "equitywithloanvalue",
 )
-SNAPSHOT_FIELD_LAST_PRICE = "31"
-SNAPSHOT_RETRY_ATTEMPTS = 3
-SNAPSHOT_RETRY_DELAY_SECONDS = 1.0
-
-# Snapshot prices can come back as "100.50", "C100.50" (close), "H100.50"
-# (high), etc. — strip any leading letter then parse.
-_SNAPSHOT_NUMBER_RE = re.compile(r"-?\d+(?:\.\d+)?")
 
 
 def run_rebalance(
     settings: Settings,
     *,
-    ibkr_transport: httpx.BaseTransport | None = None,
+    client: IBKRClient | None = None,
     target_transport: httpx.BaseTransport | None = None,
     notifier: Notifier | None = None,
     sleeper: Callable[[float], None] = time.sleep,
-) -> ExecutionSummary:
-    """Run one full rebalance and return the execution summary.
+) -> RebalanceReport:
+    """Run one full rebalance and return the cost-attributed report.
 
     Raises only on unrecoverable input errors (e.g. cannot fetch target,
-    cannot extract NAV). Anything else surfaces in the returned summary.
+    cannot extract NAV). Anything else surfaces in the returned report.
+
+    Pass `client` to inject a pre-built IBKRClient (used by tests). When
+    omitted, a real one is constructed from settings — which under OAuth
+    triggers the live session token handshake at construction time.
     """
     target = _fetch_target(settings, transport=target_transport)
     notifier = notifier or build_notifier(
         ntfy_topic=settings.ntfy_topic, ntfy_server=settings.ntfy_server
     )
 
-    with IBKRClient(
-        settings.ibkr_gateway_url,
-        verify_ssl=settings.ibkr_gateway_verify_ssl,
-        timeout=settings.http_timeout_seconds,
-        transport=ibkr_transport,
-    ) as client:
-        client.ensure_authenticated()
-        client.tickle()
+    if client is None:
+        client = IBKRClient(timeout=settings.http_timeout_seconds)
 
+    with client:
+        visible_accounts = client.iserver_accounts()
         positions = client.positions(settings.ibkr_account_id)
         nav = _extract_nav(client.portfolio_summary(settings.ibkr_account_id))
         resolved_targets = _resolve_target_conids(client, target)
-        prices = _collect_prices(client, positions, resolved_targets, sleeper=sleeper)
 
-        trades = compute_trades(current=positions, targets=resolved_targets, nav=nav, prices=prices)
+        trades = compute_trades(current=positions, targets=resolved_targets, nav=nav)
         _log_plan(trades, nav, settings)
+
+        try:
+            check_safety(
+                settings=settings,
+                target=target,
+                trades=trades,
+                nav=nav,
+                visible_accounts=visible_accounts,
+            )
+        except PreTradeSafetyError as e:
+            log.error("pre-trade safety check failed: %s", e)
+            aborted = RebalanceReport(nav=nav, trades=[], aborted_reason=str(e))
+            notifier.notify(aborted)
+            raise
 
         summary = execute_trades(
             client,
@@ -88,13 +95,66 @@ def run_rebalance(
             enforce_rth=settings.trading_hours_only,
             settle_timeout=settings.order_settle_timeout_seconds,
             poll_interval=settings.order_poll_interval_seconds,
+            sleeper=sleeper,
         )
 
-    notifier.notify(summary)
-    return summary
+    report = build_report(summary, nav=nav)
+    if settings.report_dir is not None:
+        saved_to = save_report(report, report_dir=settings.report_dir)
+        log.info("report saved to %s", saved_to)
+    notifier.notify(report)
+    return report
 
 
 # ---- helpers ----------------------------------------------------------------
+
+
+def run_what_if(
+    settings: Settings,
+    *,
+    client: IBKRClient | None = None,
+    target_transport: httpx.BaseTransport | None = None,
+) -> list[dict[str, Any]]:
+    """Like run_rebalance, but calls IBKR's whatif endpoint per trade instead
+    of placing orders. Returns a list of `{"trade": Trade, "preview": dict}`
+    where each preview is IBKR's commission + margin response.
+
+    Pre-trade safety checks still run — we wouldn't want a what-if to surface
+    "$50k commission!" because we're previewing against the wrong account.
+    """
+    target = _fetch_target(settings, transport=target_transport)
+
+    if client is None:
+        client = IBKRClient(timeout=settings.http_timeout_seconds)
+
+    previews: list[dict[str, Any]] = []
+    with client:
+        visible_accounts = client.iserver_accounts()
+        positions = client.positions(settings.ibkr_account_id)
+        nav = _extract_nav(client.portfolio_summary(settings.ibkr_account_id))
+        resolved_targets = _resolve_target_conids(client, target)
+
+        trades = compute_trades(current=positions, targets=resolved_targets, nav=nav)
+        _log_plan(trades, nav, settings)
+
+        check_safety(
+            settings=settings,
+            target=target,
+            trades=trades,
+            nav=nav,
+            visible_accounts=visible_accounts,
+        )
+
+        for t in trades:
+            preview = client.what_if_order(
+                settings.ibkr_account_id,
+                conid=t.conid,
+                side=t.side,
+                quantity=t.quantity,
+            )
+            previews.append({"trade": t, "preview": preview})
+
+    return previews
 
 
 def _fetch_target(settings: Settings, *, transport: httpx.BaseTransport | None) -> TargetPortfolio:
@@ -146,81 +206,10 @@ def _resolve_target_conids(client: IBKRClient, target: TargetPortfolio) -> list[
                 symbol=tp.symbol,
                 exchange=tp.exchange,
                 weight_pct=tp.weight_pct,
+                reference_price=tp.reference_price,
             )
         )
     return resolved
-
-
-def _collect_prices(
-    client: IBKRClient,
-    positions: list[CurrentPosition],
-    targets: list[ResolvedTarget],
-    *,
-    sleeper: Callable[[float], None],
-) -> dict[int, Decimal]:
-    """Build conid → price for every conid the diff engine needs.
-
-    Strategy: positions already include `mktPrice`; for target conids not
-    currently held, hit /iserver/marketdata/snapshot. IBKR's first snapshot
-    call can return empty data while it warms up, so we retry briefly.
-    """
-    prices: dict[int, Decimal] = {}
-    for p in positions:
-        if p.mkt_price is not None and p.mkt_price > 0:
-            prices[p.conid] = p.mkt_price
-
-    needed = [t.conid for t in targets if t.conid not in prices]
-    if not needed:
-        return prices
-
-    for attempt in range(SNAPSHOT_RETRY_ATTEMPTS):
-        rows = client.marketdata_snapshot(needed, fields=[SNAPSHOT_FIELD_LAST_PRICE])
-        for row in rows:
-            cid = _to_int(row.get("conid"))
-            if cid is None or cid in prices:
-                continue
-            price = _parse_snapshot_price(row)
-            if price is not None and price > 0:
-                prices[cid] = price
-        needed = [c for c in needed if c not in prices]
-        if not needed:
-            break
-        log.info(
-            "snapshot warm-up: %d conid(s) still without price (attempt %d/%d)",
-            len(needed),
-            attempt + 1,
-            SNAPSHOT_RETRY_ATTEMPTS,
-        )
-        sleeper(SNAPSHOT_RETRY_DELAY_SECONDS)
-
-    if needed:
-        raise ValueError(
-            f"could not resolve market prices for conids {needed} after "
-            f"{SNAPSHOT_RETRY_ATTEMPTS} attempts"
-        )
-    return prices
-
-
-def _parse_snapshot_price(row: dict[str, Any]) -> Decimal | None:
-    raw = row.get(SNAPSHOT_FIELD_LAST_PRICE)
-    if raw is None:
-        return None
-    m = _SNAPSHOT_NUMBER_RE.search(str(raw))
-    if not m:
-        return None
-    try:
-        return Decimal(m.group(0))
-    except InvalidOperation:
-        return None
-
-
-def _to_int(v: Any) -> int | None:
-    if v is None:
-        return None
-    try:
-        return int(v)
-    except (TypeError, ValueError):
-        return None
 
 
 def _log_plan(trades: list[Trade], nav: Decimal, settings: Settings) -> None:

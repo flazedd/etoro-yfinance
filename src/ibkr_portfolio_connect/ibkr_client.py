@@ -1,43 +1,40 @@
-"""Thin synchronous httpx wrapper around the IBKR Client Portal API (cpapi-v1).
+"""Adapter over `ibind.IbkrClient` exposing the rebalancer's IBKR surface.
 
-All requests are sent to a locally-hosted IBeam gateway, default
-`https://localhost:5000/v1/api`. The gateway uses a self-signed cert; TLS
-verification is off by default for that reason.
+We talk to IBKR via OAuth 1.0a against `api.ibkr.com` (no local gateway).
+IBind handles signing + the live session token; this class normalizes the
+results into our domain types and the small order-reply shape executor.py
+already knows how to walk.
 
-Endpoint coverage is limited to what the rebalancer needs:
-  - auth: /iserver/auth/status, /iserver/reauthenticate, /tickle
-  - account discovery: /iserver/accounts, /portfolio/accounts
-  - positions: /portfolio/{accountId}/positions/{pageId}
-  - symbol resolution: /iserver/secdef/search
-  - orders: /iserver/account/{accountId}/orders, /iserver/reply/{replyId},
-            /iserver/account/orders, /iserver/account/order/status/{orderId}
+Tests inject a fake via `run_rebalance(..., client=<fake>)` rather than
+constructing this class — production construction triggers IBind's OAuth
+handshake, which requires real credentials.
 """
 
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
 from decimal import Decimal
 from types import TracebackType
 from typing import Any, Self
 
-import httpx
+from ibind import IbkrClient as _IBind  # type: ignore[import-untyped]
+from ibind.client.ibkr_utils import OrderRequest, QuestionType  # type: ignore[import-untyped]
+from ibind.support.errors import ExternalBrokerError  # type: ignore[import-untyped]
 from pydantic import BaseModel, ConfigDict
 
 from .schema import CurrentPosition, OrderSide
 
 log = logging.getLogger(__name__)
 
-# IBKR returns at most 100 positions per page; treat anything < 100 as last page.
 POSITIONS_PAGE_SIZE = 100
 
 
 class IBKRError(Exception):
-    """Raised when the gateway returns a non-2xx response or an embedded error."""
+    """Raised when an IBKR API call fails."""
 
 
 class IBKRAuthError(IBKRError):
-    """Raised when the gateway reports the session as unauthenticated."""
+    """Raised when IBKR rejects us as unauthenticated/unauthorized."""
 
 
 class AuthStatus(BaseModel):
@@ -50,12 +47,6 @@ class AuthStatus(BaseModel):
 
 
 class SecDefMatch(BaseModel):
-    """A single match from /iserver/secdef/search.
-
-    The `sections` list contains per-exchange variants; we use it to verify
-    that the desired listing exchange is available for the returned conid.
-    """
-
     model_config = ConfigDict(extra="ignore")
 
     conid: int
@@ -67,13 +58,10 @@ class SecDefMatch(BaseModel):
 class PlaceOrderReply(BaseModel):
     """One element of the response from `place_order` or `confirm_reply`.
 
-    Three distinct shapes share the wire format:
-      - confirmed:      {order_id, order_status, encrypt_message}
-      - reply required: {id, message: [...], isSuppressed, messageIds: [...]}
-      - rejected:       {error: "..."} (still 200 OK)
-
-    Pydantic accepts all fields as optional and the caller branches on which
-    are present via `kind`.
+    Three shapes share the wire format — confirmed / reply-required / rejected.
+    With IBind handling the reply chain internally we will normally see only
+    the `confirmed` shape, but we still parse all three so executor.py's
+    chain-walker remains compatible (and `confirm_reply` works for tests).
     """
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
@@ -96,31 +84,21 @@ class PlaceOrderReply(BaseModel):
         return "unknown"
 
 
-class IBKRClient:
-    """Synchronous client for the local IBKR Client Portal gateway.
+# Accept every known warning automatically — this is a headless rebalancer,
+# there's no human to click through dialogs. New warning types from IBKR will
+# need to be added here (or detected and added) as they appear.
+_AUTO_ANSWER_ALL: dict[QuestionType | str, bool] = dict.fromkeys(QuestionType, True)
 
-    Use as a context manager; the underlying httpx.Client is closed on exit.
+
+class IBKRClient:
+    """Synchronous client for IBKR via OAuth 1.0a (using IBind under the hood).
+
+    Use as a context manager; IBind's OAuth shutdown runs on `close()`.
     """
 
-    def __init__(
-        self,
-        gateway_url: str,
-        *,
-        verify_ssl: bool = False,
-        timeout: float = 30.0,
-        transport: httpx.BaseTransport | None = None,
-    ) -> None:
-        base = gateway_url.rstrip("/")
-        if not base.endswith("/v1/api"):
-            base = f"{base}/v1/api"
-        self._base = base
-        self._client = httpx.Client(
-            base_url=self._base,
-            verify=verify_ssl,
-            timeout=timeout,
-            transport=transport,
-            headers={"User-Agent": "ibkr-portfolio-connect/0.1"},
-        )
+    def __init__(self, *, timeout: float = 30.0) -> None:
+        self._timeout = timeout
+        self._ibind = _IBind(use_oauth=True, timeout=timeout)
 
     def __enter__(self) -> Self:
         return self
@@ -134,99 +112,83 @@ class IBKRClient:
         self.close()
 
     def close(self) -> None:
-        self._client.close()
-
-    # ----- low-level -------------------------------------------------------
-
-    def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+        # IBind also registers an atexit close handler; calling explicitly is
+        # safe and lets us catch errors here rather than during interpreter
+        # teardown.
         try:
-            resp = self._client.request(method, path, **kwargs)
-        except httpx.HTTPError as e:
-            raise IBKRError(f"network error contacting gateway: {e}") from e
-        if resp.status_code == 401:
-            raise IBKRAuthError(f"gateway returned 401 for {method} {path}")
-        if resp.status_code >= 400:
-            raise IBKRError(
-                f"gateway returned {resp.status_code} for {method} {path}: {resp.text[:500]}"
-            )
-        if not resp.content:
-            return None
-        return resp.json()
+            self._ibind.close()
+        except Exception:
+            log.debug("ibind close raised; ignoring", exc_info=True)
 
     # ----- auth / session --------------------------------------------------
 
     def auth_status(self) -> AuthStatus:
-        data = self._request("POST", "/iserver/auth/status")
-        return AuthStatus.model_validate(data)
+        """OAuth sessions are authenticated for the life of the live session
+        token (24h). If IBind's constructor succeeded, we're good.
+        """
+        return AuthStatus(authenticated=True, connected=True)
 
     def reauthenticate(self) -> None:
-        self._request("POST", "/iserver/reauthenticate")
+        """No-op under OAuth. The live session token auto-refreshes."""
+        return
 
     def tickle(self) -> dict[str, Any]:
-        return self._request("POST", "/tickle") or {}
+        try:
+            return dict(self._ibind.tickle().data or {})
+        except Exception as e:
+            raise self._wrap(e, "tickle") from e
 
     def ensure_authenticated(self) -> AuthStatus:
-        """Return the current auth status; raise IBKRAuthError if not connected.
-
-        Triggers a single `reauthenticate` retry on a non-authenticated session
-        before giving up. Does not loop indefinitely.
-        """
-        status = self.auth_status()
-        if status.authenticated and status.connected:
-            return status
-        log.info("session not authenticated; attempting reauthenticate")
-        self.reauthenticate()
-        status = self.auth_status()
-        if not (status.authenticated and status.connected):
-            raise IBKRAuthError(
-                f"session not authenticated after reauthenticate: {status.message!r}"
-            )
-        return status
+        return self.auth_status()
 
     # ----- accounts --------------------------------------------------------
 
     def iserver_accounts(self) -> list[str]:
-        """Return account IDs visible to the iserver session (side effect: sets context)."""
-        data = self._request("GET", "/iserver/accounts") or {}
-        accounts = data.get("accounts", [])
-        return [str(a) for a in accounts]
+        """Return the list of account IDs the OAuth token can see.
+
+        OAuth doesn't have a separate iserver/accounts session concept — the
+        canonical list comes from /portfolio/accounts.
+        """
+        return [
+            str(a.get("accountId") or a.get("id"))
+            for a in self.portfolio_accounts()
+            if a.get("accountId") or a.get("id")
+        ]
 
     def portfolio_accounts(self) -> list[dict[str, Any]]:
-        """Return full portfolio account metadata. Must be called before /portfolio/{id}/positions."""
-        data = self._request("GET", "/portfolio/accounts") or []
-        return list(data)
+        try:
+            data = self._ibind.portfolio_accounts().data or []
+            return list(data)
+        except Exception as e:
+            raise self._wrap(e, "portfolio_accounts") from e
 
     # ----- positions -------------------------------------------------------
 
     def positions(self, account_id: str) -> list[CurrentPosition]:
-        """Return every position in the account, paged to exhaustion."""
         all_raw: list[dict[str, Any]] = []
-        for page in self._iter_pages(account_id):
-            all_raw.extend(page)
-        return [_to_current_position(item) for item in all_raw]
-
-    def _iter_pages(self, account_id: str) -> Iterator[list[dict[str, Any]]]:
         page = 0
         while True:
-            data = self._request("GET", f"/portfolio/{account_id}/positions/{page}") or []
-            yield list(data)
+            try:
+                resp = self._ibind.positions(account_id=account_id, page=page)
+            except Exception as e:
+                raise self._wrap(e, f"positions(page={page})") from e
+            data = list(resp.data or [])
+            all_raw.extend(data)
             if len(data) < POSITIONS_PAGE_SIZE:
-                return
+                break
             page += 1
+        return [_to_current_position(item) for item in all_raw]
 
     # ----- symbol resolution ----------------------------------------------
 
     def secdef_search(self, symbol: str) -> list[SecDefMatch]:
-        data = self._request("GET", "/iserver/secdef/search", params={"symbol": symbol}) or []
+        try:
+            data = self._ibind.search_contract_by_symbol(symbol).data or []
+        except Exception as e:
+            raise self._wrap(e, f"secdef_search({symbol})") from e
         return [SecDefMatch.model_validate(x) for x in data]
 
     def resolve_conid(self, symbol: str, exchange: str, *, asset_class: str = "STK") -> int:
-        """Look up the IBKR conid for a given (symbol, exchange) pair.
-
-        Picks the first match where (a) the symbol equals `symbol`, and (b) one
-        of the per-exchange `sections` lists `asset_class` and (best-effort)
-        mentions `exchange`. Raises `IBKRError` if no plausible match is found.
-        """
         matches = self.secdef_search(symbol)
         symbol_upper = symbol.upper()
         exchange_upper = exchange.upper()
@@ -237,13 +199,8 @@ class IBKRClient:
                 if str(section.get("secType", "")).upper() != asset_class.upper():
                     continue
                 exch_list = str(section.get("exchange", "")).upper()
-                # IBKR's `exchange` field can be a comma-separated list, e.g.
-                # "ARCA,BATS,NYSE" — accept membership.
                 if exchange_upper in {e.strip() for e in exch_list.split(",")}:
                     return m.conid
-        # Fall back: a single perfect symbol match with the desired secType,
-        # exchange unmatched. Better than failing entirely for tickers with
-        # idiosyncratic exchange names.
         for m in matches:
             if m.symbol.upper() != symbol_upper:
                 continue
@@ -260,7 +217,7 @@ class IBKRClient:
 
     # ----- order placement -------------------------------------------------
 
-    def place_market_day_order(
+    def place_midprice_day_order(
         self,
         account_id: str,
         *,
@@ -269,75 +226,128 @@ class IBKRClient:
         quantity: int,
         listing_exchange: str | None = None,
     ) -> list[PlaceOrderReply]:
-        """Submit a single MKT DAY order. Returns the raw reply list from IBKR."""
-        order: dict[str, Any] = {
-            "acctId": account_id,
-            "conid": conid,
-            "orderType": "MKT",
-            "side": side.value,
-            "tif": "DAY",
-            "quantity": quantity,
-            # We're an automated tool, not a manual UI entry.
-            "manualIndicator": False,
-        }
-        if listing_exchange is not None:
-            order["listingExchange"] = listing_exchange
-        data = self._request(
-            "POST",
-            f"/iserver/account/{account_id}/orders",
-            json={"orders": [order]},
+        """Submit a single MIDPRICE DAY order via IBind.
+
+        MIDPRICE pegs the order to the bid-ask midpoint and lets IBKR adjust
+        as the market moves, auto-escalating up to the offer (buys) / down to
+        the bid (sells) if not filled. Good default for liquid ETFs where we
+        want a "smart" fill near mid rather than blind MKT slippage.
+
+        IBind handles the reply chain internally using `_AUTO_ANSWER_ALL`, so
+        the returned list always has a single element of kind="confirmed" on
+        success. Errors raise IBKRError; we never return kind="error" replies
+        because IBind raises ExternalBrokerError instead.
+        """
+        order = OrderRequest(
+            conid=conid,
+            side=side.value,
+            quantity=float(quantity),
+            order_type="MIDPRICE",
+            acct_id=account_id,
+            tif="DAY",
+            manual_indicator=False,
+            listing_exchange=listing_exchange,
         )
-        return _parse_order_reply_list(data)
+        try:
+            result = self._ibind.place_order(order, _AUTO_ANSWER_ALL, account_id=account_id)
+        except Exception as e:
+            raise self._wrap(e, f"place_order({side.value} {quantity} conid={conid})") from e
+        return _parse_order_reply_list(result.data)
+
+    def what_if_order(
+        self,
+        account_id: str,
+        *,
+        conid: int,
+        side: OrderSide,
+        quantity: int,
+        listing_exchange: str | None = None,
+    ) -> dict[str, Any]:
+        """Preview commission + margin impact for a MIDPRICE DAY order; no place.
+
+        Returns IBKR's raw whatif response (commission, init_margin,
+        maint_margin, equity_with_loan, etc.). Shape varies by account.
+        """
+        order = OrderRequest(
+            conid=conid,
+            side=side.value,
+            quantity=float(quantity),
+            order_type="MIDPRICE",
+            acct_id=account_id,
+            tif="DAY",
+            manual_indicator=False,
+            listing_exchange=listing_exchange,
+        )
+        try:
+            result = self._ibind.whatif_order(order, account_id=account_id)
+        except Exception as e:
+            raise self._wrap(e, f"whatif_order({side.value} {quantity} conid={conid})") from e
+        return dict(result.data or {})
 
     def confirm_reply(self, reply_id: str, *, confirmed: bool = True) -> list[PlaceOrderReply]:
-        data = self._request("POST", f"/iserver/reply/{reply_id}", json={"confirmed": confirmed})
-        return _parse_order_reply_list(data)
+        """Rarely called in practice (IBind auto-walks the reply chain), but
+        kept for back-compat with the executor's chain-walker logic.
+        """
+        try:
+            result = self._ibind.reply(reply_id, confirmed=confirmed)
+        except Exception as e:
+            raise self._wrap(e, f"reply({reply_id})") from e
+        return _parse_order_reply_list(result.data)
 
     # ----- order status ----------------------------------------------------
 
     def order_status(self, order_id: str) -> dict[str, Any]:
-        data = self._request("GET", f"/iserver/account/order/status/{order_id}") or {}
-        return dict(data)
+        try:
+            return dict(self._ibind.order_status(order_id).data or {})
+        except Exception as e:
+            raise self._wrap(e, f"order_status({order_id})") from e
 
     def live_orders(self) -> list[dict[str, Any]]:
-        data = self._request("GET", "/iserver/account/orders") or {}
-        return list(data.get("orders", []))
+        try:
+            data = self._ibind.live_orders().data or {}
+            return list(data.get("orders", []))
+        except Exception as e:
+            raise self._wrap(e, "live_orders") from e
 
     # ----- portfolio summary / market data ---------------------------------
 
     def portfolio_summary(self, account_id: str) -> dict[str, Any]:
-        """Account summary including netliquidation, totalcashvalue, etc."""
-        data = self._request("GET", f"/portfolio/{account_id}/summary") or {}
-        return dict(data)
+        try:
+            return dict(self._ibind.portfolio_summary(account_id=account_id).data or {})
+        except Exception as e:
+            raise self._wrap(e, "portfolio_summary") from e
 
     def marketdata_snapshot(
         self, conids: list[int], *, fields: list[str] | None = None
     ) -> list[dict[str, Any]]:
-        """Return /iserver/marketdata/snapshot rows for each conid.
-
-        Note: IBKR's first call sometimes returns empty data (the gateway has
-        to "warm up"); callers should retry once after a short delay. We do
-        not retry here so testing stays deterministic.
-        """
         if not conids:
             return []
-        params = {
-            "conids": ",".join(str(c) for c in conids),
-            "fields": ",".join(fields or ["31"]),  # 31 = Last Price
-        }
-        data = self._request("GET", "/iserver/marketdata/snapshot", params=params) or []
-        return list(data)
+        try:
+            data = (
+                self._ibind.live_marketdata_snapshot(
+                    conids=[str(c) for c in conids],
+                    fields=fields or ["31"],
+                ).data
+                or []
+            )
+            return list(data)
+        except Exception as e:
+            raise self._wrap(e, "marketdata_snapshot") from e
+
+    # ----- internals -------------------------------------------------------
+
+    def _wrap(self, e: BaseException, context: str) -> IBKRError:
+        if isinstance(e, ExternalBrokerError):
+            msg = str(e)
+            if "401" in msg or "403" in msg or "Unauthorized" in msg or "Forbidden" in msg:
+                return IBKRAuthError(f"OAuth unauthorized during {context}: {e}")
+        return IBKRError(f"IBKR error during {context}: {e}")
 
 
-# ----- helpers -------------------------------------------------------------
+# ----- helpers (unchanged from pre-OAuth shape) ----------------------------
 
 
 def _to_current_position(raw: dict[str, Any]) -> CurrentPosition:
-    """Normalize one item from /portfolio/{id}/positions/{page} into our type.
-
-    `mktValue` can be negative for short positions; we preserve the sign in
-    `quantity` and store `market_value` as the signed economic value too.
-    """
     mkt_price = _to_decimal(raw["mktPrice"]) if raw.get("mktPrice") is not None else None
     return CurrentPosition(
         conid=int(raw["conid"]),
@@ -351,15 +361,12 @@ def _to_current_position(raw: dict[str, Any]) -> CurrentPosition:
 
 
 def _to_decimal(v: Any) -> Decimal:
-    """Convert a JSON number to Decimal without going through float."""
     if isinstance(v, Decimal):
         return v
     return Decimal(str(v))
 
 
 def _parse_order_reply_list(data: Any) -> list[PlaceOrderReply]:
-    """Parse the IBKR place-order response, which is sometimes a list and
-    sometimes a single object (in the 200-with-error case)."""
     if data is None:
         return []
     if isinstance(data, dict):

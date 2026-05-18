@@ -1,11 +1,11 @@
-"""Pure diff engine: (current positions, target weights, NAV, prices) → list of whole-share trades.
+"""Pure diff engine: (current positions, targets with reference_price, NAV) → trades.
 
 No I/O. No globals. Same inputs → same outputs. The algorithmic core of the
 rebalancer, kept deliberately simple so it's easy to reason about and test
 exhaustively (including property tests in tests/test_rebalance.py).
 
 Algorithm:
-  - For each target position: target_shares = floor((weight_pct / 100) * NAV / price).
+  - For each target position: target_shares = floor((weight_pct / 100) * NAV / reference_price).
     The trade is the delta from the integer portion of the currently held
     quantity to target_shares.
   - For each currently-held position NOT in the target: trade the integer
@@ -13,6 +13,11 @@ Algorithm:
   - Whole shares only. Any fractional residue on existing positions cannot be
     traded out by v1 and is ignored.
   - Cash buffer is implicit: cash unallocated by target weights stays as cash.
+
+Sizing uses each target's `reference_price` (supplied by the upstream service
+in the target portfolio JSON). No live market-data calls are involved here or
+in the orchestrator — the producing service is responsible for using a price
+recent enough that the rebalance is meaningful.
 """
 
 from __future__ import annotations
@@ -25,12 +30,18 @@ from .schema import CurrentPosition, OrderSide, Trade
 
 @dataclass(frozen=True, slots=True)
 class ResolvedTarget:
-    """A target-portfolio entry with its IBKR conid resolved."""
+    """A target-portfolio entry with its IBKR conid resolved.
+
+    `reference_price` carries through from `TargetPosition.reference_price`
+    and is used for both share-count sizing here and post-trade slippage
+    measurement downstream.
+    """
 
     conid: int
     symbol: str
     exchange: str
     weight_pct: Decimal
+    reference_price: Decimal
 
 
 def compute_trades(
@@ -38,15 +49,13 @@ def compute_trades(
     current: list[CurrentPosition],
     targets: list[ResolvedTarget],
     nav: Decimal,
-    prices: dict[int, Decimal],
 ) -> list[Trade]:
     """Compute the whole-share trade set that moves current → target.
 
     Args:
         current: positions currently held in the IBKR account.
-        targets: target positions with conids already resolved.
+        targets: target positions with conids and reference_prices resolved.
         nav: total account net asset value (positions + cash).
-        prices: per-share market price by conid; must cover every target conid.
 
     Returns:
         Trades sorted with sells first (to free cash), then buys, each group
@@ -54,13 +63,19 @@ def compute_trades(
         are never emitted.
 
     Raises:
-        ValueError: if nav <= 0, targets is empty, a target conid is missing
-            from `prices`, or any provided price is <= 0.
+        ValueError: if nav <= 0, targets is empty, or any reference_price <= 0.
     """
     if nav <= 0:
         raise ValueError(f"nav must be positive, got {nav}")
     if not targets:
         raise ValueError("targets must not be empty")
+
+    for t in targets:
+        if t.reference_price <= 0:
+            raise ValueError(
+                f"reference_price for {t.symbol} (conid {t.conid}) must be positive, "
+                f"got {t.reference_price}"
+            )
 
     target_conids = {t.conid for t in targets}
     current_by_conid: dict[int, CurrentPosition] = {p.conid: p for p in current}
@@ -73,8 +88,8 @@ def compute_trades(
             continue
         whole = _trunc_to_int(pos.quantity)
         if whole == 0:
-            # Only fractional dust; nothing we can do with whole-share orders.
             continue
+        # No reference_price for liquidations — the target doesn't list it.
         if whole > 0:
             trades.append(
                 Trade(
@@ -84,6 +99,7 @@ def compute_trades(
                     side=OrderSide.SELL,
                     quantity=whole,
                     reason="liquidate: not in target",
+                    reference_price=None,
                 )
             )
         else:
@@ -95,22 +111,14 @@ def compute_trades(
                     side=OrderSide.BUY,
                     quantity=-whole,
                     reason="cover short: not in target",
+                    reference_price=None,
                 )
             )
 
     # (2) Target positions: compute delta against integer portion of current.
     for t in targets:
-        if t.conid not in prices:
-            raise ValueError(f"missing price for conid {t.conid} ({t.symbol})")
-        price = prices[t.conid]
-        if price <= 0:
-            raise ValueError(
-                f"price for {t.symbol} (conid {t.conid}) must be positive, got {price}"
-            )
-
         target_value = (t.weight_pct / Decimal("100")) * nav
-        # Integer division on Decimal is floor for non-negative numerators.
-        target_shares = int(target_value / price)
+        target_shares = int(target_value / t.reference_price)
 
         if t.conid in current_by_conid:
             current_whole = _trunc_to_int(current_by_conid[t.conid].quantity)
@@ -130,6 +138,7 @@ def compute_trades(
                     side=OrderSide.BUY,
                     quantity=diff,
                     reason=reason,
+                    reference_price=t.reference_price,
                 )
             )
         else:
@@ -142,6 +151,7 @@ def compute_trades(
                     side=OrderSide.SELL,
                     quantity=-diff,
                     reason=reason,
+                    reference_price=t.reference_price,
                 )
             )
 

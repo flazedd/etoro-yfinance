@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -15,6 +16,8 @@ import pytest
 
 from ibkr_portfolio_connect.executor import (
     NotInTradingHoursError,
+    _extract_commission,
+    _extract_fill_price,
     execute_trades,
     is_rth,
 )
@@ -39,7 +42,7 @@ class FakeClient:
     confirm_calls: list[dict[str, Any]] = field(default_factory=list)
     status_calls: list[str] = field(default_factory=list)
 
-    def place_market_day_order(
+    def place_midprice_day_order(
         self,
         account_id: str,
         *,
@@ -156,6 +159,38 @@ class TestDryRun:
 # ---- happy path -----------------------------------------------------------
 
 
+class TestExtractHelpers:
+    @pytest.mark.parametrize(
+        ("blob", "expected"),
+        [
+            ({"avg_price": "100.50"}, Decimal("100.50")),
+            ({"avgPrice": 99.99}, Decimal("99.99")),
+            ({"average_price": "1"}, Decimal("1")),
+            ({"price": "55"}, Decimal("55")),
+            ({}, None),
+            ({"avg_price": ""}, None),
+            ({"avg_price": "0"}, None),  # rejected (must be > 0)
+            ({"avg_price": "garbage"}, None),
+        ],
+    )
+    def test_extract_fill_price(self, blob: dict[str, Any], expected: Decimal | None) -> None:
+        assert _extract_fill_price(blob) == expected
+
+    @pytest.mark.parametrize(
+        ("blob", "expected"),
+        [
+            ({"commission": "0.35"}, Decimal("0.35")),
+            ({"comm": 1.0}, Decimal("1.0")),
+            ({"commission_amount": "2.50"}, Decimal("2.50")),
+            ({}, None),
+            ({"commission": ""}, None),
+            ({"commission": "junk"}, None),
+        ],
+    )
+    def test_extract_commission(self, blob: dict[str, Any], expected: Decimal | None) -> None:
+        assert _extract_commission(blob) == expected
+
+
 class TestHappyPath:
     def test_single_trade_immediate_fill(self) -> None:
         client = FakeClient(
@@ -178,6 +213,48 @@ class TestHappyPath:
         assert result.order_id == "111"
         assert result.final_status == "Filled"
         assert client.place_calls[0]["quantity"] == 5
+
+    def test_filled_extracts_fill_price_and_commission(self) -> None:
+        client = FakeClient(
+            place_responses=[[{"order_id": "111", "order_status": "Submitted"}]],
+            status_responses=[
+                {"order_status": "Filled", "avg_price": "285.42", "commission": "0.35"}
+            ],
+        )
+        clock = FakeClock()
+        summary = execute_trades(
+            client,  # type: ignore[arg-type]
+            "U1",
+            [_trade("VTI", quantity=5)],
+            enforce_rth=False,
+            clock=clock,
+            sleeper=FakeSleeper(clock),
+            now=in_rth_now,
+        )
+        result = summary.results[0]
+        assert result.success
+        assert result.fill_price == Decimal("285.42")
+        assert result.commission == Decimal("0.35")
+
+    def test_filled_with_missing_price_fields_leaves_none(self) -> None:
+        client = FakeClient(
+            place_responses=[[{"order_id": "111", "order_status": "Submitted"}]],
+            status_responses=[{"order_status": "Filled"}],
+        )
+        clock = FakeClock()
+        summary = execute_trades(
+            client,  # type: ignore[arg-type]
+            "U1",
+            [_trade("VTI", quantity=5)],
+            enforce_rth=False,
+            clock=clock,
+            sleeper=FakeSleeper(clock),
+            now=in_rth_now,
+        )
+        result = summary.results[0]
+        assert result.success
+        assert result.fill_price is None
+        assert result.commission is None
 
     def test_reply_required_then_filled(self) -> None:
         client = FakeClient(

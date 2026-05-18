@@ -44,7 +44,7 @@ TrimmedString = Annotated[
 
 
 class TargetPosition(BaseModel):
-    """A single line in the target portfolio."""
+    """A single line in the target portfolio (schema v2)."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -52,14 +52,19 @@ class TargetPosition(BaseModel):
     exchange: TrimmedString
     asset_class: AssetClass
     weight_pct: Percent
+    # Per-share price the upstream service observed when generating this target.
+    # The diff engine uses it to compute share counts and the slippage report
+    # uses it as the benchmark for fills.
+    reference_price: Decimal = Field(gt=0)
+    reference_price_at: datetime
 
 
 class TargetPortfolio(BaseModel):
-    """External contract (schema v1) for the JSON the rebalancer consumes."""
+    """External contract (schema v2) for the JSON the rebalancer consumes."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    schema_version: int = Field(ge=1, le=1)
+    schema_version: int = Field(ge=2, le=2)
     generated_at: datetime
     base_currency: Annotated[str, StringConstraints(min_length=3, max_length=3, to_upper=True)]
     cash_buffer_pct: Percent
@@ -67,9 +72,9 @@ class TargetPortfolio(BaseModel):
 
     @field_validator("base_currency")
     @classmethod
-    def _only_usd_in_v1(cls, v: str) -> str:
+    def _only_usd_in_v2(cls, v: str) -> str:
         if v != "USD":
-            raise ValueError(f"base_currency must be 'USD' in v1, got {v!r}")
+            raise ValueError(f"base_currency must be 'USD' in v2, got {v!r}")
         return v
 
     @model_validator(mode="after")
@@ -108,14 +113,21 @@ class CurrentPosition(BaseModel):
     quantity: Decimal
     market_value: Decimal
     currency: TrimmedString
-    # Per-share market price as reported by IBKR alongside the position.
-    # Optional because some endpoints don't include it; the orchestrator
-    # falls back to a fresh /marketdata/snapshot call when None.
+    # Per-share market price as reported by IBKR alongside the position. Kept
+    # for diagnostic / logging purposes; sizing now uses the upstream-supplied
+    # reference_price on TargetPosition instead.
     mkt_price: Decimal | None = None
 
 
 class Trade(BaseModel):
-    """A planned trade emitted by the diff engine and consumed by the executor."""
+    """A planned trade emitted by the diff engine and consumed by the executor.
+
+    `reference_price` is the per-share price the upstream target service
+    observed when generating the target portfolio. It carries through to
+    the slippage report so we can attribute fills against the benchmark.
+    None for liquidation trades (positions no longer in the target), which
+    are sized purely from current quantity, not from a target reference.
+    """
 
     model_config = ConfigDict(frozen=True)
 
@@ -125,3 +137,4 @@ class Trade(BaseModel):
     side: OrderSide
     quantity: int = Field(gt=0)  # whole shares only in v1
     reason: TrimmedString
+    reference_price: Decimal | None = None

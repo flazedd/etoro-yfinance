@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Lint + types + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv (pinned to match Dockerfile)
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.5.11"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Lint (ruff check)
+        run: uv run ruff check .
+
+      - name: Format check (ruff format --check)
+        run: uv run ruff format --check .
+
+      - name: Type check (mypy --strict)
+        run: uv run mypy --strict src tests
+
+      - name: Tests (pytest)
+        run: uv run pytest -q

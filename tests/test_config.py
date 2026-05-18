@@ -24,7 +24,6 @@ def test_settings_load_from_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
     assert str(s.target_portfolio_url) == "https://example.invalid/target.json"
     assert s.dry_run is False  # default
     assert s.trading_hours_only is True  # default
-    assert s.ibkr_gateway_verify_ssl is False  # default
 
 
 def test_settings_rejects_missing_required(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

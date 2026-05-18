@@ -17,11 +17,13 @@ from ibkr_portfolio_connect.schema import (
     Trade,
 )
 
+REF_AT = datetime(2026, 5, 12, 12, 0, 0, tzinfo=UTC)
+
 
 def _valid_kwargs(**overrides: object) -> dict[str, object]:
     base: dict[str, object] = {
-        "schema_version": 1,
-        "generated_at": datetime(2026, 5, 12, 12, 0, 0, tzinfo=UTC),
+        "schema_version": 2,
+        "generated_at": REF_AT,
         "base_currency": "USD",
         "cash_buffer_pct": Decimal("0.5"),
         "positions": [
@@ -30,18 +32,24 @@ def _valid_kwargs(**overrides: object) -> dict[str, object]:
                 "exchange": "ARCA",
                 "asset_class": "STK",
                 "weight_pct": Decimal("60.0"),
+                "reference_price": Decimal("285.50"),
+                "reference_price_at": REF_AT,
             },
             {
                 "symbol": "VXUS",
                 "exchange": "NASDAQ",
                 "asset_class": "STK",
                 "weight_pct": Decimal("30.0"),
+                "reference_price": Decimal("67.80"),
+                "reference_price_at": REF_AT,
             },
             {
                 "symbol": "BND",
                 "exchange": "NASDAQ",
                 "asset_class": "STK",
                 "weight_pct": Decimal("9.5"),
+                "reference_price": Decimal("72.40"),
+                "reference_price_at": REF_AT,
             },
         ],
     }
@@ -49,12 +57,32 @@ def _valid_kwargs(**overrides: object) -> dict[str, object]:
     return base
 
 
+def _position(
+    *,
+    symbol: str = "VTI",
+    exchange: str = "ARCA",
+    asset_class: AssetClass = AssetClass.STK,
+    weight_pct: Decimal = Decimal("10"),
+    reference_price: Decimal = Decimal("100"),
+    reference_price_at: datetime = REF_AT,
+) -> TargetPosition:
+    return TargetPosition(
+        symbol=symbol,
+        exchange=exchange,
+        asset_class=asset_class,
+        weight_pct=weight_pct,
+        reference_price=reference_price,
+        reference_price_at=reference_price_at,
+    )
+
+
 class TestTargetPortfolio:
     def test_canonical_example_validates(self) -> None:
         p = TargetPortfolio(**_valid_kwargs())  # type: ignore[arg-type]
-        assert p.schema_version == 1
+        assert p.schema_version == 2
         assert len(p.positions) == 3
         assert p.positions[0].symbol == "VTI"
+        assert p.positions[0].reference_price == Decimal("285.50")
 
     def test_weights_must_sum_to_100(self) -> None:
         kwargs = _valid_kwargs(cash_buffer_pct=Decimal("1.0"))  # sum becomes 100.5
@@ -62,11 +90,10 @@ class TestTargetPortfolio:
             TargetPortfolio(**kwargs)  # type: ignore[arg-type]
 
     def test_weights_sum_tolerance(self) -> None:
-        # Tiny float-noise drift is accepted.
         kwargs = _valid_kwargs(cash_buffer_pct=Decimal("0.50001"))
         TargetPortfolio(**kwargs)  # type: ignore[arg-type]  # no error
 
-    def test_rejects_non_usd_base_currency_in_v1(self) -> None:
+    def test_rejects_non_usd_base_currency(self) -> None:
         with pytest.raises(ValidationError, match="must be 'USD'"):
             TargetPortfolio(**_valid_kwargs(base_currency="EUR"))  # type: ignore[arg-type]
 
@@ -77,12 +104,16 @@ class TestTargetPortfolio:
                 "exchange": "ARCA",
                 "asset_class": "STK",
                 "weight_pct": Decimal("50"),
+                "reference_price": Decimal("285.50"),
+                "reference_price_at": REF_AT,
             },
             {
                 "symbol": "vti",
                 "exchange": "arca",
                 "asset_class": "STK",
                 "weight_pct": Decimal("49.5"),
+                "reference_price": Decimal("285.50"),
+                "reference_price_at": REF_AT,
             },
         ]
         with pytest.raises(ValidationError, match="duplicate position"):
@@ -95,6 +126,8 @@ class TestTargetPortfolio:
                 "exchange": "CME",
                 "asset_class": "FUT",
                 "weight_pct": Decimal("99.5"),
+                "reference_price": Decimal("5000"),
+                "reference_price_at": REF_AT,
             },
         ]
         with pytest.raises(ValidationError):
@@ -107,12 +140,16 @@ class TestTargetPortfolio:
                 "exchange": "ARCA",
                 "asset_class": "STK",
                 "weight_pct": Decimal("-1"),
+                "reference_price": Decimal("285.50"),
+                "reference_price_at": REF_AT,
             },
             {
                 "symbol": "BND",
                 "exchange": "NASDAQ",
                 "asset_class": "STK",
                 "weight_pct": Decimal("100.5"),
+                "reference_price": Decimal("72.40"),
+                "reference_price_at": REF_AT,
             },
         ]
         with pytest.raises(ValidationError):
@@ -129,6 +166,8 @@ class TestTargetPortfolio:
                 "exchange": "ARCA",
                 "asset_class": "STK",
                 "weight_pct": Decimal("99.5"),
+                "reference_price": Decimal("285.50"),
+                "reference_price_at": REF_AT,
                 "leverage": 2,
             },
         ]
@@ -139,9 +178,11 @@ class TestTargetPortfolio:
         with pytest.raises(ValidationError):
             TargetPortfolio(**_valid_kwargs(positions=[]))  # type: ignore[arg-type]
 
-    def test_only_schema_version_1(self) -> None:
+    def test_only_schema_version_2(self) -> None:
         with pytest.raises(ValidationError):
-            TargetPortfolio(**_valid_kwargs(schema_version=2))  # type: ignore[arg-type]
+            TargetPortfolio(**_valid_kwargs(schema_version=1))  # type: ignore[arg-type]
+        with pytest.raises(ValidationError):
+            TargetPortfolio(**_valid_kwargs(schema_version=3))  # type: ignore[arg-type]
 
     def test_is_frozen(self) -> None:
         p = TargetPortfolio(**_valid_kwargs())  # type: ignore[arg-type]
@@ -152,30 +193,31 @@ class TestTargetPortfolio:
 class TestTargetPosition:
     def test_weight_must_be_nonneg(self) -> None:
         with pytest.raises(ValidationError):
-            TargetPosition(
-                symbol="VTI",
-                exchange="ARCA",
-                asset_class=AssetClass.STK,
-                weight_pct=Decimal("-0.0001"),
-            )
+            _position(weight_pct=Decimal("-0.0001"))
 
     def test_weight_capped_at_100(self) -> None:
         with pytest.raises(ValidationError):
-            TargetPosition(
+            _position(weight_pct=Decimal("100.5"))
+
+    def test_symbol_stripped(self) -> None:
+        p = _position(symbol="  VTI  ")
+        assert p.symbol == "VTI"
+
+    def test_reference_price_must_be_positive(self) -> None:
+        with pytest.raises(ValidationError):
+            _position(reference_price=Decimal("0"))
+        with pytest.raises(ValidationError):
+            _position(reference_price=Decimal("-1"))
+
+    def test_reference_price_at_required(self) -> None:
+        with pytest.raises(ValidationError):
+            TargetPosition(  # type: ignore[call-arg]
                 symbol="VTI",
                 exchange="ARCA",
                 asset_class=AssetClass.STK,
-                weight_pct=Decimal("100.5"),
+                weight_pct=Decimal("10"),
+                reference_price=Decimal("100"),
             )
-
-    def test_symbol_stripped(self) -> None:
-        p = TargetPosition(
-            symbol="  VTI  ",
-            exchange="ARCA",
-            asset_class=AssetClass.STK,
-            weight_pct=Decimal("10"),
-        )
-        assert p.symbol == "VTI"
 
 
 class TestTrade:

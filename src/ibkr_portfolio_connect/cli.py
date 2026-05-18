@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Annotated
+from decimal import Decimal, InvalidOperation
+from typing import Annotated, Any
 
 import typer
 from pydantic import HttpUrl
 
 from .config import Settings
-from .pipeline import run_rebalance
+from .pipeline import run_rebalance, run_what_if
+from .safety import PreTradeSafetyError
 
 app = typer.Typer(no_args_is_help=False, add_completion=False, rich_markup_mode=None)
 
@@ -22,6 +24,16 @@ def rebalance(
         typer.Option(
             "--dry-run",
             help="Print the planned trades and exit; place no orders.",
+        ),
+    ] = False,
+    what_if: Annotated[
+        bool,
+        typer.Option(
+            "--what-if",
+            help=(
+                "Compute trades and call IBKR's whatif endpoint per trade to "
+                "preview commission + margin impact. Places no orders."
+            ),
         ),
     ] = False,
     target_url: Annotated[
@@ -57,13 +69,61 @@ def rebalance(
         dry_run=dry_run, target_url=target_url, account=account, no_rth=no_rth
     )
 
+    if what_if:
+        try:
+            previews = run_what_if(settings)
+        except PreTradeSafetyError as e:
+            logging.getLogger(__name__).error("aborted: %s", e)
+            raise typer.Exit(code=2) from e
+        _print_what_if(previews)
+        raise typer.Exit(code=0)
+
     try:
-        summary = run_rebalance(settings)
+        report = run_rebalance(settings)
+    except PreTradeSafetyError as e:
+        # Already logged + pushed by pipeline; just exit non-zero cleanly.
+        logging.getLogger(__name__).error("aborted: %s", e)
+        raise typer.Exit(code=2) from e
     except Exception as e:
         logging.getLogger(__name__).exception("rebalance run failed: %s", e)
         raise typer.Exit(code=2) from e
 
-    raise typer.Exit(code=0 if summary.overall_success else 1)
+    raise typer.Exit(code=0 if report.overall_success else 1)
+
+
+def _print_what_if(previews: list[dict[str, Any]]) -> None:
+    """Render a what-if preview table to stdout."""
+    if not previews:
+        typer.echo("=== What-If preview ===\n(no trades planned)")
+        return
+
+    typer.echo("=== What-If preview ===")
+    total_commission = Decimal("0")
+    commission_known = False
+    for item in previews:
+        trade = item["trade"]
+        preview = item["preview"]
+        comm = preview.get("commission")
+        init_margin = preview.get("initMargin") or preview.get("init_margin")
+        equity = preview.get("equityWithLoanAfter") or preview.get("equity_with_loan")
+
+        line = f"  {trade.side.value:4s} {trade.quantity:>6d} {trade.symbol:<6s}"
+        if comm is not None:
+            line += f"  commission≈{comm}"
+            try:
+                total_commission += Decimal(str(comm))
+                commission_known = True
+            except (InvalidOperation, TypeError):
+                pass
+        if init_margin is not None:
+            line += f"  init_margin={init_margin}"
+        if equity is not None:
+            line += f"  equity_after={equity}"
+        typer.echo(line)
+
+    if commission_known:
+        typer.echo(f"\nTotal estimated commission: ${total_commission}")
+    typer.echo("\nNo orders placed.")
 
 
 def _setup_logging(*, verbose: bool) -> None:

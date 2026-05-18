@@ -1,30 +1,135 @@
 """Tests for the rebalance orchestrator.
 
-The unit-level helpers (`_extract_nav`, `_parse_snapshot_price`, `_collect_prices`)
-are tested directly. `run_rebalance` is exercised end-to-end with mocked
-httpx transports so the IBKR gateway and target URL never touch the network.
+Unit-level helpers (`_extract_nav`) are tested directly. `run_rebalance` is
+exercised end-to-end with a fake IBKRClient (method-level mocking) injected
+via the `client` parameter; the target URL is still mocked via an httpx
+transport since target.py uses httpx.
+
+The pre-OAuth pipeline used a marketdata snapshot to fetch prices for target
+conids not currently held. That whole path is gone — sizing now uses the
+reference_price embedded in each TargetPosition of schema v2.
 """
 
 from __future__ import annotations
 
-import json
 from decimal import Decimal
-from typing import Any
+from types import TracebackType
+from typing import Any, Self, cast
 
 import httpx
 import pytest
 
 from ibkr_portfolio_connect.config import Settings
-from ibkr_portfolio_connect.executor import ExecutionSummary
-from ibkr_portfolio_connect.ibkr_client import IBKRClient
-from ibkr_portfolio_connect.pipeline import (
-    _collect_prices,
-    _extract_nav,
-    _parse_snapshot_price,
-    run_rebalance,
+from ibkr_portfolio_connect.cost import RebalanceReport
+from ibkr_portfolio_connect.ibkr_client import (
+    AuthStatus,
+    IBKRClient,
+    PlaceOrderReply,
 )
-from ibkr_portfolio_connect.rebalance import ResolvedTarget
-from ibkr_portfolio_connect.schema import CurrentPosition
+from ibkr_portfolio_connect.pipeline import _extract_nav, run_rebalance, run_what_if
+from ibkr_portfolio_connect.schema import CurrentPosition, OrderSide
+
+# ---- Fake IBKRClient for method-level mocking ------------------------------
+
+
+class _FakeIBKR:
+    """Method-level fake of IBKRClient.
+
+    Tests configure canned responses via attributes and read call history
+    back for assertions. Construction is free (no OAuth handshake).
+    """
+
+    def __init__(self) -> None:
+        self.positions_data: list[CurrentPosition] = []
+        self.summary_data: dict[str, Any] = {}
+        # (symbol, exchange) → conid for resolve_conid
+        self.conid_map: dict[tuple[str, str], int] = {}
+        self.order_status_data: dict[str, Any] = {"order_status": "Filled"}
+        self.visible_accounts: list[str] = []
+        # Call history
+        self.placed_orders: list[dict[str, Any]] = []
+        self.tickle_called: bool = False
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
+        return None
+
+    def auth_status(self) -> AuthStatus:
+        return AuthStatus(authenticated=True, connected=True)
+
+    def ensure_authenticated(self) -> AuthStatus:
+        return self.auth_status()
+
+    def tickle(self) -> dict[str, Any]:
+        self.tickle_called = True
+        return {}
+
+    def iserver_accounts(self) -> list[str]:
+        return list(self.visible_accounts)
+
+    def positions(self, account_id: str) -> list[CurrentPosition]:
+        return list(self.positions_data)
+
+    def portfolio_summary(self, account_id: str) -> dict[str, Any]:
+        return dict(self.summary_data)
+
+    def resolve_conid(self, symbol: str, exchange: str, *, asset_class: str = "STK") -> int:
+        return self.conid_map[(symbol, exchange)]
+
+    def place_midprice_day_order(
+        self,
+        account_id: str,
+        *,
+        conid: int,
+        side: OrderSide,
+        quantity: int,
+        listing_exchange: str | None = None,
+    ) -> list[PlaceOrderReply]:
+        order_id = str(100 + len(self.placed_orders))
+        self.placed_orders.append(
+            {
+                "account_id": account_id,
+                "conid": conid,
+                "side": side,
+                "quantity": quantity,
+                "listing_exchange": listing_exchange,
+                "order_id": order_id,
+            }
+        )
+        return [PlaceOrderReply(order_id=order_id, order_status="Submitted")]
+
+    def order_status(self, order_id: str) -> dict[str, Any]:
+        return dict(self.order_status_data)
+
+    def what_if_order(
+        self,
+        account_id: str,
+        *,
+        conid: int,
+        side: OrderSide,
+        quantity: int,
+        listing_exchange: str | None = None,
+    ) -> dict[str, Any]:
+        # Return a canned preview keyed by conid so tests can scope behavior.
+        return {
+            "commission": "0.35",
+            "initMargin": "100.00",
+            "_test_conid": conid,
+            "_test_side": side.value,
+            "_test_quantity": quantity,
+        }
+
+
+def _as_client(fake: _FakeIBKR) -> IBKRClient:
+    return cast(IBKRClient, fake)
+
 
 # ---- _extract_nav ----------------------------------------------------------
 
@@ -47,7 +152,6 @@ class TestExtractNav:
         assert _extract_nav({"equitywithloanvalue": {"amount": 999}}) == Decimal("999")
 
     def test_skips_zero(self) -> None:
-        # netliquidation is 0 → keep looking for a positive alternative
         with pytest.raises(ValueError, match="could not extract"):
             _extract_nav({"netliquidation": 0})
 
@@ -60,198 +164,31 @@ class TestExtractNav:
             _extract_nav({"netliquidation": "not-a-number"})
 
 
-# ---- _parse_snapshot_price -------------------------------------------------
-
-
-class TestParseSnapshotPrice:
-    @pytest.mark.parametrize(
-        ("raw", "expected"),
-        [
-            ("100.50", Decimal("100.50")),
-            ("C100.50", Decimal("100.50")),  # closing-price prefix
-            ("H250.0", Decimal("250.0")),
-            (100.5, Decimal("100.5")),
-            ("-3.25", Decimal("-3.25")),
-            (None, None),
-            ("", None),
-            ("nope", None),
-        ],
-    )
-    def test_parse(self, raw: object, expected: Decimal | None) -> None:
-        assert _parse_snapshot_price({"31": raw}) == expected
-
-    def test_no_field_returns_none(self) -> None:
-        assert _parse_snapshot_price({}) is None
-
-
-# ---- _collect_prices -------------------------------------------------------
-
-
-class TestCollectPrices:
-    def _client_with_snapshot(self, snapshot_response: list[dict[str, Any]]) -> IBKRClient:
-        def handler(_r: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, json=snapshot_response)
-
-        return IBKRClient(
-            "https://localhost:5000",
-            verify_ssl=False,
-            transport=httpx.MockTransport(handler),
-        )
-
-    def test_uses_position_mkt_price(self) -> None:
-        client = self._client_with_snapshot([])  # should never be called
-        positions = [
-            CurrentPosition(
-                conid=1,
-                symbol="VTI",
-                asset_class="STK",
-                quantity=Decimal("10"),
-                market_value=Decimal("1000"),
-                currency="USD",
-                mkt_price=Decimal("100"),
-            )
-        ]
-        targets = [ResolvedTarget(conid=1, symbol="VTI", exchange="ARCA", weight_pct=Decimal("99"))]
-        prices = _collect_prices(client, positions, targets, sleeper=lambda _: None)
-        assert prices == {1: Decimal("100")}
-
-    def test_snapshot_fallback_for_missing(self) -> None:
-        client = self._client_with_snapshot([{"conid": "2", "31": "200.00"}])
-        positions: list[CurrentPosition] = []
-        targets = [
-            ResolvedTarget(conid=2, symbol="BND", exchange="NASDAQ", weight_pct=Decimal("99"))
-        ]
-        prices = _collect_prices(client, positions, targets, sleeper=lambda _: None)
-        assert prices == {2: Decimal("200.00")}
-
-    def test_snapshot_retry_until_warmed_up(self) -> None:
-        # Returns empty on first call, full data on second.
-        call_count = {"n": 0}
-
-        def handler(_r: httpx.Request) -> httpx.Response:
-            call_count["n"] += 1
-            if call_count["n"] == 1:
-                return httpx.Response(200, json=[])
-            return httpx.Response(200, json=[{"conid": "2", "31": "200.00"}])
-
-        client = IBKRClient(
-            "https://localhost:5000",
-            verify_ssl=False,
-            transport=httpx.MockTransport(handler),
-        )
-        targets = [
-            ResolvedTarget(conid=2, symbol="BND", exchange="NASDAQ", weight_pct=Decimal("99"))
-        ]
-        sleeps: list[float] = []
-        prices = _collect_prices(client, [], targets, sleeper=lambda s: sleeps.append(s))
-        assert prices == {2: Decimal("200.00")}
-        assert call_count["n"] == 2
-        assert sleeps == [1.0]
-
-    def test_snapshot_gives_up_after_retries(self) -> None:
-        client = self._client_with_snapshot([])  # always empty
-        targets = [
-            ResolvedTarget(conid=2, symbol="BND", exchange="NASDAQ", weight_pct=Decimal("99"))
-        ]
-        with pytest.raises(ValueError, match="could not resolve market prices"):
-            _collect_prices(client, [], targets, sleeper=lambda _: None)
-
-
 # ---- end-to-end run_rebalance ---------------------------------------------
 
 
 class _StubNotifier:
     def __init__(self) -> None:
-        self.summary: ExecutionSummary | None = None
+        self.report: RebalanceReport | None = None
 
-    def notify(self, summary: ExecutionSummary) -> None:
-        self.summary = summary
+    def notify(self, report: RebalanceReport) -> None:
+        self.report = report
 
 
 def _settings_for_run(*, dry_run: bool = True, account: str = "U1") -> Settings:
-    """Build a Settings object without reading any real .env."""
     return Settings(
         ibkr_account_id=account,
         target_portfolio_url="https://target.invalid/p.json",  # type: ignore[arg-type]
-        ibkr_gateway_url="https://gw.invalid",
-        ibkr_gateway_verify_ssl=False,
         dry_run=dry_run,
         trading_hours_only=False,
         ntfy_topic=None,
+        # Disable pre-trade safety thresholds — they have their own test suite,
+        # and stale-reference dates in fixtures here would constantly trip them.
+        min_nav_dollars=None,
+        max_trade_pct_of_nav=None,
+        max_total_churn_pct_of_nav=None,
+        max_reference_age_hours=None,
     )
-
-
-def _build_gateway_handler() -> tuple[httpx.MockTransport, dict[str, list[dict[str, Any]]]]:
-    """Realistic gateway: returns scripted responses for all endpoints the
-    pipeline calls. Returns (transport, call_log)."""
-    call_log: dict[str, list[dict[str, Any]]] = {}
-
-    def log(name: str, request: httpx.Request) -> None:
-        call_log.setdefault(name, []).append(
-            {"url": str(request.url), "body": request.content.decode() if request.content else ""}
-        )
-
-    def handle(request: httpx.Request) -> httpx.Response:
-        path = request.url.path
-        if path.endswith("/iserver/auth/status"):
-            log("auth_status", request)
-            return httpx.Response(200, json={"authenticated": True, "connected": True})
-        if path.endswith("/tickle"):
-            log("tickle", request)
-            return httpx.Response(200, json={"session": "abc"})
-        if path == "/v1/api/portfolio/U1/positions/0":
-            log("positions", request)
-            return httpx.Response(
-                200,
-                json=[
-                    {
-                        "conid": 1,
-                        "contractDesc": "VTI",
-                        "position": 30,
-                        "mktPrice": 100.0,
-                        "mktValue": 3000.0,
-                        "currency": "USD",
-                        "assetClass": "STK",
-                    }
-                ],
-            )
-        if path == "/v1/api/portfolio/U1/summary":
-            log("summary", request)
-            return httpx.Response(
-                200, json={"netliquidation": {"amount": 10000.0, "currency": "USD"}}
-            )
-        if path.endswith("/iserver/secdef/search"):
-            sym = request.url.params.get("symbol", "")
-            log("secdef", request)
-            return httpx.Response(
-                200,
-                json=[
-                    {
-                        "conid": 1 if sym == "VTI" else 2 if sym == "BND" else 3,
-                        "symbol": sym,
-                        "sections": [{"secType": "STK", "exchange": "ARCA,NASDAQ"}],
-                    }
-                ],
-            )
-        if path.endswith("/iserver/marketdata/snapshot"):
-            log("snapshot", request)
-            # Return prices for conids 2 (BND) — VTI is already covered by positions
-            return httpx.Response(
-                200,
-                json=[{"conid": "2", "31": "100.00"}],
-            )
-        if path == "/v1/api/iserver/account/U1/orders":
-            log("place_order", request)
-            return httpx.Response(
-                200,
-                json=[{"order_id": "111", "order_status": "Submitted"}],
-            )
-        if path.startswith("/v1/api/iserver/account/order/status/"):
-            log("order_status", request)
-            return httpx.Response(200, json={"order_status": "Filled"})
-        return httpx.Response(404, json={"err": f"unmocked {path}"})
-
-    return httpx.MockTransport(handle), call_log
 
 
 def _build_target_handler(body: dict[str, Any]) -> httpx.MockTransport:
@@ -263,115 +200,166 @@ def _build_target_handler(body: dict[str, Any]) -> httpx.MockTransport:
 
 def _target_body() -> dict[str, Any]:
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": "2026-05-12T12:00:00Z",
         "base_currency": "USD",
         "cash_buffer_pct": 0.5,
         "positions": [
-            {"symbol": "VTI", "exchange": "ARCA", "asset_class": "STK", "weight_pct": 60.0},
-            {"symbol": "BND", "exchange": "NASDAQ", "asset_class": "STK", "weight_pct": 39.5},
+            {
+                "symbol": "VTI",
+                "exchange": "ARCA",
+                "asset_class": "STK",
+                "weight_pct": 60.0,
+                "reference_price": 100.0,
+                "reference_price_at": "2026-05-12T12:00:00Z",
+            },
+            {
+                "symbol": "BND",
+                "exchange": "NASDAQ",
+                "asset_class": "STK",
+                "weight_pct": 39.5,
+                "reference_price": 100.0,
+                "reference_price_at": "2026-05-12T12:00:00Z",
+            },
         ],
     }
 
 
+def _make_fake_for_rebalance(positions: list[CurrentPosition]) -> _FakeIBKR:
+    """Build a fake configured for the 'standard' rebalance scenario:
+    $10k account, VTI conid=1 and BND conid=2 with $100 reference prices."""
+    fake = _FakeIBKR()
+    fake.positions_data = positions
+    fake.summary_data = {"netliquidation": {"amount": 10000.0, "currency": "USD"}}
+    fake.conid_map = {("VTI", "ARCA"): 1, ("BND", "NASDAQ"): 2}
+    fake.visible_accounts = ["U1"]  # matches _settings_for_run(account="U1")
+    return fake
+
+
 def test_run_rebalance_dry_run_end_to_end() -> None:
     settings = _settings_for_run(dry_run=True)
-    gw, calls = _build_gateway_handler()
+    fake = _make_fake_for_rebalance(
+        [
+            CurrentPosition(
+                conid=1,
+                symbol="VTI",
+                asset_class="STK",
+                quantity=Decimal("30"),
+                market_value=Decimal("3000"),
+                currency="USD",
+                mkt_price=Decimal("100"),
+            )
+        ]
+    )
     notif = _StubNotifier()
 
-    summary = run_rebalance(
+    report = run_rebalance(
         settings,
-        ibkr_transport=gw,
+        client=_as_client(fake),
         target_transport=_build_target_handler(_target_body()),
         notifier=notif,
         sleeper=lambda _: None,
     )
-    assert summary.dry_run is True
-    assert summary.overall_success is True
-    # No orders should have been placed
-    assert "place_order" not in calls
-    assert notif.summary is summary
+    assert report.dry_run is True
+    assert report.overall_success is True
+    assert fake.placed_orders == []
+    assert notif.report is report
 
 
 def test_run_rebalance_live_end_to_end_places_orders() -> None:
     settings = _settings_for_run(dry_run=False)
-    gw, calls = _build_gateway_handler()
+    fake = _make_fake_for_rebalance(
+        [
+            CurrentPosition(
+                conid=1,
+                symbol="VTI",
+                asset_class="STK",
+                quantity=Decimal("30"),
+                market_value=Decimal("3000"),
+                currency="USD",
+                mkt_price=Decimal("100"),
+            )
+        ]
+    )
     notif = _StubNotifier()
 
-    summary = run_rebalance(
+    report = run_rebalance(
         settings,
-        ibkr_transport=gw,
+        client=_as_client(fake),
         target_transport=_build_target_handler(_target_body()),
         notifier=notif,
         sleeper=lambda _: None,
     )
-    assert summary.overall_success is True
-    # We started with 30 VTI @ $100 ($3000) and 0 BND on a $10k account.
-    # Target: 60% VTI ($6000 → 60 shares), 39.5% BND ($3950 → 39 shares).
+    assert report.overall_success is True
+    # Start: 30 VTI @ $100 ($3000), 0 BND on $10k account.
+    # Target: 60% VTI ($6000 -> 60), 39.5% BND ($3950 -> 39).
     # Expect: BUY 30 VTI (60 - 30), BUY 39 BND.
-    assert "place_order" in calls
-    bodies = [json.loads(c["body"]) for c in calls["place_order"]]
-    placed = sorted((b["orders"][0]["conid"], b["orders"][0]["quantity"]) for b in bodies)
+    placed = sorted((o["conid"], o["quantity"]) for o in fake.placed_orders)
     assert placed == [(1, 30), (2, 39)]
 
 
-def test_run_rebalance_handles_no_trades() -> None:
-    """Account already matches target → no orders placed but pipeline succeeds."""
+def test_run_what_if_returns_previews_without_placing_orders() -> None:
     settings = _settings_for_run(dry_run=False)
-
-    def handle(request: httpx.Request) -> httpx.Response:
-        path = request.url.path
-        if path.endswith("/iserver/auth/status"):
-            return httpx.Response(200, json={"authenticated": True, "connected": True})
-        if path.endswith("/tickle"):
-            return httpx.Response(200, json={})
-        if path == "/v1/api/portfolio/U1/positions/0":
-            return httpx.Response(
-                200,
-                json=[
-                    {
-                        "conid": 1,
-                        "contractDesc": "VTI",
-                        "position": 60,
-                        "mktPrice": 100.0,
-                        "mktValue": 6000.0,
-                        "currency": "USD",
-                        "assetClass": "STK",
-                    },
-                    {
-                        "conid": 2,
-                        "contractDesc": "BND",
-                        "position": 39,
-                        "mktPrice": 100.0,
-                        "mktValue": 3900.0,
-                        "currency": "USD",
-                        "assetClass": "STK",
-                    },
-                ],
+    fake = _make_fake_for_rebalance(
+        [
+            CurrentPosition(
+                conid=1,
+                symbol="VTI",
+                asset_class="STK",
+                quantity=Decimal("30"),
+                market_value=Decimal("3000"),
+                currency="USD",
+                mkt_price=Decimal("100"),
             )
-        if path == "/v1/api/portfolio/U1/summary":
-            return httpx.Response(200, json={"netliquidation": {"amount": 10000.0}})
-        if path.endswith("/iserver/secdef/search"):
-            sym = request.url.params.get("symbol", "")
-            return httpx.Response(
-                200,
-                json=[
-                    {
-                        "conid": 1 if sym == "VTI" else 2,
-                        "symbol": sym,
-                        "sections": [{"secType": "STK", "exchange": "ARCA,NASDAQ"}],
-                    }
-                ],
-            )
-        return httpx.Response(404, text=path)
-
-    notif = _StubNotifier()
-    summary = run_rebalance(
+        ]
+    )
+    previews = run_what_if(
         settings,
-        ibkr_transport=httpx.MockTransport(handle),
+        client=_as_client(fake),
+        target_transport=_build_target_handler(_target_body()),
+    )
+    # Expect 2 trades planned (BUY 30 VTI, BUY 39 BND); each gets a preview.
+    assert len(previews) == 2
+    assert fake.placed_orders == []  # no orders placed!
+    for item in previews:
+        assert "trade" in item
+        assert "preview" in item
+        assert item["preview"]["commission"] == "0.35"
+
+
+def test_run_rebalance_handles_no_trades() -> None:
+    settings = _settings_for_run(dry_run=False)
+    fake = _make_fake_for_rebalance(
+        [
+            CurrentPosition(
+                conid=1,
+                symbol="VTI",
+                asset_class="STK",
+                quantity=Decimal("60"),
+                market_value=Decimal("6000"),
+                currency="USD",
+                mkt_price=Decimal("100"),
+            ),
+            CurrentPosition(
+                conid=2,
+                symbol="BND",
+                asset_class="STK",
+                quantity=Decimal("39"),
+                market_value=Decimal("3900"),
+                currency="USD",
+                mkt_price=Decimal("100"),
+            ),
+        ]
+    )
+    notif = _StubNotifier()
+
+    report = run_rebalance(
+        settings,
+        client=_as_client(fake),
         target_transport=_build_target_handler(_target_body()),
         notifier=notif,
         sleeper=lambda _: None,
     )
-    assert summary.overall_success is True
-    assert summary.n_total == 0
+    assert report.overall_success is True
+    assert report.n_total == 0
+    assert fake.placed_orders == []
