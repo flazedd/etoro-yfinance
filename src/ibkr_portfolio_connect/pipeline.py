@@ -158,6 +158,11 @@ def run_what_if(
 
 
 def _fetch_target(settings: Settings, *, transport: httpx.BaseTransport | None) -> TargetPortfolio:
+    if settings.target_portfolio_url is None:
+        raise ValueError(
+            "TARGET_PORTFOLIO_URL is not set; this legacy JSON path needs it. "
+            "Use the bbterminal rebalancer (scripts/rebalance.py) instead."
+        )
     token = (
         settings.target_portfolio_auth_token.get_secret_value()
         if settings.target_portfolio_auth_token

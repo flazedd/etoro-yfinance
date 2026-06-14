@@ -13,6 +13,7 @@ handshake, which requires real credentials.
 from __future__ import annotations
 
 import logging
+import time
 from decimal import Decimal
 from types import TracebackType
 from typing import Any, Self
@@ -27,6 +28,9 @@ from .schema import CurrentPosition, OrderSide
 log = logging.getLogger(__name__)
 
 POSITIONS_PAGE_SIZE = 100
+
+# secdef/search 503s intermittently on IBKR's side; how many times to try.
+_SECDEF_SEARCH_ATTEMPTS = 4
 
 
 class IBKRError(Exception):
@@ -181,12 +185,42 @@ class IBKRClient:
 
     # ----- symbol resolution ----------------------------------------------
 
+    def secdef_search_raw(self, symbol: str) -> list[dict[str, Any]]:
+        """Raw secdef/search rows, no validation.
+
+        IBKR returns heterogeneous rows for a symbol search — some have a null
+        `symbol` (e.g. index/derivative parents), which the strict SecDefMatch
+        model rejects. Callers that just want to inspect availability across
+        listings should use this and parse defensively.
+        """
+        # IBKR's secdef/search 503s intermittently (cold start / rate limit);
+        # retry transient 503s with backoff before giving up.
+        data: Any = []
+        delay = 1.0
+        for attempt in range(_SECDEF_SEARCH_ATTEMPTS):
+            try:
+                data = self._ibind.search_contract_by_symbol(symbol).data or []
+                break
+            except Exception as e:
+                wrapped = self._wrap(e, f"secdef_search({symbol})")
+                if "503" in str(e) and attempt < _SECDEF_SEARCH_ATTEMPTS - 1:
+                    time.sleep(delay)
+                    delay *= 2
+                    continue
+                raise wrapped from e
+        # IBKR usually returns a list of row dicts, but for some symbols it
+        # returns a single dict or other shapes — normalize and drop non-dicts.
+        if isinstance(data, dict):
+            data = [data]
+        return [dict(x) for x in data if isinstance(x, dict)]
+
     def secdef_search(self, symbol: str) -> list[SecDefMatch]:
-        try:
-            data = self._ibind.search_contract_by_symbol(symbol).data or []
-        except Exception as e:
-            raise self._wrap(e, f"secdef_search({symbol})") from e
-        return [SecDefMatch.model_validate(x) for x in data]
+        # Skip rows with no symbol — they can't match a ticker anyway.
+        return [
+            SecDefMatch.model_validate(x)
+            for x in self.secdef_search_raw(symbol)
+            if x.get("symbol") is not None
+        ]
 
     def resolve_conid(self, symbol: str, exchange: str, *, asset_class: str = "STK") -> int:
         matches = self.secdef_search(symbol)

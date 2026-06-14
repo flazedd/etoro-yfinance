@@ -42,8 +42,36 @@ def check_safety(
     used to verify our configured account is actually accessible (catches
     paper-vs-live profile mistakes).
     """
+    check_trade_caps(
+        settings=settings, trades=trades, nav=nav, visible_accounts=visible_accounts
+    )
+
     now = now or datetime.now(UTC)
 
+    # 5. Stale reference prices.
+    if settings.max_reference_age_hours is not None:
+        max_age = timedelta(hours=settings.max_reference_age_hours)
+        for tp in target.positions:
+            age = now - tp.reference_price_at
+            if age > max_age:
+                hours = age.total_seconds() / 3600
+                raise PreTradeSafetyError(
+                    f"reference_price for {tp.symbol} is {hours:.1f}h old, exceeds "
+                    f"max_reference_age_hours={settings.max_reference_age_hours}"
+                )
+
+
+def check_trade_caps(
+    *,
+    settings: Settings,
+    trades: list[Trade],
+    nav: Decimal,
+    visible_accounts: list[str],
+) -> None:
+    """Source-agnostic pre-trade checks: account match, NAV floor, per-trade and
+    total-churn caps. Shared by the legacy JSON path and the bbterminal path.
+    Raises PreTradeSafetyError on first failure.
+    """
     # 1. Account-ID-in-visible-accounts — always enforced when we have a list.
     if visible_accounts and settings.ibkr_account_id not in visible_accounts:
         raise PreTradeSafetyError(
@@ -59,43 +87,24 @@ def check_safety(
 
     # 3. Per-trade size cap.
     if settings.max_trade_pct_of_nav is not None and nav > 0:
-        cap_dollars = nav * settings.max_trade_pct_of_nav / Decimal("100")
+        cap = nav * settings.max_trade_pct_of_nav / Decimal("100")
         for t in trades:
             est = _trade_est_value(t)
-            if est is None:
-                continue
-            if est > cap_dollars:
+            if est is not None and est > cap:
                 raise PreTradeSafetyError(
                     f"trade {t.side.value} {t.quantity} {t.symbol} estimated value "
-                    f"${est:.2f} exceeds {settings.max_trade_pct_of_nav}% of NAV "
-                    f"(cap ${cap_dollars:.2f})"
+                    f"{est:.2f} exceeds {settings.max_trade_pct_of_nav}% of NAV (cap {cap:.2f})"
                 )
 
     # 4. Total-churn cap.
     if settings.max_total_churn_pct_of_nav is not None and nav > 0:
-        cap_dollars = nav * settings.max_total_churn_pct_of_nav / Decimal("100")
-        total = sum(
-            (_trade_est_value(t) or Decimal("0") for t in trades),
-            start=Decimal("0"),
-        )
-        if total > cap_dollars:
+        cap = nav * settings.max_total_churn_pct_of_nav / Decimal("100")
+        total = sum((_trade_est_value(t) or Decimal("0") for t in trades), start=Decimal("0"))
+        if total > cap:
             raise PreTradeSafetyError(
-                f"total trade volume ${total:.2f} exceeds "
-                f"{settings.max_total_churn_pct_of_nav}% of NAV "
-                f"(cap ${cap_dollars:.2f})"
+                f"total trade volume {total:.2f} exceeds "
+                f"{settings.max_total_churn_pct_of_nav}% of NAV (cap {cap:.2f})"
             )
-
-    # 5. Stale reference prices.
-    if settings.max_reference_age_hours is not None:
-        max_age = timedelta(hours=settings.max_reference_age_hours)
-        for tp in target.positions:
-            age = now - tp.reference_price_at
-            if age > max_age:
-                hours = age.total_seconds() / 3600
-                raise PreTradeSafetyError(
-                    f"reference_price for {tp.symbol} is {hours:.1f}h old, exceeds "
-                    f"max_reference_age_hours={settings.max_reference_age_hours}"
-                )
 
 
 def _trade_est_value(trade: Trade) -> Decimal | None:
