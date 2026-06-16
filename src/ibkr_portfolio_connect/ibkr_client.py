@@ -214,6 +214,33 @@ class IBKRClient:
             data = [data]
         return [dict(x) for x in data if isinstance(x, dict)]
 
+    def secdef_by_conids(self, conids: list[int]) -> list[dict[str, Any]]:
+        """`trsrv/secdef` for a batch of conids -> the authoritative IBKR
+        name / ticker / listingExchange / currency / countryCode for each.
+
+        Used to VERIFY a resolved conid is the company we think it is. The
+        endpoint does NOT return an ISIN (the field is always null), so
+        cross-check on name + currency + country instead. Batchable, so it's
+        cheap to validate the whole book.
+        """
+        if not conids:
+            return []
+        try:
+            data = self._ibind.security_definition_by_conid([str(c) for c in conids]).data
+        except Exception as e:
+            raise self._wrap(e, "secdef_by_conids") from e
+        secdefs = data.get("secdef") if isinstance(data, dict) else data
+        return [dict(x) for x in (secdefs or []) if isinstance(x, dict)]
+
+    def contract_info(self, conid: int) -> dict[str, Any]:
+        """`iserver/contract/{conid}/info` -> full details incl. company_name,
+        currency, and `cusip` (the US-ISIN middle, so US names get an ISIN
+        cross-check). One conid per call — heavier than secdef_by_conids."""
+        try:
+            return dict(self._ibind.contract_information_by_conid(str(conid)).data or {})
+        except Exception as e:
+            raise self._wrap(e, f"contract_info({conid})") from e
+
     def secdef_search(self, symbol: str) -> list[SecDefMatch]:
         # Skip rows with no symbol — they can't match a ticker anyway.
         return [
@@ -351,19 +378,35 @@ class IBKRClient:
         except Exception as e:
             raise self._wrap(e, "portfolio_summary") from e
 
+    def init_brokerage_session(self) -> None:
+        """Initialize the iserver brokerage session — required before
+        /iserver/marketdata/snapshot, which otherwise 500s with
+        'Please query /accounts first'. Idempotent; safe to call once up front."""
+        try:
+            self._ibind.receive_brokerage_accounts()
+        except Exception as e:
+            raise self._wrap(e, "init_brokerage_session") from e
+
     def marketdata_snapshot(
-        self, conids: list[int], *, fields: list[str] | None = None
+        self, conids: list[int], *, fields: list[str] | None = None, warmups: int = 1
     ) -> list[dict[str, Any]]:
+        """Live market-data snapshot. IBKR primes the feed on first request and
+        returns the requested fields only on a follow-up call, so `warmups`
+        repeats the call (discarding early partial rows) before returning."""
         if not conids:
             return []
         try:
-            data = (
-                self._ibind.live_marketdata_snapshot(
-                    conids=[str(c) for c in conids],
-                    fields=fields or ["31"],
-                ).data
-                or []
-            )
+            data: Any = []
+            for _ in range(max(1, warmups + 1)):
+                data = (
+                    self._ibind.live_marketdata_snapshot(
+                        conids=[str(c) for c in conids],
+                        fields=fields or ["31"],
+                    ).data
+                    or []
+                )
+                if warmups:
+                    time.sleep(0.6)
             return list(data)
         except Exception as e:
             raise self._wrap(e, "marketdata_snapshot") from e

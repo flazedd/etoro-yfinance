@@ -158,6 +158,34 @@ class BBTerminalClient:
         """Composite go/no-go. Gate trades on is_healthy_strict."""
         return cast(dict[str, Any], self._request("GET", "/api/admin/health"))
 
+    def universes(self, include_all: bool = False) -> list[dict[str, Any]]:
+        """List universes — id, label, kind, frozen_at, month range.
+
+        By default returns only the frozen static snapshots (the canonical
+        "X (as of YYYY-MM)" sets). Pass include_all=True to also see the live
+        template-managed canonicals, the LongEquity time-series universe,
+        criteria-derived and imported-index universes. Pick a universe_id to
+        pass to universe()."""
+        resp = self._request(
+            "GET",
+            "/api/admin/universes",
+            params={"include_all": str(include_all).lower()},
+        )
+        return cast(list[dict[str, Any]], cast(dict[str, Any], resp)["universes"])
+
+    def universe(self, universe_id: int, month: str | None = None) -> dict[str, Any]:
+        """One universe's full membership. Each member carries ticker,
+        exchange, country, currency, isin, company_name, sector, industry,
+        latest_close_local, latest_close_eur, latest_close_date, fx_rate_per_eur.
+
+        `month` (YYYY-MM) only does anything for the multi-month LongEquity
+        time-series universe; for any single-month frozen set it is ignored."""
+        params = {"month": month} if month else None
+        return cast(
+            dict[str, Any],
+            self._request("GET", f"/api/admin/universes/{universe_id}", params=params),
+        )
+
     # ─── Factory ─────────────────────────────────────────────────
 
     @classmethod

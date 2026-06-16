@@ -96,6 +96,18 @@ def test_symbol_override_for_ibkr_rename() -> None:
     assert client.searched[0] == "CSG1"  # override tried before raw ticker
 
 
+def test_conid_override_pins_without_any_search() -> None:
+    # A reviewed CONID_OVERRIDES pin (Diageo ADR, bbterminal-tagged LSE) wins
+    # outright — no secdef/search call, exchange-matching bypassed entirely.
+    client = FakeClient({})
+    rc = resolve_contract(client, "DGED", "LSE", "GBP", isin="US25243Q2057")
+    assert rc.conid == 7788
+    assert rc.ibkr_symbol == "DEO"
+    assert rc.ibkr_listing == "NYSE"
+    assert rc.method == "override"
+    assert client.searched == []  # never hit IBKR
+
+
 def test_unmapped_exchange_raises() -> None:
     client = FakeClient({})
     with pytest.raises(ContractResolutionError, match="no IBKR exchange mapping"):

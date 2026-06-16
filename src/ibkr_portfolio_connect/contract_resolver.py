@@ -35,6 +35,24 @@ BBTERMINAL_TO_IBKR_LISTING: dict[str, set[str]] = {
     "XSWX": {"EBS"},  # SIX Swiss Exchange
     "XKRX": {"KRX", "KSE"},  # Korea Exchange
     "HKSE": {"SEHK"},  # Hong Kong (SEHK)
+    # Added from the LEONTEQ universe sweep (scripts/resolve_universe.py): the
+    # home-market IBKR listing code for each exchange, confirmed present on the
+    # ISIN search for ~all members. NSE (India), PHS (Manila) and DUB (Dublin)
+    # are deliberately NOT here — IBKR only exposes ADR/foreign lines for those
+    # ISINs, no directly-tradeable local listing, so they must stay unresolved.
+    "XTER": {"IBIS"},  # Xetra (Deutsche Börse). FWB (Frankfurt floor) omitted on purpose — far less liquid.
+    "LSE": {"LSE"},  # London Stock Exchange
+    "TSX": {"TSE"},  # Toronto Stock Exchange (IBKR calls it TSE)
+    "OSTO": {"SFB"},  # Nasdaq Stockholm
+    "OCSE": {"CPH"},  # Nasdaq Copenhagen
+    "OHEL": {"HEX"},  # Nasdaq Helsinki
+    "XMAD": {"BM"},  # Bolsa de Madrid
+    "SGX": {"SGX"},  # Singapore Exchange
+    "ASX": {"ASX"},  # Australian Securities Exchange
+    "XLIS": {"BVL"},  # Euronext Lisbon
+    "WBO": {"VSE"},  # Wiener Börse (Vienna)
+    "XPRA": {"PRA", "VSE"},  # Prague; some bbterminal XPRA names are Vienna-listed (VSE)
+    "TPE": {"TWSE"},  # Taiwan Stock Exchange
 }
 
 # Exchanges whose tickers are zero-padded numbers in bbterminal but unpadded in
@@ -48,6 +66,39 @@ _STRIP_LEADING_ZERO_EXCHANGES = {"HKSE"}
 # search can't find these, so map them explicitly. Keys are upper-cased.
 SYMBOL_OVERRIDES: dict[tuple[str, str], str] = {
     ("CSG", "XAMS"): "CSG1",  # CSG NV (Euronext Amsterdam), conid 848752492
+}
+
+# Manual (ticker, bbterminal_exchange) -> pinned IBKR contract. Last resort for
+# names where neither ISIN nor ticker search lands on a tradeable listing on the
+# bbterminal-labelled exchange — typically because bbterminal mislabels the venue
+# (an ADR tagged to a local exchange, a US stock tagged to its thin German line,
+# an HK name tagged XTER). We pin the verified IBKR contract for the SAME company
+# directly, bypassing exchange-matching. Each entry is a deliberate, reviewed
+# substitution; `git blame` is the audit trail. Values: (conid, ibkr_symbol,
+# ibkr_listing). Keys are upper-cased (ticker, bbterminal_exchange).
+CONID_OVERRIDES: dict[tuple[str, str], tuple[int, str, str]] = {
+    # --- LEONTEQ universe, reviewed 2026-06-16 (scripts/inspect_candidates.py) ---
+    # ADRs that bbterminal tags to a local exchange; the ISIN is the US line, so
+    # we pin the US-listed ADR (the instrument bbterminal actually prices).
+    ("DGED", "LSE"): (7788, "DEO", "NYSE"),  # Diageo plc ADR
+    ("0HKP", "LSE"): (5171, "BP", "NYSE"),  # BP plc ADR
+    ("0ADF", "LSE"): (653400472, "ARM", "NYSE"),  # Arm Holdings ADR
+    ("YPF", "XTER"): (14019, "YPF", "NYSE"),  # YPF SA ADR
+    ("BVXB", "XTER"): (58996617, "ITUB", "NYSE"),  # Itau Unibanco ADR
+    ("22UA", "XTER"): (386752917, "BNTX", "NYSE"),  # BioNTech SE ADR
+    ("CLV", "XTER"): (390332321, "TCOM", "NYSE"),  # Trip.com Group ADR
+    ("N1UA", "XTER"): (554208336, "EDU", "NYSE"),  # New Oriental Education ADR
+    ("INFY", "NSE"): (4813460, "INFY", "NYSE"),  # Infosys ADR (NSE India not directly tradeable)
+    ("RYA", "DUB"): (210918190, "RYAAY", "NYSE"),  # Ryanair Holdings ADR
+    # Bermuda-incorporated, primary US listing; bbterminal tags its thin German line.
+    ("SZ2", "XTER"): (53747825, "SIG", "NYSE"),  # Signet Jewelers Ltd
+    # HK names mis-tagged XTER; pin the SEHK main-board (HKD) listing.
+    ("CTM", "XTER"): (3408229, "941", "SEHK"),  # China Mobile Ltd (00941.HK)
+    ("SHX", "XTER"): (46636743, "1071", "SEHK"),  # Huadian Power Intl H (01071.HK)
+    # TSMC tagged TSE/JPY but its ISIN (US8740391003) is the US ADR. The ISIN->
+    # ticker fallback wrongly matched Japanese ticker 2330 (Forside Co Ltd) on
+    # TSEJ — a different company the name-verify caught. Pin the TSM ADR.
+    ("2330", "TSE"): (6223250, "TSM", "NYSE"),  # Taiwan Semiconductor ADR
 }
 
 
@@ -207,9 +258,23 @@ def resolve_contract(
 ) -> ResolvedContract:
     """Resolve one holding to a single IBKR STK conid, or raise.
 
-    Prefers ISIN (collision-free) when available, falling back to ticker+exchange
-    symbol search. `client` must expose `secdef_search_raw(symbol) -> list[dict]`.
+    A reviewed CONID_OVERRIDES pin wins outright; otherwise prefer ISIN
+    (collision-free) when available, falling back to ticker+exchange symbol
+    search. `client` must expose `secdef_search_raw(symbol) -> list[dict]`.
     """
+    override = CONID_OVERRIDES.get((ticker.upper(), bbterminal_exchange.upper()))
+    if override:
+        conid, ibkr_symbol, ibkr_listing = override
+        return ResolvedContract(
+            ticker=ticker,
+            bbterminal_exchange=bbterminal_exchange,
+            currency=currency,
+            conid=conid,
+            ibkr_listing=ibkr_listing,
+            ibkr_symbol=ibkr_symbol,
+            routing_exchanges=[ibkr_listing],
+            method="override",
+        )
     if isin:
         try:
             return resolve_by_isin(client, isin, bbterminal_exchange, currency, ticker=ticker)
