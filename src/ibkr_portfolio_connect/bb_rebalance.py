@@ -31,11 +31,20 @@ from typing import Any
 from .bbterminal_client import BBTerminalClient
 from .config import Settings
 from .conid_map import ConidMap, load_map, require_reviewed_conid
-from .cost import RebalanceReport, build_report, save_report
+from .cost import RebalanceReport, build_report, serialize_report
 from .executor import execute_trades
 from .ibkr_client import IBKRClient
 from .notify import Notifier, build_notifier
 from .rebalance import ResolvedTarget, compute_trades
+from .run_record import (
+    ABORTED,
+    ERROR,
+    RunRecorder,
+    status_from_report,
+    summarize_positions,
+    summarize_targets,
+    summarize_trades,
+)
 from .safety import PreTradeSafetyError, check_trade_caps
 from .schema import Trade
 
@@ -179,65 +188,103 @@ def run_bb_rebalance(
         ntfy_topic=settings.ntfy_topic, ntfy_server=settings.ntfy_server
     )
 
-    # --- bbterminal gates (no orders yet) ---
-    health = bb.health()
-    if settings.require_strategy_healthy and not health.get("is_healthy_strict", False):
-        raise RebalanceInputError(
-            f"bbterminal not healthy (is_healthy_strict=false): {health.get('problems')}. "
-            "Set REQUIRE_STRATEGY_HEALTHY=false to override."
+    # The audit record the dashboard reads. Written at every checkpoint so a
+    # crash/hang still leaves a `status="running"` breadcrumb. report_dir=None
+    # makes it a no-op, so this is free when persistence is off.
+    recorder = RunRecorder(settings.report_dir, dry_run=do_dry)
+    recorder.update(sizing_currency=settings.sizing_currency)
+    notifier.event(
+        "ibkr-rebalance: run started",
+        f"dry_run={do_dry}; sizing in {settings.sizing_currency}",
+    )
+
+    try:
+        # --- bbterminal gates (no orders yet) ---
+        health = bb.health()
+        recorder.update(
+            health={
+                "is_healthy_strict": health.get("is_healthy_strict"),
+                "problems": health.get("problems"),
+            }
         )
-    scheds = bb.schedules(enabled_only=True)
-    if not scheds:
-        raise RebalanceInputError("no enabled scheduled strategy")
-    strategy_id = scheds[0]["strategy_id"]
-    detail = bb.schedule(strategy_id)
-    check_strategy_freshness(detail, max_age_days=settings.max_strategy_age_days)
-    holdings = detail.get("holdings", [])
-
-    conid_map = load_map(settings.conid_map_path)
-    # Resolve+review-gate up front so we fail before any IBKR write if a name
-    # isn't vetted. (Raises ConidMapError.)
-    targets = build_targets(holdings, conid_map)
-
-    if client is None:
-        client = IBKRClient(timeout=settings.http_timeout_seconds)
-
-    with client:
-        visible_accounts = client.iserver_accounts()
-        positions = client.positions(settings.ibkr_account_id)
-        nav = extract_nav(
-            client.portfolio_summary(settings.ibkr_account_id),
-            required_currency=settings.sizing_currency,
-        )
-        trades = compute_trades(current=positions, targets=targets, nav=nav)
-        _log_plan(trades, nav, strategy_id, do_dry)
-
-        try:
-            check_trade_caps(
-                settings=settings, trades=trades, nav=nav, visible_accounts=visible_accounts
+        if settings.require_strategy_healthy and not health.get("is_healthy_strict", False):
+            raise RebalanceInputError(
+                f"bbterminal not healthy (is_healthy_strict=false): {health.get('problems')}. "
+                "Set REQUIRE_STRATEGY_HEALTHY=false to override."
             )
-        except PreTradeSafetyError as e:
-            log.error("pre-trade safety check failed: %s", e)
-            aborted = RebalanceReport(nav=nav, trades=[], aborted_reason=str(e))
-            notifier.notify(aborted)
-            raise
+        scheds = bb.schedules(enabled_only=True)
+        if not scheds:
+            raise RebalanceInputError("no enabled scheduled strategy")
+        strategy_id = scheds[0]["strategy_id"]
+        detail = bb.schedule(strategy_id)
+        recorder.update(strategy_id=strategy_id, as_of_date=detail.get("as_of_date"))
+        check_strategy_freshness(detail, max_age_days=settings.max_strategy_age_days)
+        holdings = detail.get("holdings", [])
 
-        summary = execute_trades(
-            client,
-            settings.ibkr_account_id,
-            trades,
-            dry_run=do_dry,
-            enforce_rth=settings.trading_hours_only,
-            settle_timeout=settings.order_settle_timeout_seconds,
-            poll_interval=settings.order_poll_interval_seconds,
-            sleeper=sleeper,
+        conid_map = load_map(settings.conid_map_path)
+        # Resolve+review-gate up front so we fail before any IBKR write if a name
+        # isn't vetted. (Raises ConidMapError.)
+        targets = build_targets(holdings, conid_map)
+        recorder.update(targets=summarize_targets(targets))
+
+        if client is None:
+            client = IBKRClient(timeout=settings.http_timeout_seconds)
+
+        with client:
+            visible_accounts = client.iserver_accounts()
+            positions = client.positions(settings.ibkr_account_id)
+            recorder.update(current_positions=summarize_positions(positions))
+            nav = extract_nav(
+                client.portfolio_summary(settings.ibkr_account_id),
+                required_currency=settings.sizing_currency,
+            )
+            recorder.update(nav=nav)
+            trades = compute_trades(current=positions, targets=targets, nav=nav)
+            recorder.update(planned_trades=summarize_trades(trades))
+            _log_plan(trades, nav, strategy_id, do_dry)
+
+            try:
+                check_trade_caps(
+                    settings=settings, trades=trades, nav=nav, visible_accounts=visible_accounts
+                )
+            except PreTradeSafetyError as e:
+                log.error("pre-trade safety check failed: %s", e)
+                aborted = RebalanceReport(nav=nav, trades=[], aborted_reason=str(e))
+                recorder.finish(ABORTED, abort_reason=str(e), report=serialize_report(aborted))
+                notifier.notify(aborted)
+                raise
+
+            summary = execute_trades(
+                client,
+                settings.ibkr_account_id,
+                trades,
+                dry_run=do_dry,
+                enforce_rth=settings.trading_hours_only,
+                settle_timeout=settings.order_settle_timeout_seconds,
+                poll_interval=settings.order_poll_interval_seconds,
+                sleeper=sleeper,
+            )
+
+        report = build_report(summary, nav=nav)
+        recorder.finish(
+            status_from_report(report), nav=report.nav, report=serialize_report(report)
         )
+        notifier.notify(report)
+        return report
 
-    report = build_report(summary, nav=nav)
-    if settings.report_dir is not None:
-        save_report(report, report_dir=settings.report_dir)
-    notifier.notify(report)
-    return report
+    except PreTradeSafetyError:
+        # Already recorded + pushed in the inner handler above.
+        raise
+    except RebalanceInputError as e:
+        # A pre-trade gate refused before any RebalanceReport existed — these
+        # would otherwise be invisible to the dashboard and to push.
+        recorder.finish(ABORTED, abort_reason=str(e))
+        notifier.event("ibkr-rebalance: ABORTED (pre-trade gate)", str(e), priority="high")
+        raise
+    except Exception as e:
+        recorder.finish(ERROR, error=str(e))
+        notifier.event("ibkr-rebalance: ERROR", str(e), priority="high")
+        raise
 
 
 def _log_plan(trades: list[Trade], nav: Decimal, strategy_id: int, dry_run: bool) -> None:

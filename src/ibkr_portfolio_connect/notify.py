@@ -24,12 +24,20 @@ log = logging.getLogger(__name__)
 class Notifier(Protocol):
     def notify(self, report: RebalanceReport) -> None: ...
 
+    def event(self, title: str, body: str, *, priority: str = "default") -> None:
+        """A free-form push not tied to a RebalanceReport — e.g. 'run started'
+        or an early gate abort that happens before any trades are computed."""
+        ...
+
 
 class LogOnlyNotifier:
     """Used when no notification channel is configured. Logs the result."""
 
     def notify(self, report: RebalanceReport) -> None:
         title, body = _format(report)
+        log.info("[%s] %s", title, body.replace("\n", " | "))
+
+    def event(self, title: str, body: str, *, priority: str = "default") -> None:
         log.info("[%s] %s", title, body.replace("\n", " | "))
 
 
@@ -51,16 +59,19 @@ class NtfyNotifier:
 
     def notify(self, report: RebalanceReport) -> None:
         title, body = _format(report)
+        priority = "default" if report.overall_success else "high"
+        tags = "white_check_mark" if report.overall_success else "warning"
+        self._post(title, body, priority=priority, tags=tags)
+
+    def event(self, title: str, body: str, *, priority: str = "default") -> None:
+        tags = "rotating_light" if priority == "high" else "information_source"
+        self._post(title, body, priority=priority, tags=tags)
+
+    def _post(self, title: str, body: str, *, priority: str, tags: str) -> None:
         # Always log to INFO too — keeps the terminal/cron-log informative
         # even when push is configured.
         log.info("[%s] %s", title, body.replace("\n", " | "))
-        priority = "default" if report.overall_success else "high"
-        tags = "white_check_mark" if report.overall_success else "warning"
-        headers = {
-            "Title": title,
-            "Priority": priority,
-            "Tags": tags,
-        }
+        headers = {"Title": title, "Priority": priority, "Tags": tags}
         url = f"{self._server}/{self._topic}"
         try:
             with httpx.Client(timeout=self._timeout, transport=self._transport) as c:

@@ -308,6 +308,48 @@ uv run python scripts/test_ntfy.py <topic> --dry-run  # blue, normal priority
 uv run python scripts/test_ntfy.py <topic> --all-fail # red, priority: high
 ```
 
+## Dashboard (read-only observability)
+
+For a monthly job, push notifications are the real-time channel; the dashboard
+is the **audit trail and history**. It answers "what did the last run do, and
+why" without SSHing in to grep logs.
+
+**How it works.** When `REPORT_DIR` / `LOG_DIR` are set (the compose stack sets
+them automatically), each run writes:
+
+- `REPORT_DIR/<timestamp>.json` — a full record: start/finish, the bbterminal
+  health + freshness gates, NAV, current-vs-target positions, planned trades,
+  fills + slippage, and final status. Written at every checkpoint, so a run that
+  crashes or hangs still leaves a `status: running` breadcrumb.
+- `LOG_DIR/rebalance.log` — a rotating log file (in addition to stderr).
+
+**Security model — this is the important part.** The dashboard is a *separate
+process* that **only reads those files**. It imports no broker client, holds no
+OAuth credentials, and exposes only `GET` endpoints — there is no way to place
+or cancel an order through it. Bind it to your LAN; **never** port-forward it.
+
+Two ways to view it:
+
+```bash
+# (a) Live server on the LAN — view at http://<pi-host>:8080
+docker compose up -d dashboard
+#     or bare-metal:
+uv run --extra dashboard ibkr-dashboard
+
+# (b) Static snapshot — a self-contained HTML file, no server needed
+uv run python scripts/build_dashboard.py --report-dir data/runs --log-dir data/logs
+open data/dashboard.html
+```
+
+The compose `dashboard` service mounts the run records + logs **read-only**,
+restarts automatically, and carries its own `fastapi`/`uvicorn` (installed via
+the `dashboard` extra) so the trade-placing `rebalancer` image stays lean.
+
+> The dashboard shows only what the cron job last recorded. It does **not**
+> poll IBKR for "positions right now" — that would mean putting credentials on
+> the web-facing process. If you want fresher between-run data, add a small
+> read-only snapshot cron; keep it out of the server.
+
 ## Offline API docs
 
 Full IBKR Client Portal v1 documentation is mirrored under

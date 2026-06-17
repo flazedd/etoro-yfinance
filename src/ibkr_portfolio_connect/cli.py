@@ -63,11 +63,10 @@ def rebalance(
     ] = False,
 ) -> None:
     """Run one rebalance pass: target JSON → IBKR positions → diff → execute."""
-    _setup_logging(verbose=verbose)
-
     settings = _load_settings(
         dry_run=dry_run, target_url=target_url, account=account, no_rth=no_rth
     )
+    _setup_logging(verbose=verbose, settings=settings)
 
     if what_if:
         try:
@@ -126,12 +125,29 @@ def _print_what_if(previews: list[dict[str, Any]]) -> None:
     typer.echo("\nNo orders placed.")
 
 
-def _setup_logging(*, verbose: bool) -> None:
-    logging.basicConfig(
-        level=logging.DEBUG if verbose else logging.INFO,
-        format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
-        stream=sys.stderr,
-    )
+def _setup_logging(*, verbose: bool, settings: Settings | None = None) -> None:
+    level = logging.DEBUG if verbose else logging.INFO
+    fmt = logging.Formatter("%(asctime)s %(levelname)-7s %(name)s: %(message)s")
+    root = logging.getLogger()
+    root.setLevel(level)
+
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setFormatter(fmt)
+    root.addHandler(stderr_handler)
+
+    # Also write to a rotating file the dashboard can tail, if configured.
+    if settings is not None and settings.log_dir is not None:
+        from logging.handlers import RotatingFileHandler
+
+        settings.log_dir.mkdir(parents=True, exist_ok=True)
+        file_handler = RotatingFileHandler(
+            settings.log_dir / "rebalance.log",
+            maxBytes=settings.log_max_bytes,
+            backupCount=settings.log_backup_count,
+            encoding="utf-8",
+        )
+        file_handler.setFormatter(fmt)
+        root.addHandler(file_handler)
 
 
 def _load_settings(

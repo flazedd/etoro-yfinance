@@ -186,6 +186,23 @@ class TestNtfyNotifier:
         assert captured["headers"]["priority"] == "default"
         assert captured["headers"]["tags"] == "white_check_mark"
 
+    def test_event_sends_freeform_push(self) -> None:
+        captured: dict[str, Any] = {}
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            captured["url"] = str(request.url)
+            captured["body"] = request.content.decode("utf-8")
+            captured["headers"] = dict(request.headers)
+            return httpx.Response(200)
+
+        NtfyNotifier("t", transport=httpx.MockTransport(handler)).event(
+            "ibkr-rebalance: run started", "dry_run=False", priority="high"
+        )
+        assert captured["body"] == "dry_run=False"
+        assert captured["headers"]["title"] == "ibkr-rebalance: run started"
+        assert captured["headers"]["priority"] == "high"
+        assert captured["headers"]["tags"] == "rotating_light"
+
     def test_sends_high_priority_on_failure(self) -> None:
         captured: dict[str, Any] = {}
 

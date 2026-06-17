@@ -15,14 +15,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Optional extras to install (e.g. "--extra dashboard" for the read-only web
+# UI service). The rebalancer image builds with no extras and stays lean.
+ARG EXTRAS=""
+
 # Install deps first (better layer caching: this layer only invalidates when
 # pyproject.toml / uv.lock change).
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --frozen --no-dev --no-install-project ${EXTRAS}
 
 # Copy the source last and install the project itself.
 COPY src ./src
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev ${EXTRAS}
 
 # Drop privileges. The .venv is already owned by root but accessible
 # read-only by rebalancer.

@@ -187,3 +187,7 @@ cython_debug/
 # Local env (never commit)
 .env
 .idea
+# Rebalancer runtime data (run records + rotating logs) + generated dashboard
+/data/runs/
+/data/logs/
+data/dashboard.html

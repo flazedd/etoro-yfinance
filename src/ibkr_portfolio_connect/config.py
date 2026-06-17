@@ -71,4 +71,18 @@ class Settings(BaseSettings):
 
     # --- Report persistence ---
     report_dir: Path | None = None
-    """If set, each RebalanceReport is serialized to {report_dir}/{ts}.json."""
+    """If set, each run is serialized to {report_dir}/{ts}.json — the audit
+    trail the dashboard reads. Holds gates, NAV, current-vs-target, fills."""
+
+    # --- Logging to file (for the dashboard's log tail) ---
+    log_dir: Path | None = None
+    """If set, logs are also written to {log_dir}/rebalance.log with rotation,
+    in addition to stderr. The dashboard tails this file."""
+    log_max_bytes: int = 2_000_000
+    log_backup_count: int = 5
+
+    # --- Read-only dashboard server (a SEPARATE process; never trades) ---
+    # The server reads report_dir + the log file only. It holds no OAuth creds
+    # and makes no broker calls. Bind to the LAN; do not expose to the internet.
+    dashboard_host: str = "0.0.0.0"
+    dashboard_port: int = 8080
