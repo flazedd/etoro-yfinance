@@ -1,8 +1,8 @@
 {
-  "universe_id": 15,
+  "universe_id": 16,
   "label": "LEONTEQ (as of 2026-06-17)",
   "template_key": null,
-  "frozen_at": "2026-06-17T14:46:42.662175+00:00",
+  "frozen_at": "2026-06-17T20:16:38.641934+00:00",
   "is_monthly": false,
   "target_month": "2026-06",
   "member_count": 1487,
@@ -3688,7 +3688,7 @@
       "exchange": "NASDAQ",
       "country": "United States",
       "currency": "USD",
-      "isin": "US98954M1018",
+      "isin": "US98954M2008",
       "company_name": "Zillow Group Inc",
       "sector": "Capital Goods",
       "industry": "Construction Services",
@@ -6542,9 +6542,9 @@
       "company_name": "BP PLC",
       "sector": "Energy",
       "industry": "Oil & Gas Operations",
-      "latest_close_local": 39.19,
-      "latest_close_eur": 33.8107,
-      "latest_close_date": "2019-11-08",
+      "latest_close_local": 41.15,
+      "latest_close_eur": 35.5017,
+      "latest_close_date": "2026-06-16",
       "fx_rate_per_eur": 1.1591
     },
     {
@@ -13832,9 +13832,9 @@
       "company_name": "New Oriental Education & Technology Group Inc - ADR",
       "sector": "Services",
       "industry": "Schools",
-      "latest_close_local": 143.13,
-      "latest_close_eur": 123.4837,
-      "latest_close_date": "2020-08-03",
+      "latest_close_local": 46.53,
+      "latest_close_eur": 40.1432,
+      "latest_close_date": "2026-06-16",
       "fx_rate_per_eur": 1.1591
     },
     {
@@ -14668,7 +14668,7 @@
       "exchange": "NASDAQ",
       "country": "United States",
       "currency": "USD",
-      "isin": "US65249B2088",
+      "isin": "US65249B1098",
       "company_name": "News Corp",
       "sector": "Services",
       "industry": "Printing & Publishing",
@@ -16308,9 +16308,9 @@
       "sector": "Technology",
       "industry": "Semiconductors",
       "latest_close_local": 2310.0,
-      "latest_close_eur": 62.9938,
+      "latest_close_eur": 63.4049,
       "latest_close_date": "2026-06-12",
-      "fx_rate_per_eur": 36.6703
+      "fx_rate_per_eur": 36.4325
     },
     {
       "company_id": 3507,

@@ -13285,22 +13285,6 @@
       "is_override": false,
       "confidence": "high"
     },
-    "4113": {
-      "company_id": 4113,
-      "ticker": "NWSA",
-      "exchange": "NASDAQ",
-      "conid": 129348130,
-      "method": "isin",
-      "bb_name": "NEWS CORP CLASS A",
-      "ibkr_name": "NEWS CORP - CLASS B",
-      "name_score": 0.471,
-      "bb_ccy": "USD",
-      "ibkr_ccy": "USD",
-      "ccy_ok": true,
-      "ibkr_listing": "NASDAQ",
-      "is_override": false,
-      "confidence": "medium"
-    },
     "4990": {
       "company_id": 4990,
       "ticker": "ACLN",
@@ -16532,22 +16516,6 @@
       "ibkr_listing": "NYSE",
       "is_override": false,
       "confidence": "high"
-    },
-    "4253": {
-      "company_id": 4253,
-      "ticker": "Z",
-      "exchange": "NASDAQ",
-      "conid": 184072087,
-      "method": "isin",
-      "bb_name": "ZILLOW GROUP INC CLASS C",
-      "ibkr_name": "ZILLOW GROUP INC - A",
-      "name_score": 0.45,
-      "bb_ccy": "USD",
-      "ibkr_ccy": "USD",
-      "ccy_ok": true,
-      "ibkr_listing": "NASDAQ",
-      "is_override": false,
-      "confidence": "medium"
     },
     "4225": {
       "company_id": 4225,
@@ -23794,6 +23762,38 @@
       "ibkr_ccy": "HKD",
       "ccy_ok": true,
       "ibkr_listing": "SEHK",
+      "is_override": false,
+      "confidence": "high"
+    },
+    "4253": {
+      "company_id": 4253,
+      "ticker": "Z",
+      "exchange": "NASDAQ",
+      "conid": 201942684,
+      "method": "isin",
+      "bb_name": "Zillow Group Inc",
+      "ibkr_name": "ZILLOW GROUP INC - C",
+      "name_score": 0.941,
+      "bb_ccy": "USD",
+      "ibkr_ccy": "USD",
+      "ccy_ok": true,
+      "ibkr_listing": "NASDAQ",
+      "is_override": false,
+      "confidence": "high"
+    },
+    "4113": {
+      "company_id": 4113,
+      "ticker": "NWSA",
+      "exchange": "NASDAQ",
+      "conid": 129348126,
+      "method": "isin",
+      "bb_name": "News Corp",
+      "ibkr_name": "NEWS CORP - CLASS A",
+      "name_score": 0.9,
+      "bb_ccy": "USD",
+      "ibkr_ccy": "USD",
+      "ccy_ok": true,
+      "ibkr_listing": "NASDAQ",
       "is_override": false,
       "confidence": "high"
     }

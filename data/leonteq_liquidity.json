@@ -1961,14 +1961,6 @@
       "close_eur": 95.5802,
       "adv_eur": 206453232
     },
-    "4253": {
-      "company_id": 4253,
-      "ticker": "Z",
-      "conid": 184072087,
-      "avg_vol": 1120000.0,
-      "close_eur": 31.5192,
-      "adv_eur": 35301504
-    },
     "3806": {
       "company_id": 3806,
       "ticker": "00175",
@@ -7777,14 +7769,6 @@
       "close_eur": 71.2193,
       "adv_eur": 2706333400
     },
-    "4113": {
-      "company_id": 4113,
-      "ticker": "NWSA",
-      "conid": 129348130,
-      "avg_vol": 1520000.0,
-      "close_eur": 22.8876,
-      "adv_eur": 34789152
-    },
     "5373": {
       "company_id": 5373,
       "ticker": "NXST",
@@ -11896,6 +11880,22 @@
       "avg_vol": 14000000.0,
       "close_eur": 0.0529,
       "adv_eur": 740600
+    },
+    "4253": {
+      "company_id": 4253,
+      "ticker": "Z",
+      "conid": 201942684,
+      "avg_vol": 4120000.0,
+      "close_eur": 27.6335,
+      "adv_eur": 113850020
+    },
+    "4113": {
+      "company_id": 4113,
+      "ticker": "NWSA",
+      "conid": 129348126,
+      "avg_vol": 4680000.0,
+      "close_eur": 22.1551,
+      "adv_eur": 103685868
     }
   }
 }

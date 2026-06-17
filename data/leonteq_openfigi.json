@@ -26743,36 +26743,6 @@
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
-    "4113": {
-      "company_id": "4113",
-      "ticker": "NWSA",
-      "isin": "US65249B2088",
-      "bb_name": "NEWS CORP CLASS A",
-      "ibkr_name": "NEWS CORP - CLASS B",
-      "figi_name": "NEWS CORP - CLASS B",
-      "figi_tickers": [
-        "0K7V",
-        "0K7VL",
-        "1NWS",
-        "NC0B",
-        "NWS",
-        "NWS11GBP",
-        "NWS1EUR",
-        "NWS1USD"
-      ],
-      "figi_exch": [
-        "B3",
-        "BW",
-        "E1",
-        "EP",
-        "EU",
-        "EZ"
-      ],
-      "verdict": "ticker_conflict",
-      "sim_bb": 0.471,
-      "sim_ibkr": 1.0,
-      "ticker_match": false
-    },
     "4990": {
       "company_id": "4990",
       "ticker": "ACLN",
@@ -33359,34 +33329,6 @@
       "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
-    },
-    "4253": {
-      "company_id": "4253",
-      "ticker": "Z",
-      "isin": "US98954M1018",
-      "bb_name": "ZILLOW GROUP INC CLASS C",
-      "ibkr_name": "ZILLOW GROUP INC - A",
-      "figi_name": "ZILLOW GROUP INC - A",
-      "figi_tickers": [
-        "0ZG",
-        "1ZGU",
-        "ZG",
-        "ZG1EUR",
-        "ZG1GBP",
-        "ZG1USD"
-      ],
-      "figi_exch": [
-        "BW",
-        "E1",
-        "EP",
-        "EU",
-        "EZ",
-        "GD"
-      ],
-      "verdict": "ticker_conflict",
-      "sim_bb": 0.45,
-      "sim_ibkr": 1.0,
-      "ticker_match": false
     },
     "4225": {
       "company_id": "4225",
@@ -48112,6 +48054,69 @@
         "EP",
         "EU",
         "EZ"
+      ],
+      "verdict": "triple_match",
+      "sim_bb": 0.9,
+      "sim_ibkr": 1.0,
+      "ticker_match": true
+    },
+    "4253": {
+      "company_id": "4253",
+      "ticker": "Z",
+      "isin": "US98954M2008",
+      "bb_name": "Zillow Group Inc",
+      "ibkr_name": "ZILLOW GROUP INC - C",
+      "figi_name": "ZILLOW GROUP INC - C",
+      "figi_tickers": [
+        "0ZG2",
+        "0ZG2D",
+        "1ZUS",
+        "1ZUSM",
+        "Z",
+        "Z*",
+        "ZEUR",
+        "ZGBP",
+        "ZHUF",
+        "ZUSD"
+      ],
+      "figi_exch": [
+        "B3",
+        "E1",
+        "EO",
+        "EP",
+        "EU",
+        "EZ"
+      ],
+      "verdict": "triple_match",
+      "sim_bb": 0.941,
+      "sim_ibkr": 1.0,
+      "ticker_match": true
+    },
+    "4113": {
+      "company_id": "4113",
+      "ticker": "NWSA",
+      "isin": "US65249B1098",
+      "bb_name": "News Corp",
+      "ibkr_name": "NEWS CORP - CLASS A",
+      "figi_name": "NEWS CORP - CLASS A",
+      "figi_tickers": [
+        "0K7U",
+        "0K7UL",
+        "1NWSA",
+        "NC0",
+        "NWSA",
+        "NWSAEUR",
+        "NWSAGBP",
+        "NWSAN",
+        "NWSAUSD"
+      ],
+      "figi_exch": [
+        "B3",
+        "BW",
+        "E1",
+        "EO",
+        "EP",
+        "EU"
       ],
       "verdict": "triple_match",
       "sim_bb": 0.9,
