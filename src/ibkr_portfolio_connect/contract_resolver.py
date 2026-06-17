@@ -99,6 +99,10 @@ CONID_OVERRIDES: dict[tuple[str, str], tuple[int, str, str]] = {
     # ticker fallback wrongly matched Japanese ticker 2330 (Forside Co Ltd) on
     # TSEJ — a different company the name-verify caught. Pin the TSM ADR.
     ("2330", "TSE"): (6223250, "TSM", "NYSE"),  # Taiwan Semiconductor ADR
+    # --- LEONTEQ universe #15 refresh, reviewed 2026-06-17 ---
+    # bbterminal now tags QinetiQ as its thin US OTC-pink ADR (OTCPK/USD). The
+    # ISIN lists on LSE too; trade the liquid London primary (GBP) instead.
+    ("QNTQF", "OTCPK"): (37920799, "QQ.", "LSE"),  # QinetiQ Group plc, LSE primary
 }
 
 

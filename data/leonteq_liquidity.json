@@ -81,14 +81,6 @@
       "close_eur": 5.3347,
       "adv_eur": null
     },
-    "5130": {
-      "company_id": 5130,
-      "ticker": "1COV",
-      "conid": 208908717,
-      "avg_vol": 14200.0,
-      "close_eur": 59.98,
-      "adv_eur": 851716
-    },
     "5535": {
       "company_id": 5535,
       "ticker": "4043",
@@ -161,14 +153,6 @@
       "close_eur": 72.6146,
       "adv_eur": 370334460
     },
-    "5049": {
-      "company_id": 5049,
-      "ticker": "ABX",
-      "conid": 780709680,
-      "avg_vol": 8230000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "4991": {
       "company_id": 4991,
       "ticker": "ACX",
@@ -176,14 +160,6 @@
       "avg_vol": 892000.0,
       "close_eur": 16.01,
       "adv_eur": 14280920
-    },
-    "5000": {
-      "company_id": 5000,
-      "ticker": "AEM",
-      "conid": 14905022,
-      "avg_vol": 1540000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5023": {
       "company_id": 5023,
@@ -216,14 +192,6 @@
       "avg_vol": 5030000.0,
       "close_eur": 33.2871,
       "adv_eur": 167434113
-    },
-    "3706": {
-      "company_id": 3706,
-      "ticker": "ANTO",
-      "conid": 17628566,
-      "avg_vol": 1050000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3383": {
       "company_id": 3383,
@@ -264,14 +232,6 @@
       "avg_vol": 675000.0,
       "close_eur": 136.095,
       "adv_eur": 91864125
-    },
-    "5033": {
-      "company_id": 5033,
-      "ticker": "AYA",
-      "conid": 437108877,
-      "avg_vol": 2240000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3868": {
       "company_id": 3868,
@@ -321,14 +281,6 @@
       "close_eur": 54.5347,
       "adv_eur": null
     },
-    "5099": {
-      "company_id": 5099,
-      "ticker": "CAVEN",
-      "conid": 708628675,
-      "avg_vol": 58700.0,
-      "close_eur": 0.7487,
-      "adv_eur": 43949
-    },
     "5110": {
       "company_id": 5110,
       "ticker": "CC",
@@ -344,14 +296,6 @@
       "avg_vol": 1110000.0,
       "close_eur": 82.9708,
       "adv_eur": 92097588
-    },
-    "5091": {
-      "company_id": 5091,
-      "ticker": "CCO",
-      "conid": 13464841,
-      "avg_vol": 1440000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3770": {
       "company_id": 3770,
@@ -424,14 +368,6 @@
       "avg_vol": 13200000.0,
       "close_eur": 30.0893,
       "adv_eur": 397178760
-    },
-    "5168": {
-      "company_id": 5168,
-      "ticker": "ELD",
-      "conid": 347896187,
-      "avg_vol": 1740000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5166": {
       "company_id": 5166,
@@ -529,14 +465,6 @@
       "close_eur": 3111.0388,
       "adv_eur": 77464866
     },
-    "3362": {
-      "company_id": 3362,
-      "ticker": "GLEN",
-      "conid": 88286963,
-      "avg_vol": 26300000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5236": {
       "company_id": 5236,
       "ticker": "GPK",
@@ -552,14 +480,6 @@
       "avg_vol": null,
       "close_eur": 1126.6228,
       "adv_eur": null
-    },
-    "5222": {
-      "company_id": 5222,
-      "ticker": "GXI",
-      "conid": 44632051,
-      "avg_vol": 351000.0,
-      "close_eur": 26.12,
-      "adv_eur": 9168120
     },
     "4001": {
       "company_id": 4001,
@@ -593,14 +513,6 @@
       "close_eur": 29.318,
       "adv_eur": 206398720
     },
-    "5303": {
-      "company_id": 5303,
-      "ticker": "K",
-      "conid": 6313288,
-      "avg_vol": 5590000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5631": {
       "company_id": 5631,
       "ticker": "KALU",
@@ -633,14 +545,6 @@
       "close_eur": 58.3326,
       "adv_eur": 384411834
     },
-    "5328": {
-      "company_id": 5328,
-      "ticker": "LYC",
-      "conid": 14064364,
-      "avg_vol": 5050000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5360": {
       "company_id": 5360,
       "ticker": "MOS",
@@ -672,14 +576,6 @@
       "avg_vol": 187000.0,
       "close_eur": 218.4,
       "adv_eur": 40840800
-    },
-    "5366": {
-      "company_id": 5366,
-      "ticker": "NEL",
-      "conid": 203501409,
-      "avg_vol": 8460000.0,
-      "close_eur": 0.236,
-      "adv_eur": 1996560
     },
     "3287": {
       "company_id": 3287,
@@ -721,14 +617,6 @@
       "close_eur": 6.085,
       "adv_eur": null
     },
-    "5409": {
-      "company_id": 5409,
-      "ticker": "PAAS",
-      "conid": 14893065,
-      "avg_vol": 1700000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "315": {
       "company_id": 315,
       "ticker": "PH",
@@ -768,14 +656,6 @@
       "avg_vol": 932000.0,
       "close_eur": 190.2938,
       "adv_eur": 177353822
-    },
-    "3297": {
-      "company_id": 3297,
-      "ticker": "RIO",
-      "conid": 2852762,
-      "avg_vol": 1890000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3865": {
       "company_id": 3865,
@@ -984,14 +864,6 @@
       "avg_vol": 952000.0,
       "close_eur": 117.5665,
       "adv_eur": 111923308
-    },
-    "5600": {
-      "company_id": 5600,
-      "ticker": "WPM",
-      "conid": 276051659,
-      "avg_vol": 1330000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3857": {
       "company_id": 3857,
@@ -1353,14 +1225,6 @@
       "close_eur": 188.6645,
       "adv_eur": 1286691890
     },
-    "3321": {
-      "company_id": 3321,
-      "ticker": "BA.",
-      "conid": 908964,
-      "avg_vol": 4810000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5085": {
       "company_id": 5085,
       "ticker": "BCHN",
@@ -1657,14 +1521,6 @@
       "close_eur": 183.3,
       "adv_eur": 86151000
     },
-    "5259": {
-      "company_id": 5259,
-      "ticker": "HEX",
-      "conid": 143040800,
-      "avg_vol": 1830000.0,
-      "close_eur": 0.8318,
-      "adv_eur": 1522194
-    },
     "5268": {
       "company_id": 5268,
       "ticker": "HII",
@@ -1696,14 +1552,6 @@
       "avg_vol": null,
       "close_eur": 480.2,
       "adv_eur": null
-    },
-    "5260": {
-      "company_id": 5260,
-      "ticker": "HPUR",
-      "conid": 882691381,
-      "avg_vol": 19400.0,
-      "close_eur": 1.1881,
-      "adv_eur": 23049
     },
     "3316": {
       "company_id": 3316,
@@ -1800,14 +1648,6 @@
       "avg_vol": 1410000.0,
       "close_eur": 444.9519,
       "adv_eur": 627382179
-    },
-    "5332": {
-      "company_id": 5332,
-      "ticker": "MDA",
-      "conid": 702882675,
-      "avg_vol": 2160000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "4061": {
       "company_id": 4061,
@@ -1961,14 +1801,6 @@
       "close_eur": 26.4901,
       "adv_eur": 14834456
     },
-    "3274": {
-      "company_id": 3274,
-      "ticker": "RR.",
-      "conid": 88383131,
-      "avg_vol": 17700000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3243": {
       "company_id": 3243,
       "ticker": "RTX",
@@ -2024,14 +1856,6 @@
       "avg_vol": null,
       "close_eur": 22.4158,
       "adv_eur": null
-    },
-    "5583": {
-      "company_id": 5583,
-      "ticker": "SPCE",
-      "conid": 709229198,
-      "avg_vol": 28300000.0,
-      "close_eur": 3.0852,
-      "adv_eur": 87311160
     },
     "5508": {
       "company_id": 5508,
@@ -2120,14 +1944,6 @@
       "avg_vol": 2520000.0,
       "close_eur": 23.6939,
       "adv_eur": 59708628
-    },
-    "5604": {
-      "company_id": 5604,
-      "ticker": "WGO",
-      "conid": 13731,
-      "avg_vol": 691000.0,
-      "close_eur": 25.3748,
-      "adv_eur": 17533987
     },
     "5606": {
       "company_id": 5606,
@@ -2569,14 +2385,6 @@
       "close_eur": 11.585,
       "adv_eur": null
     },
-    "5223": {
-      "company_id": 5223,
-      "ticker": "GIL",
-      "conid": 14890959,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3369": {
       "company_id": 3369,
       "ticker": "GM",
@@ -2688,14 +2496,6 @@
       "avg_vol": 616000.0,
       "close_eur": 479.05,
       "adv_eur": 295094800
-    },
-    "5338": {
-      "company_id": 5338,
-      "ticker": "MG",
-      "conid": 14892129,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5357": {
       "company_id": 5357,
@@ -3121,14 +2921,6 @@
       "close_eur": 1262.1991,
       "adv_eur": 18428107
     },
-    "3288": {
-      "company_id": 3288,
-      "ticker": "BATS",
-      "conid": 908931,
-      "avg_vol": 2660000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "4180": {
       "company_id": 4180,
       "ticker": "BEI",
@@ -3169,14 +2961,6 @@
       "close_eur": 69.8327,
       "adv_eur": 136173765
     },
-    "5057": {
-      "company_id": 5057,
-      "ticker": "BYND",
-      "conid": 364036112,
-      "avg_vol": 57600000.0,
-      "close_eur": 0.663,
-      "adv_eur": 38188800
-    },
     "5124": {
       "company_id": 5124,
       "ticker": "CAG",
@@ -3200,14 +2984,6 @@
       "avg_vol": 240000.0,
       "close_eur": 112.6229,
       "adv_eur": 27029496
-    },
-    "3963": {
-      "company_id": 3963,
-      "ticker": "CCH",
-      "conid": 126945329,
-      "avg_vol": 497000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5102": {
       "company_id": 5102,
@@ -3280,22 +3056,6 @@
       "avg_vol": 2720000.0,
       "close_eur": 52.2922,
       "adv_eur": 142234784
-    },
-    "3490": {
-      "company_id": 3490,
-      "ticker": "DGE",
-      "conid": 3310674,
-      "avg_vol": 4810000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "5145": {
-      "company_id": 5145,
-      "ticker": "DGED",
-      "conid": 7788,
-      "avg_vol": 1490000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "161": {
       "company_id": 161,
@@ -3400,14 +3160,6 @@
       "avg_vol": 1860000.0,
       "close_eur": 63.4717,
       "adv_eur": 118057362
-    },
-    "3580": {
-      "company_id": 3580,
-      "ticker": "IMB",
-      "conid": 2117419,
-      "avg_vol": 1400000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5282": {
       "company_id": 5282,
@@ -3577,14 +3329,6 @@
       "close_eur": 61.64,
       "adv_eur": 49127080
     },
-    "195": {
-      "company_id": 195,
-      "ticker": "RKT",
-      "conid": 851166531,
-      "avg_vol": 1320000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5293": {
       "company_id": 5293,
       "ticker": "SJM",
@@ -3641,14 +3385,6 @@
       "close_eur": 48.1238,
       "adv_eur": 229550526
     },
-    "1628": {
-      "company_id": 1628,
-      "ticker": "ULVR",
-      "conid": 837455630,
-      "avg_vol": 4450000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5548": {
       "company_id": 5548,
       "ticker": "USFD",
@@ -3688,14 +3424,6 @@
       "avg_vol": 47300000.0,
       "close_eur": 1.7019,
       "adv_eur": 80499870
-    },
-    "5041": {
-      "company_id": 5041,
-      "ticker": "0HKP",
-      "conid": 5171,
-      "avg_vol": 12500000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3719": {
       "company_id": 3719,
@@ -3753,14 +3481,6 @@
       "close_eur": 55.9321,
       "adv_eur": 467033035
     },
-    "3289": {
-      "company_id": 3289,
-      "ticker": "BP.",
-      "conid": 228891,
-      "avg_vol": 35900000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5412": {
       "company_id": 5412,
       "ticker": "BTU",
@@ -3768,14 +3488,6 @@
       "avg_vol": 3850000.0,
       "close_eur": 25.6695,
       "adv_eur": 98827575
-    },
-    "5095": {
-      "company_id": 5095,
-      "ticker": "CNQ",
-      "conid": 5027019,
-      "avg_vol": 20900000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3276": {
       "company_id": 3276,
@@ -3792,22 +3504,6 @@
       "avg_vol": 900000.0,
       "close_eur": 53.4795,
       "adv_eur": 48131550
-    },
-    "3690": {
-      "company_id": 3690,
-      "ticker": "CTRA",
-      "conid": 5946,
-      "avg_vol": 10400000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "5104": {
-      "company_id": 5104,
-      "ticker": "CVE",
-      "conid": 70009773,
-      "avg_vol": 13100000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3232": {
       "company_id": 3232,
@@ -4073,14 +3769,6 @@
       "close_eur": 34.3704,
       "adv_eur": 109985280
     },
-    "3242": {
-      "company_id": 3242,
-      "ticker": "SHEL",
-      "conid": 542125742,
-      "avg_vol": 6950000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3358": {
       "company_id": 3358,
       "ticker": "SLB",
@@ -4112,14 +3800,6 @@
       "avg_vol": 540000.0,
       "close_eur": 35.08,
       "adv_eur": 18943200
-    },
-    "5522": {
-      "company_id": 5522,
-      "ticker": "TECK.B",
-      "conid": 4458983,
-      "avg_vol": 1880000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3259": {
       "company_id": 3259,
@@ -4160,14 +3840,6 @@
       "avg_vol": 19800000.0,
       "close_eur": 129.6126,
       "adv_eur": 2566329480
-    },
-    "5613": {
-      "company_id": 5613,
-      "ticker": "YPF",
-      "conid": 14019,
-      "avg_vol": 2500000.0,
-      "close_eur": 47.6,
-      "adv_eur": 119000000
     },
     "36": {
       "company_id": 36,
@@ -4585,14 +4257,6 @@
       "close_eur": 63.44,
       "adv_eur": 33686640
     },
-    "3653": {
-      "company_id": 3653,
-      "ticker": "AV.",
-      "conid": 561966652,
-      "avg_vol": 6960000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3689": {
       "company_id": 3689,
       "ticker": "AVB",
@@ -4633,14 +4297,6 @@
       "close_eur": 70.2884,
       "adv_eur": 37744871
     },
-    "17": {
-      "company_id": 17,
-      "ticker": "BAM",
-      "conid": 600802720,
-      "avg_vol": 2820000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3838": {
       "company_id": 3838,
       "ticker": "BAMI",
@@ -4648,14 +4304,6 @@
       "avg_vol": 7390000.0,
       "close_eur": 13.39,
       "adv_eur": 98952100
-    },
-    "3329": {
-      "company_id": 3329,
-      "ticker": "BARC",
-      "conid": 908940,
-      "avg_vol": 36300000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5078": {
       "company_id": 5078,
@@ -4705,22 +4353,6 @@
       "close_eur": 53.9561,
       "adv_eur": 28380909
     },
-    "3327": {
-      "company_id": 3327,
-      "ticker": "BK",
-      "conid": 44986804,
-      "avg_vol": 3720000.0,
-      "close_eur": 122.2376,
-      "adv_eur": 454723872
-    },
-    "5077": {
-      "company_id": 5077,
-      "ticker": "BLHEF",
-      "conid": 2681926,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "228": {
       "company_id": 228,
       "ticker": "BLK",
@@ -4737,14 +4369,6 @@
       "close_eur": 26.4668,
       "adv_eur": 36259516
     },
-    "5046": {
-      "company_id": 5046,
-      "ticker": "BMO",
-      "conid": 4458881,
-      "avg_vol": 3320000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3786": {
       "company_id": 3786,
       "ticker": "BMPS",
@@ -4760,14 +4384,6 @@
       "avg_vol": 2380000.0,
       "close_eur": 94.43,
       "adv_eur": 224743400
-    },
-    "5048": {
-      "company_id": 5048,
-      "ticker": "BNS",
-      "conid": 4457153,
-      "avg_vol": 5830000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3739": {
       "company_id": 3739,
@@ -4792,14 +4408,6 @@
       "avg_vol": 3310000.0,
       "close_eur": 51.0096,
       "adv_eur": 168841776
-    },
-    "5375": {
-      "company_id": 5375,
-      "ticker": "BVXB",
-      "conid": 58996617,
-      "avg_vol": 24100000.0,
-      "close_eur": 6.7,
-      "adv_eur": 161470000
     },
     "3315": {
       "company_id": 3315,
@@ -5113,14 +4721,6 @@
       "close_eur": 922.5929,
       "adv_eur": 1937445090
     },
-    "5233": {
-      "company_id": 5233,
-      "ticker": "GSHD",
-      "conid": 316073744,
-      "avg_vol": 460000.0,
-      "close_eur": 31.3112,
-      "adv_eur": 14403152
-    },
     "3547": {
       "company_id": 3547,
       "ticker": "HBAN",
@@ -5161,14 +4761,6 @@
       "close_eur": 225.2,
       "adv_eur": 47066800
     },
-    "3236": {
-      "company_id": 3236,
-      "ticker": "HSBA",
-      "conid": 909083,
-      "avg_vol": 16900000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "272": {
       "company_id": 272,
       "ticker": "IBKR",
@@ -5192,22 +4784,6 @@
       "avg_vol": 3600000.0,
       "close_eur": 122.6276,
       "adv_eur": 441459360
-    },
-    "5269": {
-      "company_id": 5269,
-      "ticker": "ICG",
-      "conid": 242485383,
-      "avg_vol": 867000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "3518": {
-      "company_id": 3518,
-      "ticker": "III",
-      "conid": 45145440,
-      "avg_vol": 2360000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "4668": {
       "company_id": 4668,
@@ -5305,22 +4881,6 @@
       "close_eur": 90.9351,
       "adv_eur": 71384054
     },
-    "3761": {
-      "company_id": 3761,
-      "ticker": "LGEN",
-      "conid": 909110,
-      "avg_vol": 21500000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "3348": {
-      "company_id": 3348,
-      "ticker": "LLOY",
-      "conid": 909301,
-      "avg_vol": 123000000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5320": {
       "company_id": 5320,
       "ticker": "LMND",
@@ -5344,14 +4904,6 @@
       "avg_vol": 953000.0,
       "close_eur": 236.095,
       "adv_eur": 224998535
-    },
-    "193": {
-      "company_id": 193,
-      "ticker": "LSEG",
-      "conid": 39234929,
-      "avg_vol": 1100000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5327": {
       "company_id": 5327,
@@ -5377,14 +4929,6 @@
       "close_eur": 71.774,
       "adv_eur": 249055780
     },
-    "5340": {
-      "company_id": 5340,
-      "ticker": "MFC",
-      "conid": 8165730,
-      "avg_vol": 7990000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3681": {
       "company_id": 3681,
       "ticker": "MKL",
@@ -5400,14 +4944,6 @@
       "avg_vol": 568000.0,
       "close_eur": 101.3346,
       "adv_eur": 57558053
-    },
-    "5335": {
-      "company_id": 5335,
-      "ticker": "MQG",
-      "conid": 47028156,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
     },
     "287": {
       "company_id": 287,
@@ -5432,14 +4968,6 @@
       "avg_vol": 404000.0,
       "close_eur": 442.4,
       "adv_eur": 178729600
-    },
-    "5365": {
-      "company_id": 5365,
-      "ticker": "NA",
-      "conid": 4458936,
-      "avg_vol": 2009999.9999999998,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3403": {
       "company_id": 3403,
@@ -5489,14 +5017,6 @@
       "close_eur": 10.3389,
       "adv_eur": 543826140
     },
-    "3394": {
-      "company_id": 3394,
-      "ticker": "NWG",
-      "conid": 581444942,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5399": {
       "company_id": 5399,
       "ticker": "OSCR",
@@ -5537,14 +5057,6 @@
       "close_eur": 191.5244,
       "adv_eur": 402201240
     },
-    "3500": {
-      "company_id": 3500,
-      "ticker": "PRU",
-      "conid": 909164,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3538": {
       "company_id": 3538,
       "ticker": "PRU",
@@ -5584,22 +5096,6 @@
       "avg_vol": 24500000.0,
       "close_eur": 12.1588,
       "adv_eur": 297890600
-    },
-    "5455": {
-      "company_id": 5455,
-      "ticker": "ROOT",
-      "conid": 579315774,
-      "avg_vol": 293000.0,
-      "close_eur": 48.2884,
-      "adv_eur": 14148501
-    },
-    "5456": {
-      "company_id": 5456,
-      "ticker": "RY",
-      "conid": 4458964,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3962": {
       "company_id": 3962,
@@ -5697,14 +5193,6 @@
       "close_eur": 124.1054,
       "adv_eur": 121995608
     },
-    "3440": {
-      "company_id": 3440,
-      "ticker": "STAN",
-      "conid": 909271,
-      "avg_vol": 5430000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3498": {
       "company_id": 3498,
       "ticker": "STT",
@@ -5728,14 +5216,6 @@
       "avg_vol": 3800000.0,
       "close_eur": 61.5045,
       "adv_eur": 233717100
-    },
-    "5540": {
-      "company_id": 5540,
-      "ticker": "TD",
-      "conid": 4458978,
-      "avg_vol": 7220000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3395": {
       "company_id": 3395,
@@ -6145,22 +5625,6 @@
       "close_eur": 192.5297,
       "adv_eur": 139391503
     },
-    "182": {
-      "company_id": 182,
-      "ticker": "AZN",
-      "conid": 909330,
-      "avg_vol": 1420000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "5034": {
-      "company_id": 5034,
-      "ticker": "AZTA",
-      "conid": 4727409,
-      "avg_vol": 1170000.0,
-      "close_eur": 20.3051,
-      "adv_eur": 23756967
-    },
     "5036": {
       "company_id": 5036,
       "ticker": "BANB",
@@ -6209,14 +5673,6 @@
       "close_eur": 25.0975,
       "adv_eur": 53206700
     },
-    "5051": {
-      "company_id": 5051,
-      "ticker": "BHC",
-      "conid": 325536411,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5060": {
       "company_id": 5060,
       "ticker": "BHVN",
@@ -6256,14 +5712,6 @@
       "avg_vol": 11500000.0,
       "close_eur": 47.1965,
       "adv_eur": 542759750
-    },
-    "5054": {
-      "company_id": 5054,
-      "ticker": "BRBR",
-      "conid": 545665955,
-      "avg_vol": 4550000.0,
-      "close_eur": 7.8343,
-      "adv_eur": 35646065
     },
     "3320": {
       "company_id": 3320,
@@ -6345,14 +5793,6 @@
       "close_eur": 178.9,
       "adv_eur": 17532200
     },
-    "5147": {
-      "company_id": 5147,
-      "ticker": "DOCM",
-      "conid": 281853504,
-      "avg_vol": 300000.0,
-      "close_eur": 7.7803,
-      "adv_eur": 2334090
-    },
     "5142": {
       "company_id": 5142,
       "ticker": "DVA",
@@ -6409,22 +5849,6 @@
       "close_eur": 64.92,
       "adv_eur": 22397400
     },
-    "5185": {
-      "company_id": 5185,
-      "ticker": "EVH",
-      "conid": 196183267,
-      "avg_vol": 2790000.0,
-      "close_eur": 3.4318,
-      "adv_eur": 9574722
-    },
-    "5186": {
-      "company_id": 5186,
-      "ticker": "EVT",
-      "conid": 6223268,
-      "avg_vol": 1170000.0,
-      "close_eur": 5.095,
-      "adv_eur": 5961150
-    },
     "253": {
       "company_id": 253,
       "ticker": "EW",
@@ -6440,14 +5864,6 @@
       "avg_vol": 2550000.0,
       "close_eur": 42.066,
       "adv_eur": 107268300
-    },
-    "5211": {
-      "company_id": 5211,
-      "ticker": "FLGT",
-      "conid": 249323303,
-      "avg_vol": 545000.0,
-      "close_eur": 16.2059,
-      "adv_eur": 8832216
     },
     "4129": {
       "company_id": 4129,
@@ -6521,14 +5937,6 @@
       "close_eur": 9.1,
       "adv_eur": 24752000
     },
-    "3296": {
-      "company_id": 3296,
-      "ticker": "GSK",
-      "conid": 574757089,
-      "avg_vol": 5650000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5247": {
       "company_id": 5247,
       "ticker": "HAE",
@@ -6544,14 +5952,6 @@
       "avg_vol": 1360000.0,
       "close_eur": 318.3551,
       "adv_eur": 432962936
-    },
-    "5254": {
-      "company_id": 5254,
-      "ticker": "HELE",
-      "conid": 6478295,
-      "avg_vol": 650000.0,
-      "close_eur": 23.1389,
-      "adv_eur": 15040285
     },
     "5262": {
       "company_id": 5262,
@@ -6592,14 +5992,6 @@
       "avg_vol": 1680000.0,
       "close_eur": 4.5934,
       "adv_eur": 7716912
-    },
-    "5283": {
-      "company_id": 5283,
-      "ticker": "INMD",
-      "conid": 378066054,
-      "avg_vol": 852000.0,
-      "close_eur": 11.6995,
-      "adv_eur": 9967974
     },
     "5284": {
       "company_id": 5284,
@@ -6664,14 +6056,6 @@
       "avg_vol": 1710000.0,
       "close_eur": 30.9559,
       "adv_eur": 52934589
-    },
-    "5313": {
-      "company_id": 5313,
-      "ticker": "KURN",
-      "conid": 237931944,
-      "avg_vol": 191000.0,
-      "close_eur": 20.4077,
-      "adv_eur": 3897871
     },
     "254": {
       "company_id": 254,
@@ -6865,14 +6249,6 @@
       "close_eur": 123.4336,
       "adv_eur": 164166688
     },
-    "5434": {
-      "company_id": 5434,
-      "ticker": "QDEL",
-      "conid": 564701585,
-      "avg_vol": 2360000.0,
-      "close_eur": 11.5175,
-      "adv_eur": 27181300
-    },
     "4187": {
       "company_id": 4187,
       "ticker": "QIA",
@@ -6968,14 +6344,6 @@
       "avg_vol": 1290000.0,
       "close_eur": 34.04,
       "adv_eur": 43911600
-    },
-    "3912": {
-      "company_id": 3912,
-      "ticker": "SN.",
-      "conid": 909254,
-      "avg_vol": 1960000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5478": {
       "company_id": 5478,
@@ -7080,14 +6448,6 @@
       "avg_vol": 2230000.0,
       "close_eur": 409.7409,
       "adv_eur": 913722207
-    },
-    "5518": {
-      "company_id": 5518,
-      "ticker": "TNDM",
-      "conid": 291995344,
-      "avg_vol": 2340000.0,
-      "close_eur": 16.1279,
-      "adv_eur": 37739286
     },
     "1447": {
       "company_id": 1447,
@@ -7320,22 +6680,6 @@
       "avg_vol": 12600000.0,
       "close_eur": 14.8962,
       "adv_eur": 187692120
-    },
-    "4332": {
-      "company_id": 4332,
-      "ticker": "09901",
-      "conid": 478596149,
-      "avg_vol": 5280000.0,
-      "close_eur": 4.251,
-      "adv_eur": 22445280
-    },
-    "3563": {
-      "company_id": 3563,
-      "ticker": "09961",
-      "conid": 481432897,
-      "avg_vol": 2190000.0,
-      "close_eur": 43.0407,
-      "adv_eur": 94259133
     },
     "3839": {
       "company_id": 3839,
@@ -7673,14 +7017,6 @@
       "close_eur": 143.7213,
       "adv_eur": 870951078
     },
-    "18": {
-      "company_id": 18,
-      "ticker": "BN",
-      "conid": 600685522,
-      "avg_vol": 4520000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "4408": {
       "company_id": 4408,
       "ticker": "BOL",
@@ -7689,14 +7025,6 @@
       "close_eur": 5.595,
       "adv_eur": 15442200
     },
-    "5084": {
-      "company_id": 5084,
-      "ticker": "BRBY",
-      "conid": 15977601,
-      "avg_vol": 1110000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5158": {
       "company_id": 5158,
       "ticker": "BROS",
@@ -7704,14 +7032,6 @@
       "avg_vol": 4099999.9999999995,
       "close_eur": 50.143,
       "adv_eur": 205586300
-    },
-    "3790": {
-      "company_id": 3790,
-      "ticker": "BT.A",
-      "conid": 13672206,
-      "avg_vol": 15100000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "4008": {
       "company_id": 4008,
@@ -7793,14 +7113,6 @@
       "close_eur": 27.91,
       "adv_eur": 45493300
     },
-    "5545": {
-      "company_id": 5545,
-      "ticker": "CLV",
-      "conid": 390332321,
-      "avg_vol": 2720000.0,
-      "close_eur": 41.6,
-      "adv_eur": 113152000
-    },
     "3310": {
       "company_id": 3310,
       "ticker": "CMCSA",
@@ -7817,14 +7129,6 @@
       "close_eur": 25.3575,
       "adv_eur": 443756250
     },
-    "5098": {
-      "company_id": 5098,
-      "ticker": "CO",
-      "conid": 699383065,
-      "avg_vol": 1200000.0,
-      "close_eur": 0.2304,
-      "adv_eur": 276480
-    },
     "247": {
       "company_id": 247,
       "ticker": "COST",
@@ -7832,14 +7136,6 @@
       "avg_vol": 2020000.0,
       "close_eur": 842.248,
       "adv_eur": 1701340960
-    },
-    "3476": {
-      "company_id": 3476,
-      "ticker": "CPG",
-      "conid": 868482245,
-      "avg_vol": 2770000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5129": {
       "company_id": 5129,
@@ -7880,14 +7176,6 @@
       "avg_vol": 2270000.0,
       "close_eur": 155.8627,
       "adv_eur": 353808329
-    },
-    "5112": {
-      "company_id": 5112,
-      "ticker": "CTM",
-      "conid": 3408229,
-      "avg_vol": 21100000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5096": {
       "company_id": 5096,
@@ -8065,14 +7353,6 @@
       "close_eur": 40.44,
       "adv_eur": null
     },
-    "4457": {
-      "company_id": 4457,
-      "ticker": "ENT",
-      "conid": 125005888,
-      "avg_vol": 3240000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3738": {
       "company_id": 3738,
       "ticker": "EQR",
@@ -8153,22 +7433,6 @@
       "close_eur": 18.4678,
       "adv_eur": 145156908
     },
-    "5231": {
-      "company_id": 5231,
-      "ticker": "GMG",
-      "conid": 45079010,
-      "avg_vol": 4930000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "5237": {
-      "company_id": 5237,
-      "ticker": "GO",
-      "conid": 371602099,
-      "avg_vol": 3440000.0,
-      "close_eur": 7.349,
-      "adv_eur": 25280560
-    },
     "211": {
       "company_id": 211,
       "ticker": "GOOGL",
@@ -8208,14 +7472,6 @@
       "avg_vol": 4590000.0,
       "close_eur": 269.3301,
       "adv_eur": 1236225159
-    },
-    "5255": {
-      "company_id": 5255,
-      "ticker": "HFG",
-      "conid": 294708433,
-      "avg_vol": 1200000.0,
-      "close_eur": 4.23,
-      "adv_eur": 5076000
     },
     "5261": {
       "company_id": 5261,
@@ -8265,14 +7521,6 @@
       "close_eur": 20.76,
       "adv_eur": 2366640
     },
-    "3792": {
-      "company_id": 3792,
-      "ticker": "IHG",
-      "conid": 843154674,
-      "avg_vol": 271000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5281": {
       "company_id": 5281,
       "ticker": "INW",
@@ -8305,22 +7553,6 @@
       "close_eur": 26.1288,
       "adv_eur": 256062240
     },
-    "4767": {
-      "company_id": 4767,
-      "ticker": "JD.",
-      "conid": 529672016,
-      "avg_vol": 16800000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "5292": {
-      "company_id": 5292,
-      "ticker": "JDW",
-      "conid": 1509934,
-      "avg_vol": 309000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5299": {
       "company_id": 5299,
       "ticker": "JLL",
@@ -8336,14 +7568,6 @@
       "avg_vol": 307000.0,
       "close_eur": 254.4,
       "adv_eur": 78100800
-    },
-    "4153": {
-      "company_id": 4153,
-      "ticker": "KGF",
-      "conid": 909096,
-      "avg_vol": 5880000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5097": {
       "company_id": 5097,
@@ -8513,14 +7737,6 @@
       "close_eur": 41.91,
       "adv_eur": 212483700
     },
-    "4134": {
-      "company_id": 4134,
-      "ticker": "MKS",
-      "conid": 909136,
-      "avg_vol": 6370000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5349": {
       "company_id": 5349,
       "ticker": "MPT",
@@ -8544,14 +7760,6 @@
       "avg_vol": 814000.0,
       "close_eur": 117.5578,
       "adv_eur": 95692049
-    },
-    "5369": {
-      "company_id": 5369,
-      "ticker": "N1UA",
-      "conid": 554208336,
-      "avg_vol": null,
-      "close_eur": 40.4,
-      "adv_eur": null
     },
     "3402": {
       "company_id": 3402,
@@ -8600,14 +7808,6 @@
       "avg_vol": 5820000.0,
       "close_eur": 51.9196,
       "adv_eur": 302172072
-    },
-    "5394": {
-      "company_id": 5394,
-      "ticker": "OCDO",
-      "conid": 77478945,
-      "avg_vol": 2560000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5395": {
       "company_id": 5395,
@@ -8665,14 +7865,6 @@
       "close_eur": 18.0865,
       "adv_eur": 334600250
     },
-    "5141": {
-      "company_id": 5141,
-      "ticker": "PLAY",
-      "conid": 169921370,
-      "avg_vol": 1960000.0,
-      "close_eur": 10.5035,
-      "adv_eur": 20586860
-    },
     "3281": {
       "company_id": 3281,
       "ticker": "PLD",
@@ -8729,14 +7921,6 @@
       "close_eur": 9.3422,
       "adv_eur": 97158880
     },
-    "5425": {
-      "company_id": 5425,
-      "ticker": "PSM",
-      "conid": 132721011,
-      "avg_vol": 259000.0,
-      "close_eur": 3.84,
-      "adv_eur": 994560
-    },
     "5407": {
       "company_id": 5407,
       "ticker": "PSPN",
@@ -8760,14 +7944,6 @@
       "avg_vol": 1080000.0,
       "close_eur": 15.93,
       "adv_eur": 17204400
-    },
-    "5410": {
-      "company_id": 5410,
-      "ticker": "PZZA",
-      "conid": 273538,
-      "avg_vol": 1050000.0,
-      "close_eur": 27.5587,
-      "adv_eur": 28936635
     },
     "5447": {
       "company_id": 5447,
@@ -8841,14 +8017,6 @@
       "close_eur": 180.2756,
       "adv_eur": 210922452
     },
-    "4163": {
-      "company_id": 4163,
-      "ticker": "SBRY",
-      "conid": 29911784,
-      "avg_vol": 7330000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3300": {
       "company_id": 3300,
       "ticker": "SBUX",
@@ -8880,14 +8048,6 @@
       "avg_vol": 2089999.9999999998,
       "close_eur": 49.4064,
       "adv_eur": 103259376
-    },
-    "5488": {
-      "company_id": 5488,
-      "ticker": "SHOP",
-      "conid": 195426111,
-      "avg_vol": 3300000.0,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5492": {
       "company_id": 5492,
@@ -8969,14 +8129,6 @@
       "close_eur": 47.62,
       "adv_eur": 17190820
     },
-    "5490": {
-      "company_id": 5490,
-      "ticker": "SZ2",
-      "conid": 53747825,
-      "avg_vol": 952000.0,
-      "close_eur": 75.4,
-      "adv_eur": 71780800
-    },
     "3258": {
       "company_id": 3258,
       "ticker": "T",
@@ -9041,14 +8193,6 @@
       "close_eur": 106.751,
       "adv_eur": 579657930
     },
-    "4071": {
-      "company_id": 4071,
-      "ticker": "TIT",
-      "conid": 891463778,
-      "avg_vol": 8330000.0,
-      "close_eur": 0.731,
-      "adv_eur": 6089230
-    },
     "3261": {
       "company_id": 3261,
       "ticker": "TJX",
@@ -9097,14 +8241,6 @@
       "close_eur": 25.8081,
       "adv_eur": 281308290
     },
-    "3482": {
-      "company_id": 3482,
-      "ticker": "TSCO",
-      "conid": 471204140,
-      "avg_vol": 11800000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5517": {
       "company_id": 5517,
       "ticker": "TUI1",
@@ -9128,14 +8264,6 @@
       "avg_vol": 763000.0,
       "close_eur": 404.7751,
       "adv_eur": 308843401
-    },
-    "5558": {
-      "company_id": 5558,
-      "ticker": "UPWK",
-      "conid": 335839458,
-      "avg_vol": 4050000.0,
-      "close_eur": 7.7823,
-      "adv_eur": 31518315
     },
     "5559": {
       "company_id": 5559,
@@ -9217,14 +8345,6 @@
       "close_eur": 29.6559,
       "adv_eur": 59015241
     },
-    "3545": {
-      "company_id": 3545,
-      "ticker": "VOD",
-      "conid": 140148322,
-      "avg_vol": 48800000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5569": {
       "company_id": 5569,
       "ticker": "VSAT",
@@ -9232,14 +8352,6 @@
       "avg_vol": 2150000.0,
       "close_eur": 62.8911,
       "adv_eur": 135215865
-    },
-    "5581": {
-      "company_id": 5581,
-      "ticker": "VSCO",
-      "conid": 502415513,
-      "avg_vol": 2440000.0,
-      "close_eur": 69.3821,
-      "adv_eur": 169292324
     },
     "3510": {
       "company_id": 3510,
@@ -9264,14 +8376,6 @@
       "avg_vol": 3990000.0,
       "close_eur": 62.6744,
       "adv_eur": 250070856
-    },
-    "5627": {
-      "company_id": 5627,
-      "ticker": "WBA",
-      "conid": 178634677,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
     },
     "3391": {
       "company_id": 3391,
@@ -9393,14 +8497,6 @@
       "close_eur": 3.3088,
       "adv_eur": 43676160
     },
-    "5117": {
-      "company_id": 5117,
-      "ticker": "00354",
-      "conid": 130940595,
-      "avg_vol": 35300000.0,
-      "close_eur": 0.4822,
-      "adv_eur": 17021660
-    },
     "4987": {
       "company_id": 4987,
       "ticker": "00522",
@@ -9465,14 +8561,6 @@
       "close_eur": 3.2756,
       "adv_eur": 533922800
     },
-    "5595": {
-      "company_id": 5595,
-      "ticker": "02013",
-      "conid": 348190395,
-      "avg_vol": 58300000.0,
-      "close_eur": 0.1692,
-      "adv_eur": 9864360
-    },
     "4617": {
       "company_id": 4617,
       "ticker": "02018",
@@ -9529,22 +8617,6 @@
       "close_eur": 20.8347,
       "adv_eur": null
     },
-    "5024": {
-      "company_id": 5024,
-      "ticker": "0ADF",
-      "conid": 653400472,
-      "avg_vol": 11000000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "3029": {
-      "company_id": 3029,
-      "ticker": "2330",
-      "conid": 6223250,
-      "avg_vol": 13500000.0,
-      "close_eur": 0.405,
-      "adv_eur": 5467500
-    },
     "3223": {
       "company_id": 3223,
       "ticker": "2330",
@@ -9584,14 +8656,6 @@
       "avg_vol": 15500000.0,
       "close_eur": 23.1384,
       "adv_eur": 358645200
-    },
-    "5468": {
-      "company_id": 5468,
-      "ticker": "3778",
-      "conid": 36337428,
-      "avg_vol": 2680000.0,
-      "close_eur": 15.7406,
-      "adv_eur": 42184808
     },
     "5446": {
       "company_id": 5446,
@@ -9728,14 +8792,6 @@
       "avg_vol": 16399999.999999998,
       "close_eur": 20.7841,
       "adv_eur": 340859240
-    },
-    "5213": {
-      "company_id": 5213,
-      "ticker": "6814",
-      "conid": 131084394,
-      "avg_vol": 486000.0,
-      "close_eur": 32.8311,
-      "adv_eur": 15955915
     },
     "96": {
       "company_id": 96,
@@ -9913,14 +8969,6 @@
       "close_eur": 817.4,
       "adv_eur": 132418800
     },
-    "52": {
-      "company_id": 52,
-      "ticker": "AI",
-      "conid": 29612135,
-      "avg_vol": 977000.0,
-      "close_eur": 166.7273,
-      "adv_eur": 162892572
-    },
     "5002": {
       "company_id": 5002,
       "ticker": "AKAM",
@@ -9983,14 +9031,6 @@
       "conid": 74792133,
       "avg_vol": null,
       "close_eur": 53.68,
-      "adv_eur": null
-    },
-    "5014": {
-      "company_id": 5014,
-      "ticker": "AMWL",
-      "conid": 713228991,
-      "avg_vol": null,
-      "close_eur": 7.3663,
       "adv_eur": null
     },
     "221": {
@@ -10089,14 +9129,6 @@
       "close_eur": 26.4148,
       "adv_eur": null
     },
-    "5045": {
-      "company_id": 5045,
-      "ticker": "BLDP",
-      "conid": 56935157,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5063": {
       "company_id": 5063,
       "ticker": "BMNR",
@@ -10193,14 +9225,6 @@
       "close_eur": 543.3746,
       "adv_eur": 1543183864
     },
-    "5101": {
-      "company_id": 5101,
-      "ticker": "CLS",
-      "conid": 700288492,
-      "avg_vol": 711000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3454": {
       "company_id": 3454,
       "ticker": "COHR",
@@ -10273,22 +9297,6 @@
       "close_eur": 46.1132,
       "adv_eur": 337087492
     },
-    "5107": {
-      "company_id": 5107,
-      "ticker": "CWR",
-      "conid": 328768119,
-      "avg_vol": 2980000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "5136": {
-      "company_id": 5136,
-      "ticker": "CYBR",
-      "conid": 168078418,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5156": {
       "company_id": 5156,
       "ticker": "DBX",
@@ -10353,14 +9361,6 @@
       "close_eur": 55.6278,
       "adv_eur": 3982950
     },
-    "5139": {
-      "company_id": 5139,
-      "ticker": "DQ",
-      "conid": 118803978,
-      "avg_vol": 871000.0,
-      "close_eur": 14.5593,
-      "adv_eur": 12681150
-    },
     "53": {
       "company_id": 53,
       "ticker": "DSY",
@@ -10409,14 +9409,6 @@
       "close_eur": 62.6831,
       "adv_eur": 480152546
     },
-    "3267": {
-      "company_id": 3267,
-      "ticker": "ENR",
-      "conid": 447545380,
-      "avg_vol": 3250000.0,
-      "close_eur": 158.52,
-      "adv_eur": 515190000
-    },
     "5162": {
       "company_id": 5162,
       "ticker": "EPAM",
@@ -10456,14 +9448,6 @@
       "avg_vol": 119000.0,
       "close_eur": 63.4,
       "adv_eur": 7544600
-    },
-    "5210": {
-      "company_id": 5210,
-      "ticker": "FCEL",
-      "conid": 740517233,
-      "avg_vol": 7840000.0,
-      "close_eur": 21.345,
-      "adv_eur": 167344800
     },
     "260": {
       "company_id": 260,
@@ -10641,14 +9625,6 @@
       "close_eur": 27.576,
       "adv_eur": 176486400
     },
-    "5624": {
-      "company_id": 5624,
-      "ticker": "GTM",
-      "conid": 425203222,
-      "avg_vol": 12100000.0,
-      "close_eur": 2.9682,
-      "adv_eur": 35915220
-    },
     "5240": {
       "company_id": 5240,
       "ticker": "GWRE",
@@ -10695,14 +9671,6 @@
       "conid": 209411798,
       "avg_vol": null,
       "close_eur": 48.6611,
-      "adv_eur": null
-    },
-    "5242": {
-      "company_id": 5242,
-      "ticker": "HPOW",
-      "conid": 174076652,
-      "avg_vol": null,
-      "close_eur": null,
       "adv_eur": null
     },
     "3849": {
@@ -10791,14 +9759,6 @@
       "conid": 9869443,
       "avg_vol": null,
       "close_eur": 140.8701,
-      "adv_eur": null
-    },
-    "83": {
-      "company_id": 83,
-      "ticker": "INFY",
-      "conid": 4813460,
-      "avg_vol": 17900000.0,
-      "close_eur": null,
       "adv_eur": null
     },
     "3237": {
@@ -10895,14 +9855,6 @@
       "conid": 68492173,
       "avg_vol": null,
       "close_eur": 54.8314,
-      "adv_eur": null
-    },
-    "4290": {
-      "company_id": 4290,
-      "ticker": "LAND",
-      "conid": 288529684,
-      "avg_vol": 2520000.0,
-      "close_eur": null,
       "adv_eur": null
     },
     "3637": {
@@ -11177,14 +10129,6 @@
       "close_eur": 280.4576,
       "adv_eur": null
     },
-    "3720": {
-      "company_id": 3720,
-      "ticker": "NXT",
-      "conid": 957975,
-      "avg_vol": 254000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "4054": {
       "company_id": 4054,
       "ticker": "OKTA",
@@ -11273,14 +10217,6 @@
       "close_eur": 119.2651,
       "adv_eur": null
     },
-    "5423": {
-      "company_id": 5423,
-      "ticker": "PCELL",
-      "conid": 177461588,
-      "avg_vol": null,
-      "close_eur": 3.1882,
-      "adv_eur": null
-    },
     "5424": {
       "company_id": 5424,
       "ticker": "PCOR",
@@ -11353,14 +10289,6 @@
       "close_eur": 187.1393,
       "adv_eur": null
     },
-    "5430": {
-      "company_id": 5430,
-      "ticker": "QQ/",
-      "conid": 37920799,
-      "avg_vol": 1490000.0,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5431": {
       "company_id": 5431,
       "ticker": "QRVO",
@@ -11399,14 +10327,6 @@
       "conid": 699030013,
       "avg_vol": null,
       "close_eur": 71.3493,
-      "adv_eur": null
-    },
-    "196": {
-      "company_id": 196,
-      "ticker": "REL",
-      "conid": 48005591,
-      "avg_vol": 4590000.0,
-      "close_eur": null,
       "adv_eur": null
     },
     "5449": {
@@ -11463,14 +10383,6 @@
       "conid": 2585629,
       "avg_vol": null,
       "close_eur": 287.8759,
-      "adv_eur": null
-    },
-    "5440": {
-      "company_id": 5440,
-      "ticker": "RPD",
-      "conid": 200154100,
-      "avg_vol": null,
-      "close_eur": 7.3057,
       "adv_eur": null
     },
     "5442": {
@@ -11641,14 +10553,6 @@
       "close_eur": 50.065,
       "adv_eur": null
     },
-    "5504": {
-      "company_id": 5504,
-      "ticker": "SPT",
-      "conid": 395576614,
-      "avg_vol": null,
-      "close_eur": 6.881,
-      "adv_eur": null
-    },
     "81": {
       "company_id": 81,
       "ticker": "SRT3",
@@ -11769,14 +10673,6 @@
       "close_eur": 310.1915,
       "adv_eur": null
     },
-    "5519": {
-      "company_id": 5519,
-      "ticker": "TMV",
-      "conid": 384928607,
-      "avg_vol": 1460000.0,
-      "close_eur": 6.355,
-      "adv_eur": 9278300
-    },
     "3975": {
       "company_id": 3975,
       "ticker": "TOST",
@@ -11847,14 +10743,6 @@
       "conid": 445423543,
       "avg_vol": null,
       "close_eur": 26.6661,
-      "adv_eur": null
-    },
-    "5550": {
-      "company_id": 5550,
-      "ticker": "UBI",
-      "conid": 2953285,
-      "avg_vol": null,
-      "close_eur": 5.496,
       "adv_eur": null
     },
     "4315": {
@@ -11993,14 +10881,6 @@
       "close_eur": 63.48,
       "adv_eur": null
     },
-    "204": {
-      "company_id": 204,
-      "ticker": "YOU",
-      "conid": 48889360,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "361": {
       "company_id": 361,
       "ticker": "ZBRA",
@@ -12081,14 +10961,6 @@
       "close_eur": 14.3528,
       "adv_eur": null
     },
-    "3435": {
-      "company_id": 3435,
-      "ticker": "AAL",
-      "conid": 788708135,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "4745": {
       "company_id": 4745,
       "ticker": "ADP",
@@ -12153,14 +11025,6 @@
       "close_eur": 239.1802,
       "adv_eur": null
     },
-    "19": {
-      "company_id": 19,
-      "ticker": "CNR",
-      "conid": 4458894,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "5126": {
       "company_id": 5126,
       "ticker": "CPA",
@@ -12199,14 +11063,6 @@
       "conid": 30351205,
       "avg_vol": null,
       "close_eur": 123.3122,
-      "adv_eur": null
-    },
-    "5625": {
-      "company_id": 5625,
-      "ticker": "EZJ",
-      "conid": 103665937,
-      "avg_vol": null,
-      "close_eur": null,
       "adv_eur": null
     },
     "5194": {
@@ -12375,14 +11231,6 @@
       "conid": 6478024,
       "avg_vol": null,
       "close_eur": 182.0262,
-      "adv_eur": null
-    },
-    "3670": {
-      "company_id": 3670,
-      "ticker": "RYA",
-      "conid": 210918190,
-      "avg_vol": null,
-      "close_eur": null,
       "adv_eur": null
     },
     "5507": {
@@ -12585,28 +11433,12 @@
       "close_eur": 236.2856,
       "adv_eur": null
     },
-    "4043": {
-      "company_id": 4043,
-      "ticker": "CNA",
-      "conid": 31765913,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3438": {
       "company_id": 3438,
       "ticker": "D",
       "conid": 6327,
       "avg_vol": null,
       "close_eur": 57.9773,
-      "adv_eur": null
-    },
-    "5155": {
-      "company_id": 5155,
-      "ticker": "DRX",
-      "conid": 44035682,
-      "avg_vol": null,
-      "close_eur": null,
       "adv_eur": null
     },
     "3590": {
@@ -12655,14 +11487,6 @@
       "conid": 36790958,
       "avg_vol": null,
       "close_eur": 131.5,
-      "adv_eur": null
-    },
-    "5170": {
-      "company_id": 5170,
-      "ticker": "ENB",
-      "conid": 5082726,
-      "avg_vol": null,
-      "close_eur": null,
       "adv_eur": null
     },
     "3322": {
@@ -12761,14 +11585,6 @@
       "close_eur": 19.365,
       "adv_eur": null
     },
-    "5271": {
-      "company_id": 5271,
-      "ticker": "ITM",
-      "conid": 38715305,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3393": {
       "company_id": 3393,
       "ticker": "KMI",
@@ -12791,22 +11607,6 @@
       "conid": 75960201,
       "avg_vol": null,
       "close_eur": 74.3912,
-      "adv_eur": null
-    },
-    "5368": {
-      "company_id": 5368,
-      "ticker": "NFE",
-      "conid": 351897863,
-      "avg_vol": null,
-      "close_eur": 0.4515,
-      "adv_eur": null
-    },
-    "3337": {
-      "company_id": 3337,
-      "ticker": "NG.",
-      "conid": 273234647,
-      "avg_vol": 9260000.0,
-      "close_eur": null,
       "adv_eur": null
     },
     "3703": {
@@ -12889,14 +11689,6 @@
       "close_eur": 9.5508,
       "adv_eur": 6723763
     },
-    "5265": {
-      "company_id": 5265,
-      "ticker": "SHX",
-      "conid": 46636743,
-      "avg_vol": 14000000.0,
-      "close_eur": 0.472,
-      "adv_eur": 6608000
-    },
     "5499": {
       "company_id": 5499,
       "ticker": "SLR",
@@ -12937,22 +11729,6 @@
       "close_eur": 6.144,
       "adv_eur": null
     },
-    "3479": {
-      "company_id": 3479,
-      "ticker": "SSE",
-      "conid": 2570998,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
-    "3967": {
-      "company_id": 3967,
-      "ticker": "SVT",
-      "conid": 41172884,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
-    },
     "3431": {
       "company_id": 3431,
       "ticker": "TRGP",
@@ -12968,14 +11744,6 @@
       "avg_vol": 3970000.0,
       "close_eur": 9.66,
       "adv_eur": 38350200
-    },
-    "4007": {
-      "company_id": 4007,
-      "ticker": "UU.",
-      "conid": 52950461,
-      "avg_vol": null,
-      "close_eur": null,
-      "adv_eur": null
     },
     "5560": {
       "company_id": 5560,
@@ -13016,6 +11784,118 @@
       "avg_vol": null,
       "close_eur": 67.4842,
       "adv_eur": null
+    },
+    "5041": {
+      "company_id": 5041,
+      "ticker": "BP",
+      "conid": 5171,
+      "avg_vol": 12400000.0,
+      "close_eur": 33.8107,
+      "adv_eur": 419252680
+    },
+    "5613": {
+      "company_id": 5613,
+      "ticker": "YPF",
+      "conid": 14019,
+      "avg_vol": 2520000.0,
+      "close_eur": 44.2067,
+      "adv_eur": 111400884
+    },
+    "3327": {
+      "company_id": 3327,
+      "ticker": "BNY",
+      "conid": 44986804,
+      "avg_vol": 3730000.0,
+      "close_eur": 124.2171,
+      "adv_eur": 463329783
+    },
+    "5375": {
+      "company_id": 5375,
+      "ticker": "ITUB",
+      "conid": 58996617,
+      "avg_vol": 23800000.0,
+      "close_eur": 6.8588,
+      "adv_eur": 163239440
+    },
+    "5369": {
+      "company_id": 5369,
+      "ticker": "EDU",
+      "conid": 554208336,
+      "avg_vol": 726000.0,
+      "close_eur": 123.4837,
+      "adv_eur": 89649166
+    },
+    "5490": {
+      "company_id": 5490,
+      "ticker": "SIG",
+      "conid": 53747825,
+      "avg_vol": 936000.0,
+      "close_eur": 75.9469,
+      "adv_eur": 71086298
+    },
+    "5545": {
+      "company_id": 5545,
+      "ticker": "TCOM",
+      "conid": 389510704,
+      "avg_vol": null,
+      "close_eur": 39.8844,
+      "adv_eur": null
+    },
+    "4071": {
+      "company_id": 4071,
+      "ticker": "TIT",
+      "conid": 891463778,
+      "avg_vol": 10600000.0,
+      "close_eur": 7.886,
+      "adv_eur": 83591600
+    },
+    "5581": {
+      "company_id": 5581,
+      "ticker": "VSXY",
+      "conid": 502415513,
+      "avg_vol": 2420000.0,
+      "close_eur": 69.0708,
+      "adv_eur": 167151336
+    },
+    "52": {
+      "company_id": 52,
+      "ticker": "AI",
+      "conid": 29612135,
+      "avg_vol": 967000.0,
+      "close_eur": 168.3,
+      "adv_eur": 162746100
+    },
+    "5024": {
+      "company_id": 5024,
+      "ticker": "ARM",
+      "conid": 653400472,
+      "avg_vol": 11100000.0,
+      "close_eur": 341.9377,
+      "adv_eur": 3795508470
+    },
+    "3267": {
+      "company_id": 3267,
+      "ticker": "ENR",
+      "conid": 447545380,
+      "avg_vol": 3210000.0,
+      "close_eur": 153.58,
+      "adv_eur": 492991800
+    },
+    "5430": {
+      "company_id": 5430,
+      "ticker": "QNTQF",
+      "conid": 37920799,
+      "avg_vol": 1490000.0,
+      "close_eur": null,
+      "adv_eur": null
+    },
+    "5265": {
+      "company_id": 5265,
+      "ticker": "01071",
+      "conid": 46636743,
+      "avg_vol": 14000000.0,
+      "close_eur": 0.0529,
+      "adv_eur": 740600
     }
   }
 }
