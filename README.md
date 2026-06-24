@@ -7,6 +7,30 @@ Raspberry Pi fetches a target portfolio (JSON over HTTP), reads current IBKR
 positions, and places the minimal set of trades to bring the account in line
 with the target.
 
+## Web app (momentum-stack)
+
+A FastAPI + HTMX UI for the RPi4 with three pages, split by credential boundary
+(the web holds **no** creds; the worker is the only thing that trades):
+
+- **`/universe`** — the LEONTEQ universe → IBKR mapping (confidence, ticker/exchange
+  match, currency, ADV, OpenFIGI verdict, GuruFocus links), from the pipeline artifacts.
+- **`/execution`** — request the monthly rebalance: *Preview (dry-run)* or *Execute LIVE*
+  (gated by a typed confirmation). The web inserts a job row; the worker runs it through
+  every gate and records the plan, fills, reference prices and slippage.
+- **`/performance`** — bbterminal strategy performance (MTD / since-inception / daily
+  returns + holdings), snapshotted by the publisher and committed to a GitHub Pages repo.
+
+```bash
+uv sync --extra web
+uv run momentum-web                 # read-only UI        (no creds)        :8800
+uv run momentum-trade-worker        # claims + executes jobs  (creds)
+uv run momentum-publish --push      # bbterminal perf -> site repo  (creds)
+```
+
+Pieces: `web/server.py` (UI), `web/worker.py` (trader), `db.py` (SQLite/SQLModel
+queue + run log), `publisher.py` (performance → git). Deployment (systemd units +
+Caddy + the credential split) is in [`deploy/README.md`](deploy/README.md).
+
 ## Architecture
 
 ```

@@ -191,3 +191,8 @@ cython_debug/
 /data/runs/
 /data/logs/
 data/dashboard.html
+
+# momentum web/worker runtime state (not source)
+data/momentum.db
+data/momentum.db-*
+data/performance_snapshot.json

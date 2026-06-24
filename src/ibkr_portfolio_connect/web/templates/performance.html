@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Performance{% endblock %}
+{% block content %}
+<div class="flex items-end justify-between mb-4">
+  <div>
+    <h1 class="text-xl font-semibold">Strategy performance</h1>
+    <p class="text-sm text-slate-500">From the bbterminal API, snapshotted by the publisher and committed to the public site repo.</p>
+  </div>
+  {% if snap.generated_at %}<span class="text-xs text-slate-400">snapshot {{ snap.generated_at }}</span>{% endif %}
+</div>
+
+{% if not snap %}
+  <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-4 text-sm">
+    No performance snapshot yet. Run <code>momentum-publish</code> (the credentialed publisher) to fetch from bbterminal and write <code>data/performance_snapshot.json</code>.
+  </div>
+{% else %}
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+  {% set m = snap.mtd_return_pct %}{% set si = snap.since_inception_return_pct %}
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="text-xs text-slate-500">Month to date</div>
+    <div class="text-2xl font-semibold tabular {{ 'text-emerald-600' if (m or 0)>=0 else 'text-rose-600' }}">{{ '%+.2f'|format(m) if m is not none else '—' }}%</div>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="text-xs text-slate-500">Since inception</div>
+    <div class="text-2xl font-semibold tabular {{ 'text-emerald-600' if (si or 0)>=0 else 'text-rose-600' }}">{{ '%+.2f'|format(si) if si is not none else '—' }}%</div>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="text-xs text-slate-500">Inception</div>
+    <div class="text-lg font-medium">{{ snap.inception_date or '—' }}</div>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="text-xs text-slate-500">Holdings</div>
+    <div class="text-lg font-medium">{{ snap.holdings|length }}</div>
+  </div>
+</div>
+
+<div class="bg-white rounded-lg border border-slate-200 p-4 mb-5">
+  <h2 class="font-medium mb-2">Daily returns</h2>
+  {% if snap.daily_returns %}
+    <canvas id="returns" height="90"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+      const DR = {{ snap.daily_returns|tojson }};
+      const key = DR.length && ('return_pct' in DR[0] ? 'return_pct' : ('return' in DR[0] ? 'return' : 'value'));
+      new Chart(document.getElementById('returns'), {
+        type: 'line',
+        data: { labels: DR.map(d => d.date || d.day || ''),
+                datasets: [{ data: DR.map(d => d[key]), borderColor:'#059669', pointRadius:0, tension:.2 }] },
+        options: { plugins:{legend:{display:false}}, scales:{x:{ticks:{maxTicksLimit:12}}} }
+      });
+    </script>
+  {% else %}
+    <p class="text-sm text-slate-400">No daily returns yet — the strategy is young; this fills in over time.</p>
+  {% endif %}
+</div>
+
+<div class="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+  <h2 class="font-medium p-4 pb-2">Current holdings</h2>
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-xs text-slate-500 text-left"><tr>
+      <th class="px-4 py-2">Company</th><th>Ticker</th><th>Sector</th>
+      <th class="text-right">Weight</th><th class="text-right">Score</th>
+      <th class="text-right">Entry €</th><th>Entry date</th><th></th></tr></thead>
+    <tbody class="divide-y divide-slate-100">
+    {% for h in snap.holdings %}
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-1.5">{{ h.company_name }}</td>
+        <td class="tabular">{{ h.ticker }}</td>
+        <td class="text-slate-500">{{ h.sector or '' }}</td>
+        <td class="text-right tabular">{{ '%.2f'|format((h.target_weight or 0)*100) }}%</td>
+        <td class="text-right tabular">{{ '%.1f'|format(h.score) if h.score is not none else '' }}</td>
+        <td class="text-right tabular">{{ '%.2f'|format(h.entry_price_eur) if h.entry_price_eur else '' }}</td>
+        <td class="text-slate-500">{{ h.entry_date or '' }}</td>
+        <td class="px-3">{% if h.gurufocus_url %}<a class="text-blue-600 hover:underline text-xs" href="{{ h.gurufocus_url }}" target="_blank" rel="noopener">GF↗</a>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if snap.published %}
+<p class="text-xs text-slate-400 mt-3">Published to {{ snap.published.repo }} · commit {{ snap.published.commit }} · {{ snap.published.at }}</p>
+{% endif %}
+{% endif %}
+{% endblock %}

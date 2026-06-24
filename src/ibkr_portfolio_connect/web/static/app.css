@@ -1,0 +1,4 @@
+/* Small bits Tailwind utility classes don't cover cleanly. */
+.tabular { font-variant-numeric: tabular-nums; }
+table.grid th { position: sticky; top: 0; }
+.htmx-request #rows-wrap { opacity: .5; transition: opacity .1s; }

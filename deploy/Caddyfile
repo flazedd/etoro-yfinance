@@ -1,0 +1,23 @@
+# Caddy reverse proxy for the momentum web UI on the RPi4.
+#
+# Recommended: reach the Pi over Tailscale and serve on the tailnet name, so the
+# brokerage-touching box is never exposed to the public internet:
+#
+#   momentum.<your-tailnet>.ts.net {
+#       reverse_proxy 127.0.0.1:8800
+#   }
+#
+# LAN-only alternative (plain HTTP on the local network):
+:80 {
+    encode gzip
+    reverse_proxy 127.0.0.1:8800
+}
+
+# Public HTTPS alternative (only if you really must expose it) — Caddy will
+# provision a cert automatically. Add real auth (basic_auth / forward_auth) first:
+#
+#   momentum.example.com {
+#       encode gzip
+#       basic_auth { you JDJhJDE0... }   # caddy hash-password
+#       reverse_proxy 127.0.0.1:8800
+#   }

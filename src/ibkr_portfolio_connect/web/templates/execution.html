@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Execution{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold mb-1">Monthly rebalance execution</h1>
+<p class="text-sm text-slate-500 mb-5">Strategy <b>MomentumTopSelectie</b> · the web only <i>requests</i> a run; the credentialed worker executes it through every gate (health, freshness, reviewed conid map, safety caps, RTH).</p>
+
+<div class="grid lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-1 space-y-5">
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <h2 class="font-medium mb-3">Request a run</h2>
+      <form method="post" action="/execution/request" class="space-y-3">
+        <input type="hidden" name="mode" value="dry">
+        <button class="w-full bg-slate-800 hover:bg-slate-900 text-white rounded-md py-2 text-sm font-medium">
+          Preview plan (dry run — no orders)
+        </button>
+      </form>
+      <form method="post" action="/execution/request" class="space-y-2 mt-4 pt-4 border-t border-slate-100"
+            onsubmit="return confirm('Place LIVE orders on IBKR?');">
+        <input type="hidden" name="mode" value="live">
+        <label class="text-xs text-slate-500">Type <b>{{ confirm_phrase }}</b> to enable live trading</label>
+        <input name="confirm" autocomplete="off" placeholder="{{ confirm_phrase }}"
+               class="w-full border border-slate-300 rounded-md px-3 py-1.5 text-sm">
+        <button class="w-full bg-rose-600 hover:bg-rose-700 text-white rounded-md py-2 text-sm font-medium">
+          Execute LIVE on IBKR
+        </button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <h2 class="font-medium mb-2">Job queue</h2>
+      <ul class="text-sm divide-y divide-slate-100">
+        {% for j in jobs %}
+        <li class="py-1.5 flex justify-between">
+          <span>#{{ j.id }} {{ 'LIVE' if not j.dry_run else 'dry' }}</span>
+          <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if j.status=='done' else ('bg-rose-100 text-rose-700' if j.status=='error' else 'bg-amber-100 text-amber-700') }}">{{ j.status }}</span>
+        </li>
+        {% else %}<li class="py-2 text-slate-400">no jobs yet</li>{% endfor %}
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <h2 class="font-medium mb-2">Recent events</h2>
+      <ul class="text-xs space-y-1 text-slate-600">
+        {% for e in events %}
+        <li><span class="text-slate-400 tabular">{{ e.created_at.strftime('%m-%d %H:%M') }}</span>
+          <span class="{{ 'text-rose-600' if e.level=='error' else ('text-amber-600' if e.level=='warn' else '') }}">{{ e.title }}</span></li>
+        {% else %}<li class="text-slate-400">—</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="lg:col-span-2 space-y-5">
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-medium">Latest dry-run plan</h2>
+        {% if latest_plan %}<span class="text-xs text-slate-500">run #{{ latest_plan.id }} · NAV €{{ '{:,.0f}'.format(latest_plan.nav_eur) if latest_plan.nav_eur else '?' }} · {{ latest_plan.n_trades }} trades</span>{% endif %}
+      </div>
+      {% if latest_plan and plan_orders %}
+      <table class="w-full text-sm">
+        <thead class="text-xs text-slate-500 text-left"><tr>
+          <th class="py-1">Side</th><th>Symbol</th><th class="text-right">Qty</th><th class="text-right">Ref €</th></tr></thead>
+        <tbody class="divide-y divide-slate-100">
+        {% for o in plan_orders %}
+          <tr><td class="py-1 {{ 'text-emerald-700' if o.side=='BUY' else 'text-rose-700' }}">{{ o.side }}</td>
+            <td>{{ o.symbol }}</td><td class="text-right tabular">{{ o.quantity|int }}</td>
+            <td class="text-right tabular">{{ '%.2f'|format(o.reference_price) if o.reference_price else '' }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% elif latest_plan %}
+        <p class="text-sm text-slate-500">No trades needed — portfolio already matches target.</p>
+      {% else %}
+        <p class="text-sm text-slate-400">No dry run yet. Click “Preview plan” to generate one.</p>
+      {% endif %}
+    </div>
+
+    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <h2 class="font-medium p-4 pb-2">Run history</h2>
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-xs text-slate-500 text-left"><tr>
+          <th class="px-4 py-2">When</th><th>Mode</th><th>Status</th>
+          <th class="text-right">Trades</th><th class="text-right">Slippage €</th>
+          <th class="text-right">Commission €</th><th></th></tr></thead>
+        <tbody class="divide-y divide-slate-100">
+        {% for r in runs %}
+          <tr class="hover:bg-slate-50">
+            <td class="px-4 py-1.5 tabular text-slate-500">{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ 'LIVE' if not r.dry_run else 'dry' }}</td>
+            <td><span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if r.status in ('success','dry_run') else ('bg-rose-100 text-rose-700' if r.status in ('error','failed') else 'bg-amber-100 text-amber-700') }}">{{ r.status }}</span></td>
+            <td class="text-right tabular">{{ r.n_trades }}</td>
+            <td class="text-right tabular">{{ '%.2f'|format(r.total_slippage_eur) if r.total_slippage_eur is not none else '' }}</td>
+            <td class="text-right tabular">{{ '%.2f'|format(r.total_commission_eur) if r.total_commission_eur is not none else '' }}</td>
+            <td class="px-4"><a class="text-blue-600 hover:underline text-xs" href="/execution/runs/{{ r.id }}">detail →</a></td>
+          </tr>
+        {% else %}<tr><td colspan="7" class="px-4 py-3 text-slate-400">no runs yet</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

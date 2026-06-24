@@ -1,0 +1,19 @@
+[Unit]
+Description=Queue the monthly momentum rebalance (the worker executes it)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=trader
+Group=trader
+WorkingDirectory=/opt/momentum-stack
+Environment=MOMENTUM_DB_PATH=/var/lib/momentum/momentum.db
+EnvironmentFile=/etc/momentum/trader.env
+# Enqueues a run honoring DRY_RUN from trader.env (set DRY_RUN=false for live).
+# The always-on momentum-trade-worker picks it up within a poll interval.
+ExecStart=/opt/momentum-stack/.venv/bin/momentum-trade-worker --enqueue
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/momentum

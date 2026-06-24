@@ -154,6 +154,15 @@ class BBTerminalClient:
         health()) so you never trade on stale data."""
         return cast(dict[str, Any], self._request("GET", f"/api/admin/schedules/{strategy_id}"))
 
+    def performance(self, strategy_id: int) -> dict[str, Any]:
+        """One strategy's performance stats: mtd_return_pct,
+        since_inception_return_pct, inception_date, as_of_date, and a
+        daily_returns time-series (may be empty for a young strategy)."""
+        return cast(
+            dict[str, Any],
+            self._request("GET", f"/api/admin/schedules/{strategy_id}/performance"),
+        )
+
     def health(self) -> dict[str, Any]:
         """Composite go/no-go. Gate trades on is_healthy_strict."""
         return cast(dict[str, Any], self._request("GET", "/api/admin/health"))

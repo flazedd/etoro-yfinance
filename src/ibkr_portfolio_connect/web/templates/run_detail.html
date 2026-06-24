@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Run #{{ run.id if run else '?' }}{% endblock %}
+{% block content %}
+<a href="/execution" class="text-sm text-blue-600 hover:underline">← back to execution</a>
+{% if not run %}
+  <p class="mt-4 text-slate-500">Run not found.</p>
+{% else %}
+<h1 class="text-xl font-semibold mt-2 mb-1">Run #{{ run.id }} · {{ 'LIVE' if not run.dry_run else 'dry run' }}</h1>
+<p class="text-sm text-slate-500 mb-4">
+  {{ run.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ run.strategy_name }} (as of {{ run.as_of_date }}) ·
+  status <b>{{ run.status }}</b> · NAV €{{ '{:,.0f}'.format(run.nav_eur) if run.nav_eur else '?' }}
+</p>
+{% if run.aborted_reason %}
+<div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-3 text-sm mb-4">{{ run.aborted_reason }}</div>
+{% endif %}
+
+<div class="bg-white rounded-lg border border-slate-200 overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-xs text-slate-500 text-left"><tr>
+      <th class="px-3 py-2">Side</th><th>Symbol</th><th>Exch</th><th class="text-right">Qty</th>
+      <th class="text-right">Ref €</th><th class="text-right">Fill €</th>
+      <th class="text-right">Slippage %</th><th class="text-right">Slippage €</th>
+      <th class="text-right">Commission €</th><th>Status</th></tr></thead>
+    <tbody class="divide-y divide-slate-100">
+    {% for o in orders %}
+      <tr>
+        <td class="px-3 py-1.5 {{ 'text-emerald-700' if o.side=='BUY' else 'text-rose-700' }}">{{ o.side }}</td>
+        <td>{{ o.symbol }}</td><td class="text-slate-500">{{ o.exchange }}</td>
+        <td class="text-right tabular">{{ o.quantity|int }}</td>
+        <td class="text-right tabular">{{ '%.2f'|format(o.reference_price) if o.reference_price else '' }}</td>
+        <td class="text-right tabular">{{ '%.2f'|format(o.fill_price) if o.fill_price else '' }}</td>
+        <td class="text-right tabular {{ 'text-rose-600' if o.slippage_pct and o.slippage_pct>0 else 'text-emerald-600' }}">{{ '%.3f'|format(o.slippage_pct) if o.slippage_pct is not none else '' }}</td>
+        <td class="text-right tabular">{{ '%.2f'|format(o.slippage_eur) if o.slippage_eur is not none else '' }}</td>
+        <td class="text-right tabular">{{ '%.2f'|format(o.commission) if o.commission is not none else '' }}</td>
+        <td class="text-xs">{{ o.status }}{% if o.error %}<span class="text-rose-600" title="{{ o.error }}"> ⚠</span>{% endif %}</td>
+      </tr>
+    {% else %}<tr><td colspan="10" class="px-3 py-3 text-slate-400">no orders recorded</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}
