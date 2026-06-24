@@ -57,14 +57,15 @@ def _verdict(bb_name: str, ibkr_name: str, figi_name: str | None,
     # An override deliberately substitutes a different listing (e.g. TSMC's local
     # ticker 2330 -> the TSM ADR), so its ticker is *expected* to differ.
     is_override = method == "override"
-    if sim_ibkr < _HI:
-        v = "ibkr_figi_mismatch"          # OpenFIGI disagrees with our conid
-    elif sim_bb >= _HI:
-        v = "triple_match"                # all three agree
-    elif tmatch or is_override:
-        v = "isin_identity_ok"            # ISIN's security confirmed; bb name differs (rename/relabel)
+    ibkr_ok, bb_ok = sim_ibkr >= _HI, sim_bb >= _HI
+    if ibkr_ok and (bb_ok or tmatch or is_override):
+        v = "triple_match"                # name agrees on the ISIN side; ticker/name confirm
+    elif ibkr_ok or tmatch or is_override:
+        v = "isin_identity_ok"            # ISIN's security confirmed (one name or the ticker); other name differs
+    elif bb_ok:
+        v = "ticker_conflict"             # bb name matches the ISIN but IBKR's conid name + ticker don't — investigate
     else:
-        v = "ticker_conflict"             # bb name AND ticker disagree with the ISIN
+        v = "ibkr_figi_mismatch"          # nothing confirms our conid is this ISIN's security
     return {"verdict": v, "sim_bb": sim_bb, "sim_ibkr": sim_ibkr, "ticker_match": tmatch}
 
 
@@ -104,11 +105,8 @@ def main() -> int:
     out = {} if args.refresh or not out_path.exists() else json.loads(out_path.read_text()).get("results", {})
     todo = [(cid, r) for cid, r in targets if cid not in out]
     print(f"{len(targets)} targets ({'all' if args.all else 'low+medium'}); {len(todo)} to query via OpenFIGI\n")
-    if not todo:
-        print("nothing to do")
-        _summary(out)
-        return 0
 
+    # Query Bloomberg only for ISINs we don't have FIGI records for yet.
     for i in range(0, len(todo), _BATCH):
         chunk = todo[i : i + _BATCH]
         isins = [r["isin"] for _, r in chunk]
@@ -119,22 +117,32 @@ def main() -> int:
             mapped = {}
         for cid, r in chunk:
             recs = mapped.get(r["isin"], [])
-            figi_name = recs[0].get("name") if recs else None
-            figi_tickers = {str(d.get("ticker")) for d in recs if d.get("ticker")}
-            v = ver.get(cid, {})
-            verdict = _verdict(r.get("company_name", ""), v.get("ibkr_name", ""),
-                               figi_name, r.get("ticker", ""), figi_tickers,
-                               method=r.get("method", "isin"))
             out[cid] = {
                 "company_id": cid, "ticker": r.get("ticker"), "isin": r.get("isin"),
-                "bb_name": r.get("company_name"), "ibkr_name": v.get("ibkr_name"),
-                "figi_name": figi_name, "figi_tickers": sorted(figi_tickers),
+                "figi_name": recs[0].get("name") if recs else None,
+                "figi_tickers": sorted({str(d.get("ticker")) for d in recs if d.get("ticker")}),
                 "figi_exch": sorted({str(d.get("exchCode")) for d in recs if d.get("exchCode")})[:6],
-                **verdict,
             }
         out_path.write_text(json.dumps({"slug": args.slug, "results": out}, indent=2, ensure_ascii=False))
         print(f"  [{min(i + _BATCH, len(todo)):4}/{len(todo)}] queried")
         time.sleep(_PER_MIN_SLEEP)
+
+    # Always (re)compute the verdict for EVERY target from cached FIGI records +
+    # the CURRENT verification — so a matcher/threshold change is reflected on a
+    # re-run without re-querying Bloomberg.
+    res_by_cid = dict(targets)
+    for cid in list(out):
+        o = out[cid]
+        r = res_by_cid.get(cid, {})
+        v = ver.get(cid, {})
+        o["bb_name"] = r.get("company_name", o.get("bb_name"))
+        o["ibkr_name"] = v.get("ibkr_name", o.get("ibkr_name"))
+        o.update(_verdict(
+            o["bb_name"] or "", o["ibkr_name"] or "", o.get("figi_name"),
+            o.get("ticker", ""), set(o.get("figi_tickers", [])),
+            method=r.get("method", "isin"),
+        ))
+    out_path.write_text(json.dumps({"slug": args.slug, "results": out}, indent=2, ensure_ascii=False))
 
     print(f"\nwrote {out_path}")
     _summary(out)

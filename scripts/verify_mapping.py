@@ -7,14 +7,18 @@ company, using a signal independent of how we resolved it:
              vs bbterminal's company_name. This is the signal that catches a
              wrong ISIN in bbterminal (it resolved cleanly, but to a different
              company — e.g. SM Energy vs SM Investments).
+  * TICKER — IBKR's symbol for the conid vs bbterminal's ticker (HK-style zero
+             padding ignored). An independent identity signal: a matching ticker
+             on the resolved (ISIN-first, expected-exchange) listing confirms the
+             company even when the display NAMES differ (rebrands, ADR labels).
   * CCY    — IBKR currency vs bbterminal currency (ADR overrides legitimately
              differ, so a known override is exempt).
   * CUSIP  — for US-ISIN names, optional second pass (--cusip) compares IBKR's
              cusip to the middle of bbterminal's US ISIN: a true ISIN check.
 
-Confidence per company:
-  high    name >= --high (default 0.7) and currency ok
-  medium  name >= --med  (default 0.4)
+Confidence per company (NAME *or* TICKER confirms identity):
+  high    (name >= --high OR ticker matches) and currency ok
+  medium  name >= --med, or ticker matches but currency differs
   low     below that — REVIEW (possible wrong mapping)
 
     uv run python scripts/verify_mapping.py                 # name+ccy sweep (batched, fast)
@@ -38,7 +42,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from ibkr_portfolio_connect.contract_resolver import CONID_OVERRIDES  # noqa: E402
+from ibkr_portfolio_connect.contract_resolver import (  # noqa: E402
+    BBTERMINAL_TO_IBKR_LISTING,
+    CONID_OVERRIDES,
+)
 from ibkr_portfolio_connect.name_match import similarity  # noqa: E402
 
 DATA_DIR = Path("data")
@@ -47,6 +54,13 @@ _BATCH = 50  # conids per trsrv/secdef call
 
 def _override_keys() -> set[tuple[str, str]]:
     return set(CONID_OVERRIDES.keys())
+
+
+def _norm_ticker(t: str) -> str:
+    """Loose ticker compare: drop case, spaces, dots, and leading zeros on the
+    numeric HK-style codes so bbterminal '00189' == IBKR '189'."""
+    t = (t or "").upper().replace(" ", "").replace(".", "")
+    return (t.lstrip("0") or "0") if t.isdigit() else t
 
 
 def main() -> int:
@@ -97,11 +111,27 @@ def main() -> int:
                 name_score = similarity(bb.get("company_name", ""), ibkr_name) if d else 0.0
                 is_override = (bb["ticker"].upper(), bb["exchange"].upper()) in overrides
                 ccy_ok = is_override or not ibkr_ccy or ibkr_ccy == bb.get("currency")
+
+                # Independent ticker + exchange identity check (from the resolve
+                # phase, no extra IBKR call). A matching ticker confirms the
+                # company even when the names disagree.
+                ibkr_symbol = str(bb.get("ibkr_symbol") or "")
+                ticker_match = bool(
+                    ibkr_symbol
+                    and _norm_ticker(bb["ticker"]) == _norm_ticker(ibkr_symbol)
+                )
+                expected = BBTERMINAL_TO_IBKR_LISTING.get(str(bb["exchange"]).upper())
+                listing_match = (
+                    None if (not ibkr_listing or expected is None)
+                    else ibkr_listing in expected
+                )
+
+                name_ok = name_score >= args.high
                 if d is None:
                     conf = "missing"
-                elif name_score >= args.high and ccy_ok:
+                elif (name_ok or ticker_match) and ccy_ok:
                     conf = "high"
-                elif name_score >= args.med:
+                elif name_score >= args.med or ticker_match:
                     conf = "medium"
                 else:
                     conf = "low"
@@ -110,6 +140,8 @@ def main() -> int:
                     "exchange": bb["exchange"], "conid": cid, "method": bb.get("method"),
                     "bb_name": bb.get("company_name"), "ibkr_name": ibkr_name,
                     "name_score": round(name_score, 3),
+                    "ibkr_symbol": ibkr_symbol, "ticker_match": ticker_match,
+                    "listing_match": listing_match,
                     "bb_ccy": bb.get("currency"), "ibkr_ccy": ibkr_ccy,
                     "ccy_ok": ccy_ok, "ibkr_listing": ibkr_listing,
                     "is_override": is_override, "confidence": conf,

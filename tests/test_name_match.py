@@ -17,6 +17,16 @@ def test_same_company_despite_legal_form_and_adr() -> None:
     assert similarity("Roche Holding AG", "ROCHE HLDG") >= 0.8
 
 
+def test_spacing_and_punctuation_only_difference_is_exact() -> None:
+    # IBKR's security master spells McDonald's with a space ("MC DONALD'S"),
+    # which used to split the key token and sink the score. The de-spaced
+    # identity strings are identical, so it must read as a full match.
+    assert similarity("McDonald's Corp", "MC DONALD'S-CORP") >= 0.95
+    assert similarity("MC DONALD'S-CORP", "MCDONALD'S CORP") >= 0.95
+    # Segmentation differences in general collapse.
+    assert similarity("JPMorgan Chase & Co", "JP MORGAN CHASE & CO") >= 0.95
+
+
 def test_wrong_company_traps_score_low() -> None:
     # The exact mismatches the review caught — must NOT look like a match.
     assert similarity("SM Investments Corp", "SM ENERGY CO") < 0.5

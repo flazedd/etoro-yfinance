@@ -52,7 +52,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -109,7 +109,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -136,7 +136,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -192,7 +192,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -277,7 +277,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -560,6 +560,7 @@
       "figi_tickers": [
         "0OIQ",
         "1ACX",
+        "1ACXM",
         "ACE1",
         "ACRXF",
         "ACX",
@@ -651,7 +652,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -730,6 +731,7 @@
       "figi_tickers": [
         "0HBH",
         "1APD",
+        "1APDM",
         "4APD",
         "AP3",
         "AP3D",
@@ -819,6 +821,7 @@
       "figi_name": "ANGLOGOLD ASHANTI PLC",
       "figi_tickers": [
         "1ANGU",
+        "1ANGUM",
         "22934EUR",
         "22934GBP",
         "22934USD",
@@ -1032,6 +1035,7 @@
       "figi_tickers": [
         "0MPT",
         "1BRE",
+        "1BREM",
         "BNR",
         "BNRCHF",
         "BNRD",
@@ -1371,7 +1375,7 @@
         "EU",
         "EZ"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -1584,6 +1588,7 @@
         "0QDSCHF",
         "0QDSGBX",
         "1EVK",
+        "1EVKM",
         "4EVK",
         "EVK",
         "EVKD",
@@ -1799,7 +1804,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -1892,8 +1897,8 @@
         "EO",
         "EP"
       ],
-      "verdict": "isin_identity_ok",
-      "sim_bb": 0.484,
+      "verdict": "triple_match",
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -1907,6 +1912,7 @@
       "figi_tickers": [
         "0IZC",
         "1HEN3",
+        "1HEN3M",
         "4HEN3",
         "HEKV",
         "HEN",
@@ -1934,7 +1940,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -2106,6 +2112,7 @@
       "figi_tickers": [
         "0H7I",
         "1LXS",
+        "1LXSM",
         "4LXS",
         "LNXSF",
         "LNXSFN",
@@ -2204,6 +2211,7 @@
         "1MP",
         "1MPM",
         "55H0",
+        "55H0D",
         "MP",
         "MP*",
         "MPEUR",
@@ -2214,9 +2222,9 @@
         "B3",
         "E1",
         "EO",
+        "EP",
         "EU",
-        "GD",
-        "GF"
+        "EZ"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -2274,6 +2282,7 @@
       "figi_tickers": [
         "0K7F",
         "1AUR",
+        "1AURM",
         "AIAGF",
         "AIAGFN",
         "NDA",
@@ -2454,6 +2463,7 @@
       "figi_tickers": [
         "0FJ8",
         "1OUT",
+        "1OUTM",
         "OUT1V",
         "OUT1VCHF",
         "OUT1VEUR",
@@ -2735,6 +2745,7 @@
       "figi_tickers": [
         "0Q2N",
         "1SDF",
+        "1SDFM",
         "4SDF",
         "KPLUF",
         "KPLUFN",
@@ -2847,7 +2858,7 @@
         "EU",
         "EZ"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.351,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -2894,6 +2905,7 @@
       "figi_tickers": [
         "0Z4C",
         "1SIKA",
+        "1SIKAM",
         "SIK",
         "SIKA",
         "SIKACHF",
@@ -3037,7 +3049,7 @@
         "EB",
         "EO"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -3073,7 +3085,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -3118,22 +3130,21 @@
       "figi_name": "SMURFIT WESTROCK PLC",
       "figi_tickers": [
         "N4U",
+        "N4UD",
         "SW",
         "SW11GBX",
         "SW11USD",
         "SW1EUR",
         "SW1N",
-        "SWN",
-        "SWR",
-        "SWRL"
+        "SWN"
       ],
       "figi_exch": [
         "B3",
-        "BQ",
         "BW",
         "E1",
         "EB",
-        "EO"
+        "EO",
+        "EP"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -3211,7 +3222,7 @@
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
-      "sim_ibkr": 0.968,
+      "sim_ibkr": 1.0,
       "ticker_match": true
     },
     "5544": {
@@ -3290,6 +3301,7 @@
       "figi_tickers": [
         "0NV5",
         "1UPM",
+        "1UPMM",
         "RPL",
         "RPLD",
         "UPM",
@@ -3416,6 +3428,7 @@
       "figi_tickers": [
         "0NR4",
         "1WCH",
+        "1WCHM",
         "4WCH",
         "WCH",
         "WCHCHF",
@@ -3465,7 +3478,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -3611,7 +3624,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -3638,7 +3651,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -3694,7 +3707,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -3722,7 +3735,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -3929,7 +3942,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -4392,6 +4405,7 @@
       "figi_tickers": [
         "0HAC",
         "1ACS",
+        "1ACSM",
         "4ACS",
         "ACS",
         "ACSAF",
@@ -4525,6 +4539,7 @@
       "figi_tickers": [
         "0A0D",
         "1ALC",
+        "1ALCM",
         "2U3",
         "2U3D",
         "ALC",
@@ -4620,6 +4635,7 @@
       "figi_tickers": [
         "0H4K",
         "1ANA",
+        "1ANAM",
         "ACXIF",
         "AJ3",
         "ANA",
@@ -4656,6 +4672,7 @@
       "figi_tickers": [
         "0MJZ",
         "1ANDR",
+        "1ANDRM",
         "ADRZF",
         "ANDR",
         "ANDRCHF",
@@ -4716,7 +4733,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -4879,7 +4896,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -5136,7 +5153,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -5330,8 +5347,8 @@
         "EU",
         "EZ"
       ],
-      "verdict": "isin_identity_ok",
-      "sim_bb": 0.481,
+      "verdict": "triple_match",
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -5422,7 +5439,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -5576,7 +5593,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -5791,7 +5808,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -5867,7 +5884,7 @@
         "CB",
         "CC"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.214,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -6058,7 +6075,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -6071,6 +6088,7 @@
       "figi_name": "HOLCIM LTD",
       "figi_tickers": [
         "1HOLN",
+        "1HOLNM",
         "HCMLF",
         "HLBN",
         "HLBND",
@@ -6145,6 +6163,7 @@
       "figi_tickers": [
         "0EPW",
         "1HOT",
+        "1HOTM",
         "4HOT",
         "HOCFF",
         "HOCFFN",
@@ -6323,7 +6342,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -6365,6 +6384,7 @@
       "figi_tickers": [
         "0QFU",
         "1KGX",
+        "1KGXM",
         "4KGX",
         "KGX",
         "KGXCHF",
@@ -6426,6 +6446,7 @@
       "figi_name": "KONE OYJ-B",
       "figi_tickers": [
         "0II2",
+        "1KNEBM",
         "1KNEBV",
         "4KNEBV",
         "KC4",
@@ -6482,7 +6503,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.917,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -6561,6 +6582,7 @@
       "figi_tickers": [
         "0MGI",
         "1METS",
+        "1METSM",
         "M6Q",
         "METSO",
         "METSOH",
@@ -6720,6 +6742,7 @@
       "figi_tickers": [
         "0FC9",
         "1MTX",
+        "1MTXM",
         "4MTX",
         "MTUAF",
         "MTUAFN",
@@ -6785,6 +6808,7 @@
       "figi_tickers": [
         "0MEC",
         "1NDX",
+        "1NDXM",
         "4NDX",
         "NDX1",
         "NDX1CHF",
@@ -6933,7 +6957,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -7146,7 +7170,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -7198,6 +7222,7 @@
       "figi_tickers": [
         "0GWL",
         "1SAAB",
+        "1SAABM",
         "SAABB",
         "SAABBEUR",
         "SAABBGBP",
@@ -7328,7 +7353,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -7407,7 +7432,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -7586,6 +7611,7 @@
         "0Y2S",
         "0Y2SL",
         "1TTH",
+        "1TTHM",
         "2IS",
         "2ISD",
         "IREUR",
@@ -7772,7 +7798,7 @@
         "DC"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -7867,7 +7893,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.941,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -7899,7 +7925,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -8015,7 +8041,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -8043,7 +8069,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -8160,7 +8186,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -8189,7 +8215,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -8216,7 +8242,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -8243,7 +8269,7 @@
         "GS"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -9150,6 +9176,7 @@
       "figi_tickers": [
         "0Q8F",
         "1BOSS",
+        "1BOSSM",
         "4BOSS",
         "BOSS",
         "BOSSCHF",
@@ -9202,7 +9229,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.947,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -9216,6 +9243,7 @@
       "figi_tickers": [
         "0QMU",
         "1CFR",
+        "1CFRM",
         "CFR",
         "CFR1ZAR",
         "CFRCHF",
@@ -9253,6 +9281,7 @@
       "figi_tickers": [
         "0LQ1",
         "1CON",
+        "1CONM",
         "4CON",
         "CON",
         "CONAUD",
@@ -9359,6 +9388,7 @@
       "figi_tickers": [
         "0AB9",
         "1DTRH",
+        "1DTRHM",
         "DTG",
         "DTG1CHF",
         "DTG1EUR",
@@ -9797,7 +9827,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -9988,7 +10018,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.72,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -10054,7 +10084,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -10176,6 +10206,7 @@
         "1ONON",
         "1ONONM",
         "49G",
+        "49GD",
         "ONON",
         "ONONEUR",
         "ONONGBP",
@@ -10256,7 +10287,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.72,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -10579,7 +10610,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -10874,7 +10905,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -10956,7 +10987,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -11037,6 +11068,7 @@
       "figi_tickers": [
         "0HTP",
         "1VOLVB",
+        "1VOLVM",
         "4VOLVB",
         "VOL1",
         "VOL1D",
@@ -11110,7 +11142,7 @@
         "CK"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -11252,7 +11284,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -11335,7 +11367,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -11590,6 +11622,7 @@
         "14352GBX",
         "14352USD",
         "1ABI",
+        "1ABIM",
         "1NBA",
         "1NBAD",
         "4ABI",
@@ -11732,6 +11765,7 @@
       "figi_tickers": [
         "0DQ7",
         "1BEI",
+        "1BEIM",
         "4BEI",
         "BDRFF",
         "BDRFFN",
@@ -11786,7 +11820,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": false
     },
@@ -11888,7 +11922,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -11986,7 +12020,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.923,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -12346,7 +12380,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13004,7 +13038,7 @@
         "CE"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13066,7 +13100,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13190,6 +13224,7 @@
       "figi_tickers": [
         "0QR4",
         "1NESN",
+        "1NESNM",
         "NESN",
         "NESNCAD",
         "NESNCHF",
@@ -13477,8 +13512,8 @@
         "EU",
         "EZ"
       ],
-      "verdict": "isin_identity_ok",
-      "sim_bb": 0.45,
+      "verdict": "triple_match",
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13513,7 +13548,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13527,6 +13562,7 @@
       "figi_tickers": [
         "0G6T",
         "1SYM",
+        "1SYMM",
         "SY1",
         "SY1CHF",
         "SY1D",
@@ -13611,7 +13647,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13642,7 +13678,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13730,7 +13766,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.944,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13790,7 +13826,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13818,7 +13854,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -13940,7 +13976,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -14561,7 +14597,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -14793,6 +14829,7 @@
       "figi_tickers": [
         "0O46",
         "1NESTE",
+        "1NESTM",
         "4NESTE",
         "NEF",
         "NEFD",
@@ -14967,6 +15004,7 @@
       "figi_tickers": [
         "0MKH",
         "1OMV",
+        "1OMVM",
         "4OMV",
         "OMV",
         "OMVBGN",
@@ -15089,7 +15127,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15151,7 +15189,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15267,6 +15305,7 @@
       "figi_tickers": [
         "0SCL",
         "1SLB",
+        "1SLBM",
         "SCL",
         "SCLD",
         "SLB",
@@ -15515,7 +15554,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15616,7 +15655,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15646,7 +15685,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15674,7 +15713,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15704,7 +15743,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15761,7 +15800,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15789,7 +15828,7 @@
         "EU",
         "EZ"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.54,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -15878,7 +15917,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15935,7 +15974,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -15963,7 +16002,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -16019,7 +16058,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -16049,7 +16088,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -16077,7 +16116,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -16189,7 +16228,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -16278,7 +16317,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -16574,7 +16613,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -17129,7 +17168,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -17321,6 +17360,7 @@
       "figi_tickers": [
         "0QO6",
         "1BAER",
+        "1BAERM",
         "BAER",
         "BAERCHF",
         "BAEREUR",
@@ -17341,7 +17381,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -17404,7 +17444,7 @@
         "EU",
         "EZ"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -17447,7 +17487,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -17478,7 +17518,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -17806,7 +17846,7 @@
         "CC"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -17927,6 +17967,7 @@
       "figi_tickers": [
         "0ILK",
         "1CABK",
+        "1CABKM",
         "48CA",
         "48CAD",
         "4CABK",
@@ -17949,7 +17990,7 @@
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
-      "sim_ibkr": 0.96,
+      "sim_ibkr": 0.95,
       "ticker_match": true
     },
     "5132": {
@@ -17990,6 +18031,7 @@
         "0VQD",
         "0VQDL",
         "1CB",
+        "1CBM",
         "ACE1USD",
         "ACE2CHF",
         "ACE2GBX",
@@ -18317,7 +18359,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -18395,7 +18437,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -18409,6 +18451,7 @@
       "figi_tickers": [
         "0H3T",
         "1DB1",
+        "1DB1M",
         "4DB1",
         "DB1",
         "DB1AUD",
@@ -18596,6 +18639,7 @@
         "0HG8",
         "0HG8L",
         "1ANTM",
+        "1ANTMM",
         "4ANTM",
         "A58",
         "A58D",
@@ -18664,6 +18708,7 @@
       "figi_tickers": [
         "0AAZ",
         "1EQT",
+        "1EQTM",
         "6EQ",
         "EQBBF",
         "EQT",
@@ -18711,7 +18756,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.923,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -18859,7 +18904,7 @@
         "GR"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -18887,7 +18932,7 @@
         "MM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19086,7 +19131,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19296,6 +19341,7 @@
       "figi_tickers": [
         "0M9A",
         "1HANN",
+        "1HANNM",
         "HNR1",
         "HNR1CHF",
         "HNR1CZK",
@@ -19347,7 +19393,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19376,7 +19422,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19412,7 +19458,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19443,7 +19489,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19525,7 +19571,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19590,7 +19636,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -19650,7 +19696,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -20010,7 +20056,7 @@
         "CI"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.933,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -20214,7 +20260,7 @@
         "BW",
         "E1"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.29,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -20231,6 +20277,7 @@
         "04QD",
         "0N4T",
         "1NDA",
+        "1NDAM",
         "4NDA",
         "NBNKF",
         "NDA",
@@ -20448,7 +20495,7 @@
         "GH"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -20723,7 +20770,7 @@
         "GR",
         "MF"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -20943,7 +20990,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -21110,6 +21157,7 @@
       "figi_tickers": [
         "0QL6",
         "1SREN",
+        "1SRENM",
         "SR9",
         "SR9D",
         "SREN",
@@ -21197,7 +21245,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -21331,7 +21379,7 @@
         "CE",
         "CI"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -21348,6 +21396,7 @@
         "0UB",
         "0UBD",
         "1UBSG",
+        "1UBSGM",
         "UBS",
         "UBSG",
         "UBSGCHF",
@@ -21755,16 +21804,15 @@
         "WLNEUR",
         "WLNGBP",
         "WLNUSD",
-        "WO61",
-        "WWLND"
+        "WO61"
       ],
       "figi_exch": [
         "E1",
         "EO",
         "GY",
-        "PQ",
         "T2",
-        "WT"
+        "WT",
+        "X1"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -21961,7 +22009,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -22044,7 +22092,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -22102,7 +22150,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -22450,6 +22498,7 @@
       "figi_tickers": [
         "0Q15",
         "1ABT",
+        "1ABTM",
         "ABL",
         "ABLD",
         "ABT",
@@ -22517,6 +22566,7 @@
       "figi_tickers": [
         "0DHC",
         "1AFX",
+        "1AFXM",
         "4AFX",
         "AFX",
         "AFXCHF",
@@ -22536,7 +22586,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -22759,7 +22809,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -22776,16 +22826,15 @@
         "ASND",
         "ASND1N",
         "ASNDGBP",
-        "ASNDN",
         "ASNDUSD"
       ],
       "figi_exch": [
         "E1",
+        "EO",
         "EP",
         "EU",
         "EZ",
-        "GD",
-        "GF"
+        "GD"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -23021,8 +23070,8 @@
         "B3",
         "BW",
         "E1",
-        "EB",
-        "EO"
+        "EO",
+        "EP"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -23172,7 +23221,8 @@
         "BMRNGBX",
         "BMRNHUF",
         "BMRNN",
-        "BMRNUSD"
+        "BMRNUSD",
+        "BMRNV"
       ],
       "figi_exch": [
         "AV",
@@ -23431,14 +23481,9 @@
       "ibkr_name": "DUPONT DE NEMOURS INC",
       "figi_name": "DUPONT DE NEMOURS INC",
       "figi_tickers": [
-        "0A6B",
-        "1DD",
-        "4DD",
-        "6D81",
-        "6D81D",
+        "6D8",
         "DD",
         "DD*",
-        "DDPN",
         "DDUSD",
         "DWDPEUR",
         "DWDPGBP",
@@ -23447,12 +23492,12 @@
         "DWDPUSD"
       ],
       "figi_exch": [
-        "AV",
-        "B3",
-        "BW",
         "E1",
         "EO",
-        "EP"
+        "EP",
+        "EU",
+        "EZ",
+        "GS"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -23868,6 +23913,7 @@
       "figi_tickers": [
         "0H9X",
         "1FME",
+        "1FMEM",
         "4FME",
         "FMCQF",
         "FMCQFN",
@@ -23906,6 +23952,7 @@
       "figi_tickers": [
         "0OO9",
         "1FRE",
+        "1FREM",
         "4FRE",
         "FRE",
         "FRE1",
@@ -24056,7 +24103,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -24133,6 +24180,7 @@
       "figi_tickers": [
         "0RDU",
         "1GRF",
+        "1GRFM",
         "4GRF",
         "GIFLF",
         "GIFLFN",
@@ -24182,7 +24230,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -24732,26 +24780,6 @@
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
-    "5344": {
-      "company_id": "5344",
-      "ticker": "MASI",
-      "isin": "US5747951003",
-      "bb_name": "Masimo Corp",
-      "ibkr_name": "MASIMO CORP",
-      "figi_name": "MASIMO CORP",
-      "figi_tickers": [
-        "MASI*"
-      ],
-      "figi_exch": [
-        "MF",
-        "MM",
-        "MU"
-      ],
-      "verdict": "triple_match",
-      "sim_bb": 1.0,
-      "sim_ibkr": 1.0,
-      "ticker_match": false
-    },
     "3143": {
       "company_id": "3143",
       "ticker": "MCK",
@@ -24961,6 +24989,7 @@
       "figi_tickers": [
         "0O14",
         "1MRK",
+        "1MRKM",
         "4MRK",
         "MEK",
         "MEREUR",
@@ -25076,6 +25105,7 @@
       "figi_tickers": [
         "0QLR",
         "1NOVN",
+        "1NOVNM",
         "NOT",
         "NOTD",
         "NOVN",
@@ -25142,7 +25172,7 @@
         "DC"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -25290,7 +25320,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -25475,7 +25505,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.947,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -25504,7 +25534,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -25536,7 +25566,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -25689,7 +25719,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -25805,6 +25835,7 @@
       "figi_tickers": [
         "0PMJ",
         "1SHL",
+        "1SHLM",
         "4SHL",
         "SEMHF",
         "SHED",
@@ -26051,7 +26082,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26307,7 +26338,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26595,7 +26626,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26652,7 +26683,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.675,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26682,7 +26713,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26748,7 +26779,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26834,7 +26865,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -26892,7 +26923,7 @@
         "HK"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -27008,7 +27039,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -27095,7 +27126,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -27280,7 +27311,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -27483,7 +27514,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -27735,7 +27766,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -27802,7 +27833,7 @@
         "EZ",
         "GD"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -27843,7 +27874,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -28075,7 +28106,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -28137,7 +28168,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -28240,7 +28271,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -28254,6 +28285,7 @@
       "figi_tickers": [
         "0HOT",
         "1BAH",
+        "1BAHM",
         "BAH",
         "BAH*",
         "BAH1EUR",
@@ -28522,7 +28554,7 @@
         "OD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -28776,7 +28808,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -28819,6 +28851,7 @@
       "figi_tickers": [
         "0R9C",
         "1CLNX",
+        "1CLNXM",
         "472",
         "CLNX",
         "CLNXE",
@@ -28875,7 +28908,7 @@
         "CE"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -29268,7 +29301,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.923,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -29316,6 +29349,7 @@
       "figi_tickers": [
         "0RTC",
         "1DHER",
+        "1DHERM",
         "2470921D",
         "4DHER",
         "DHER",
@@ -29376,7 +29410,7 @@
         "E1",
         "EB"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.32,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -29451,7 +29485,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -29605,7 +29639,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30106,7 +30140,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30249,7 +30283,7 @@
         "CC"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30305,7 +30339,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30335,7 +30369,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.984,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30433,7 +30467,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30597,7 +30631,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -30640,6 +30674,7 @@
       "figi_tickers": [
         "0QWI",
         "1ITX",
+        "1ITXM",
         "4ITX",
         "IDEXF",
         "IDEXFN",
@@ -30948,6 +30983,7 @@
       "figi_tickers": [
         "0QC9",
         "1LEG",
+        "1LEGM",
         "4LEG",
         "LEG",
         "LEG1",
@@ -31210,7 +31246,7 @@
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
-      "sim_ibkr": 0.947,
+      "sim_ibkr": 1.0,
       "ticker_match": true
     },
     "5339": {
@@ -31271,7 +31307,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -31314,9 +31350,9 @@
         "CB",
         "CC"
       ],
-      "verdict": "ibkr_figi_mismatch",
+      "verdict": "triple_match",
       "sim_bb": 1.0,
-      "sim_ibkr": 0.484,
+      "sim_ibkr": 1.0,
       "ticker_match": true
     },
     "299": {
@@ -31349,7 +31385,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.957,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -31427,7 +31463,7 @@
         "CC"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -31620,7 +31656,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -31750,7 +31786,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -31812,7 +31848,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32005,7 +32041,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32068,7 +32104,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32238,7 +32274,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32320,6 +32356,7 @@
       "figi_name": "PUIG BRANDS SA-B",
       "figi_tickers": [
         "1PUIG",
+        "1PUIGM",
         "B1B",
         "PUIG",
         "PUIG1EUR",
@@ -32337,7 +32374,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32367,7 +32404,7 @@
         "DG"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32404,7 +32441,7 @@
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
-      "sim_ibkr": 0.957,
+      "sim_ibkr": 0.95,
       "ticker_match": true
     },
     "5477": {
@@ -32470,7 +32507,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32765,7 +32802,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -32809,6 +32846,7 @@
       "figi_tickers": [
         "0NW7",
         "1SIX",
+        "1SIXM",
         "4SIX",
         "SIX2",
         "SIX2CHF",
@@ -32878,6 +32916,7 @@
         "SPCX1USD",
         "SPCXCHF",
         "SPCXEUR",
+        "SPCXHUF",
         "SPCXN",
         "SPCXUSD",
         "SPCXV",
@@ -33086,7 +33125,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -33137,6 +33176,7 @@
         "0QZ1",
         "0QZ1L",
         "1T",
+        "1TM",
         "4T",
         "ATT",
         "SBC",
@@ -33162,7 +33202,7 @@
         "CC"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.737,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -33467,6 +33507,7 @@
         "TIAOFN",
         "TIT",
         "TIT*",
+        "TIT2",
         "TITAUD",
         "TITCHF",
         "TITEUR",
@@ -33485,7 +33526,7 @@
         "EB",
         "EO"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.132,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -33551,7 +33592,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -33928,7 +33969,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -34079,6 +34120,7 @@
       "figi_tickers": [
         "0QFT",
         "1VNA",
+        "1VNAM",
         "4VNA",
         "ANN",
         "DAIMFN",
@@ -34291,7 +34333,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -34440,7 +34482,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -34646,6 +34688,7 @@
       "figi_tickers": [
         "0QXN",
         "1ZAL",
+        "1ZALM",
         "4ZAL",
         "ZAL",
         "ZAL1CHF",
@@ -34693,7 +34736,7 @@
         "UV"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -34983,7 +35026,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -35011,7 +35054,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -35041,7 +35084,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -35206,7 +35249,7 @@
         "US"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -36304,6 +36347,7 @@
       "figi_tickers": [
         "0NX2",
         "1ABB",
+        "1ABBM",
         "ABB",
         "ABBN",
         "ABBNCHF",
@@ -36362,7 +36406,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -36416,6 +36460,7 @@
         "0HFN",
         "0HFNL",
         "1ADI",
+        "1ADIM",
         "4ADI",
         "ADI",
         "ADI*",
@@ -36825,6 +36870,7 @@
       "figi_tickers": [
         "0P2W",
         "1AMS",
+        "1AMSM",
         "4AMS",
         "AI3A",
         "AI3AD",
@@ -36894,6 +36940,7 @@
         "0HFB",
         "0HFBL",
         "1APH",
+        "1APHM",
         "4APH",
         "APH",
         "APH*",
@@ -36912,7 +36959,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -36972,7 +37019,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37186,7 +37233,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37313,7 +37360,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37401,7 +37448,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37494,7 +37541,7 @@
         "LA"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37527,7 +37574,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.6,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37617,7 +37664,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37763,7 +37810,7 @@
         "MM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37838,7 +37885,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.96,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37868,7 +37915,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -37975,7 +38022,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -38008,7 +38055,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -38043,7 +38090,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -38134,7 +38181,7 @@
         "MM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -38531,7 +38578,7 @@
         "EB",
         "EO"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.3,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -38591,7 +38638,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.952,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -38891,7 +38938,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -38958,7 +39005,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -39220,6 +39267,7 @@
         "0VQS",
         "0VQSL",
         "1GRMN",
+        "1GRMNM",
         "GEY",
         "GRMN",
         "GRMNCHF",
@@ -39265,7 +39313,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -39309,6 +39357,7 @@
       "figi_tickers": [
         "0A5S",
         "1HENS",
+        "1HENSM",
         "5UHCHF",
         "5UHD",
         "5UHEUR",
@@ -39363,7 +39412,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -39432,7 +39481,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -39697,7 +39746,6 @@
       "figi_tickers": [
         "1IBM",
         "1IBMM",
-        "2575688D",
         "4IBM",
         "5B9D",
         "IBM",
@@ -39973,7 +40021,7 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -40063,7 +40111,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -40223,7 +40271,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -40369,6 +40417,7 @@
       "figi_tickers": [
         "0QK6",
         "1LOGN",
+        "1LOGNM",
         "LOGI",
         "LOGIN",
         "LOGN",
@@ -40581,7 +40630,7 @@
         "GS"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -40706,7 +40755,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.963,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -40766,7 +40815,7 @@
         "GH"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.917,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -40829,8 +40878,8 @@
         "B3",
         "BW",
         "E1",
-        "EB",
-        "EO"
+        "EO",
+        "EP"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -41009,7 +41058,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -41259,7 +41308,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.917,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -41346,6 +41395,7 @@
       "figi_tickers": [
         "0EDE",
         "1NXPI",
+        "1NXPIM",
         "4NXPI",
         "NXPI",
         "NXPIEUR",
@@ -41594,7 +41644,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.923,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -41634,7 +41684,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -41704,7 +41754,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -41862,7 +41912,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -42187,7 +42237,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -42217,7 +42267,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.909,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -42373,7 +42423,7 @@
         "GF"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -42422,6 +42472,7 @@
         "1ROP",
         "ROP",
         "ROP*",
+        "ROP1CHF",
         "ROPCHF",
         "ROPD",
         "ROPEUR",
@@ -42589,7 +42640,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -42603,6 +42654,7 @@
       "figi_tickers": [
         "0NIF",
         "1S",
+        "1SM",
         "4S",
         "S92",
         "S92CHF",
@@ -42680,7 +42732,7 @@
         "1SATS",
         "E20",
         "E20D",
-        "SATS",
+        "ECHO",
         "SATS*",
         "SATS1EUR",
         "SATSGBP",
@@ -42695,9 +42747,9 @@
         "GD"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.929,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
-      "ticker_match": true
+      "ticker_match": false
     },
     "133": {
       "company_id": "133",
@@ -42784,7 +42836,7 @@
         "UB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43098,8 +43150,8 @@
         "E1",
         "EB"
       ],
-      "verdict": "isin_identity_ok",
-      "sim_bb": 0.2,
+      "verdict": "triple_match",
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43140,6 +43192,7 @@
       "figi_tickers": [
         "0NIR",
         "1SRT3",
+        "1SRT3M",
         "4SRT3",
         "SRT3",
         "SRT3CHF",
@@ -43157,7 +43210,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43260,7 +43313,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.917,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43519,7 +43572,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43771,7 +43824,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43835,7 +43888,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.909,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43937,7 +43990,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -43999,7 +44052,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -44155,7 +44208,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.947,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -44305,7 +44358,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -44466,7 +44519,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -44595,7 +44648,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -44772,7 +44825,7 @@
         "EB",
         "EO"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.25,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -44971,7 +45024,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.6,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -45249,7 +45302,7 @@
         "E1",
         "EB"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -45264,6 +45317,7 @@
       "figi_tickers": [
         "0O1R",
         "1FRA",
+        "1FRAM",
         "4FRA",
         "FPRUF",
         "FPRUFN",
@@ -45285,7 +45339,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -45331,6 +45385,7 @@
       "figi_name": "INTL CONSOLIDATED AIRLINE-DI",
       "figi_tickers": [
         "1IAG",
+        "1IAGM",
         "4IAG",
         "BABWF",
         "BABWFN",
@@ -45649,7 +45704,7 @@
         "E1"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.675,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -45681,7 +45736,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -45810,7 +45865,7 @@
         "EU"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46042,7 +46097,7 @@
         "CI"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46105,7 +46160,7 @@
         "EB",
         "EP"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.431,
       "sim_ibkr": 1.0,
       "ticker_match": true
@@ -46227,7 +46282,7 @@
         "GM"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46311,7 +46366,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46340,7 +46395,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46368,7 +46423,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46396,7 +46451,7 @@
         "EZ"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -46503,6 +46558,7 @@
         "0HEC",
         "0HECL",
         "1AEP",
+        "1AEPM",
         "AEP",
         "AEP*",
         "AEPC",
@@ -46587,8 +46643,8 @@
         "B3",
         "BW",
         "E1",
-        "EB",
-        "EO"
+        "EO",
+        "EP"
       ],
       "verdict": "triple_match",
       "sim_bb": 1.0,
@@ -47188,6 +47244,7 @@
       "figi_tickers": [
         "0HAH",
         "1FORT",
+        "1FORTM",
         "4FORT",
         "FOJCF",
         "FOJCFN",
@@ -47588,7 +47645,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.727,
+      "sim_bb": 1.0,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -47619,7 +47676,7 @@
         "EP"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -47633,6 +47690,7 @@
       "figi_tickers": [
         "0RI5",
         "1REE",
+        "1REEM",
         "4REE",
         "RDEIF",
         "RE21",
@@ -47655,7 +47713,7 @@
         "EB"
       ],
       "verdict": "triple_match",
-      "sim_bb": 0.9,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -47745,6 +47803,7 @@
       "figi_tickers": [
         "0KCD",
         "1SLR",
+        "1SLRM",
         "AOR",
         "SEYMF",
         "SLR",
@@ -47762,7 +47821,7 @@
         "EO"
       ],
       "verdict": "triple_match",
-      "sim_bb": 1.0,
+      "sim_bb": 0.95,
       "sim_ibkr": 1.0,
       "ticker_match": true
     },
@@ -48056,7 +48115,7 @@
         "EB",
         "EO"
       ],
-      "verdict": "isin_identity_ok",
+      "verdict": "triple_match",
       "sim_bb": 0.45,
       "sim_ibkr": 1.0,
       "ticker_match": true

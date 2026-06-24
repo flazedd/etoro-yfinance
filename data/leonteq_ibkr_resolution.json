@@ -1,7 +1,7 @@
 {
-  "universe_id": 16,
+  "universe_id": 15,
   "label": "LEONTEQ (as of 2026-06-17)",
-  "updated_at": "2026-06-17T21:23:36.209834+00:00",
+  "updated_at": "2026-06-24T19:09:40.454943+00:00",
   "results": {
     "5149": {
       "company_id": 5149,
@@ -3509,7 +3509,6 @@
         "DRCTEDGE",
         "EDGEA",
         "EDGX",
-        "EUIBSI",
         "FOXRIVER",
         "FWB",
         "GETTEX",
@@ -3517,7 +3516,6 @@
         "IBIS",
         "IEX",
         "ISE",
-        "LSE",
         "LTSE",
         "MEMX",
         "MEXI",
@@ -3530,7 +3528,8 @@
         "PSX",
         "SMART",
         "T24X",
-        "TPLUS0"
+        "TPLUS0",
+        "VALUE"
       ],
       "status": "resolved",
       "method": "isin",
@@ -8875,6 +8874,7 @@
       "company_name": "Hyundai Motor Co",
       "ibkr_venues": [
         "KRX",
+        "NXT",
         "SMART"
       ],
       "status": "resolved",
@@ -23418,8 +23418,10 @@
         "AQEUES",
         "AQXEUK",
         "BATEES",
+        "BATEUK",
         "BM",
         "CHIXES",
+        "CHIXUK",
         "DXEES",
         "EUIBSI",
         "FWB",
@@ -26491,7 +26493,7 @@
       "method": "isin",
       "conid": 365921621,
       "ibkr_listing": "AMEX",
-      "ibkr_symbol": "DD"
+      "ibkr_symbol": "DD.OLD"
     },
     "3723": {
       "company_id": 3723,
@@ -28124,24 +28126,6 @@
       "conid": 5909431,
       "ibkr_listing": "EBS",
       "ibkr_symbol": "LONN"
-    },
-    "5344": {
-      "company_id": 5344,
-      "ticker": "MASI",
-      "exchange": "NYSE",
-      "currency": "USD",
-      "isin": "US5747951003",
-      "company_name": "Masimo Corp",
-      "ibkr_venues": [
-        "FWB",
-        "MEXI",
-        "VALUE"
-      ],
-      "status": "resolved",
-      "method": "isin",
-      "conid": 45441825,
-      "ibkr_listing": "VALUE",
-      "ibkr_symbol": "MASI"
     },
     "3143": {
       "company_id": 3143,
@@ -40455,6 +40439,7 @@
       "company_name": "Doosan Fuel Cell",
       "ibkr_venues": [
         "KRX",
+        "NXT",
         "SMART"
       ],
       "status": "resolved",
@@ -49982,7 +49967,7 @@
       "method": "isin",
       "conid": 47965865,
       "ibkr_listing": "AMEX",
-      "ibkr_symbol": "SATS"
+      "ibkr_symbol": "ECHO"
     },
     "133": {
       "company_id": 133,
@@ -53707,7 +53692,6 @@
         "EDGX",
         "EUIBSI",
         "FOXRIVER",
-        "FWB",
         "GETTEX",
         "IBEOS",
         "IEX",
@@ -53723,9 +53707,7 @@
         "PHLX",
         "PSX",
         "SMART",
-        "SWB",
         "T24X",
-        "TGATE",
         "TPLUS0"
       ],
       "status": "resolved",
@@ -54782,7 +54764,6 @@
       "ibkr_venues": [
         "AMEX",
         "ARCA",
-        "BATEDE",
         "BATS",
         "BEX",
         "BYX",
@@ -54798,7 +54779,6 @@
         "FWB",
         "GETTEX",
         "IBEOS",
-        "IBIS",
         "IEX",
         "ISE",
         "LTSE",

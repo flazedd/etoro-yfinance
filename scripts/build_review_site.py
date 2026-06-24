@@ -36,6 +36,9 @@ def main() -> int:
     args = parser.parse_args()
 
     res = _load(DATA_DIR / f"{args.slug}_ibkr_resolution.json").get("results", {})
+    # company_id -> country, for the GuruFocus link (US exchanges = ticker only).
+    uni = _load(DATA_DIR / f"{args.slug}_universe.json").get("members", [])
+    country_by_cid = {str(m.get("company_id")): m.get("country") for m in uni}
     ver = _load(DATA_DIR / f"{args.slug}_mapping_verification.json").get("results", {})
     liq = _load(DATA_DIR / f"{args.slug}_liquidity.json").get("results", {})
     fig = _load(DATA_DIR / f"{args.slug}_openfigi.json").get("results", {})
@@ -64,11 +67,15 @@ def main() -> int:
             "ibkr_ccy": v.get("ibkr_ccy"),
             "ccy_ok": v.get("ccy_ok", True),
             "ticker": r.get("ticker"),
+            "ibkr_sym": v.get("ibkr_symbol") or r.get("ibkr_symbol"),
+            "tmatch": v.get("ticker_match"),
+            "lmatch": v.get("listing_match"),
             "exch": r.get("exchange"),
             "conid": r.get("conid"),
             "listing": r.get("ibkr_listing") or v.get("ibkr_listing"),
             "isin": r.get("isin"),
             "adv": lq.get("adv_eur"),
+            "country": country_by_cid.get(cid),
         })
 
     payload = {
@@ -106,7 +113,7 @@ _HTML = r"""<!doctype html>
  .pill{padding:1px 7px;border-radius:9px;font-size:11px;font-weight:600;color:#fff}
  .high{background:var(--g)} .medium{background:var(--y)} .low{background:var(--r)} .miss{background:#666}
  .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
- .bad{color:var(--r);font-weight:600} .mono{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+ .bad{color:var(--r);font-weight:600} .ok{color:var(--g);font-weight:600} .mono{font-family:ui-monospace,Menlo,monospace;font-size:11px}
  .act button{padding:2px 7px;margin-right:3px} .on-a{background:var(--g);color:#fff;border-color:var(--g)}
  .on-r{background:var(--r);color:#fff;border-color:var(--r)}
  a{color:#1a56db;text-decoration:none} a:hover{text-decoration:underline}
@@ -192,18 +199,25 @@ function render(){
    const ccyHtml = r.ccy_ok? r.ccy : `<span class="bad">${r.ccy}≠${r.ibkr_ccy||'?'}</span>`;
    const g=`https://www.google.com/search?q=${encodeURIComponent((r.isin||'')+' '+(r.ibkr||r.bb||''))}`;
    const ib=`https://www.interactivebrokers.ie/portal/?loginType=1&action=ACCT_MGMT_MAIN&clt=0#/quote/${r.conid}`;
+   const gfsym = r.country==='United States' ? r.ticker : `${r.exch}:${r.ticker}`;
+   const gf=`https://www.gurufocus.com/stock/${encodeURIComponent(gfsym)}/summary`;
+   const tkHtml = r.ibkr_sym ? (r.tmatch
+       ? ' <span class="ok" title="IBKR symbol matches">✓</span>'
+       : ` <span class="bad" title="IBKR symbol differs">≠${r.ibkr_sym}</span>`) : '';
+   const lmHtml = r.lmatch===false ? ' <span class="bad" title="not on expected venue">≠</span>'
+       : (r.lmatch===true ? ' <span class="ok" title="on expected venue">✓</span>' : '');
    return `<tr class="${tradeable(r)?'':'dim'} ${d}">
     <td title="priority ${pr.toFixed(2)}" style="color:${r.conf==='low'?'var(--r)':r.conf==='medium'?'var(--y)':'#bbb'}">${flag}</td>
     <td class="act"><button data-c="${r.cid}" data-d="approve" class="${d==='approve'?'on-a':''}">✓</button>
         <button data-c="${r.cid}" data-d="reject" class="${d==='reject'?'on-r':''}">✗</button></td>
-    <td class="name">${r.bb||''}<div class="sub">${r.ticker} · ${r.exch}</div></td>
+    <td class="name">${r.bb||''} <a href="${gf}" target="_blank" rel="noopener" title="GuruFocus ${gfsym}">GF⇗</a><div class="sub">${r.ticker} · ${r.exch}</div></td>
     <td class="name">${r.ibkr||'<span class=bad>(no IBKR name)</span>'} <a href="${g}" target="_blank" title="verify">⇗</a></td>
     <td>${r.figi?`<span class="fv fv-${r.figi}" title="OpenFIGI name: ${(r.figi_name||'').replace(/"/g,'&quot;')}">${FVTXT[r.figi]||r.figi}</span>`:'<span class=sub>—</span>'}</td>
     <td class="num"><span class="pill ${r.conf}">${r.score==null?'?':r.score.toFixed(2)}</span></td>
     <td>${r.conf}</td>
     <td class="num">${r.adv==null?'<span class=sub>n/a</span>':fmt(r.adv)}</td>
     <td>${r.method||''}</td><td class="num">${ccyHtml}</td>
-    <td>${r.ticker}</td><td>${r.exch}</td><td>${r.listing||''}</td>
+    <td>${r.ticker}${tkHtml}</td><td>${r.exch}</td><td>${r.listing||''}${lmHtml}</td>
     <td class="num mono"><a href="${ib}" target="_blank" rel="noopener" title="IBKR contract info">${r.conid}</a></td>
     <td class="mono">${r.isin||''}</td></tr>`;
  }).join('');

@@ -48,8 +48,19 @@ def normalize(name: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _ordered_tokens(name: str) -> list[str]:
+    return [t for t in normalize(name).split() if t and t not in _NOISE]
+
+
 def _tokens(name: str) -> set[str]:
-    return {t for t in normalize(name).split() if t and t not in _NOISE}
+    return set(_ordered_tokens(name))
+
+
+def _compact(name: str) -> str:
+    """Identity tokens concatenated, order preserved — so spacing / punctuation /
+    word-segmentation differences vanish. "MC DONALD'S-CORP" and "McDonald's Corp"
+    both compact to "MCDONALDS" (CORP is noise)."""
+    return "".join(_ordered_tokens(name))
 
 
 def _overlap(ta: set[str], tb: set[str]) -> int:
@@ -80,6 +91,15 @@ def similarity(a: str, b: str) -> float:
     na, nb = normalize(a), normalize(b)
     if not na or not nb:
         return 0.0
+    # Spacing/punctuation/segmentation-only difference: the de-spaced identity
+    # strings are identical (or one is a prefix of the other = subset name).
+    # "MC DONALD'S-CORP" vs "McDonald's Corp" -> both "MCDONALDS".
+    ca, cb = _compact(a), _compact(b)
+    if ca and cb:
+        if ca == cb:
+            return 1.0
+        if len(ca) >= 6 and len(cb) >= 6 and (ca.startswith(cb) or cb.startswith(ca)):
+            return 0.95
     seq = SequenceMatcher(None, na, nb).ratio()
     ta, tb = _tokens(a), _tokens(b)
     if not ta or not tb:
