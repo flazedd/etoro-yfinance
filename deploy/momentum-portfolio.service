@@ -1,0 +1,20 @@
+[Unit]
+Description=Snapshot the IBKR portfolio for the read-only web /portfolio page
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=trader
+Group=trader
+WorkingDirectory=/opt/momentum-stack
+Environment=MOMENTUM_DATA_DIR=/var/lib/momentum/data
+# trader.env holds the secrets: IBIND_OAUTH1A_*, IBKR_ACCOUNT_ID, SIZING_CURRENCY, etc.
+EnvironmentFile=/etc/momentum/trader.env
+ExecStart=/opt/momentum-stack/.venv/bin/momentum-portfolio-snapshot
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/momentum

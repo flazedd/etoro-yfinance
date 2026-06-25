@@ -9,26 +9,34 @@ with the target.
 
 ## Web app (momentum-stack)
 
-A FastAPI + HTMX UI for the RPi4 with three pages, split by credential boundary
+A FastAPI + HTMX UI for the RPi4 with five pages, split by credential boundary
 (the web holds **no** creds; the worker is the only thing that trades):
 
 - **`/universe`** — the LEONTEQ universe → IBKR mapping (confidence, ticker/exchange
   match, currency, ADV, OpenFIGI verdict, GuruFocus links), from the pipeline artifacts.
+- **`/portfolio`** — live IBKR positions for the account (quantity, price, market value,
+  weight, P&L), read from a snapshot file written by the credentialed
+  `momentum-portfolio-snapshot` job. The web never calls IBKR itself.
 - **`/execution`** — request the monthly rebalance: *Preview (dry-run)* or *Execute LIVE*
   (gated by a typed confirmation). The web inserts a job row; the worker runs it through
   every gate and records the plan, fills, reference prices and slippage.
 - **`/performance`** — bbterminal strategy performance (MTD / since-inception / daily
   returns + holdings), snapshotted by the publisher and committed to a GitHub Pages repo.
+- **`/diagnostics`** — RPi4 health: disk, RAM, CPU temperature and load, uptime, SQLite
+  size, and snapshot freshness, each with an ok/warn/crit verdict. No creds, no broker
+  calls — it reads only the local machine (JSON at `/api/diagnostics`).
 
 ```bash
 uv sync --extra web
-uv run momentum-web                 # read-only UI        (no creds)        :8800
+uv run momentum-web                 # read-only UI            (no creds)    :8800
 uv run momentum-trade-worker        # claims + executes jobs  (creds)
-uv run momentum-publish --push      # bbterminal perf -> site repo  (creds)
+uv run momentum-portfolio-snapshot  # IBKR positions -> data/ snapshot  (creds)
+uv run momentum-publish --push      # bbterminal perf -> site repo      (creds)
 ```
 
-Pieces: `web/server.py` (UI), `web/worker.py` (trader), `db.py` (SQLite/SQLModel
-queue + run log), `publisher.py` (performance → git). Deployment (systemd units +
+Pieces: `web/server.py` (UI), `web/diagnostics.py` (system health), `web/worker.py`
+(trader), `db.py` (SQLite/SQLModel queue + run log), `portfolio_snapshot.py` (IBKR
+positions → JSON), `publisher.py` (performance → git). Deployment (systemd units +
 Caddy + the credential split) is in [`deploy/README.md`](deploy/README.md).
 
 ## Architecture

@@ -10,6 +10,7 @@ confirmation phrase, so a stray click can't fire real orders.
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from ibkr_portfolio_connect.db import (
+    default_db_path,
     get_run,
     get_session,
     init_db,
@@ -30,6 +32,7 @@ from ibkr_portfolio_connect.db import (
 )
 
 from . import data as datamod
+from . import diagnostics as diag
 
 _HERE = Path(__file__).parent
 CONFIRM_PHRASE = "EXECUTE"
@@ -107,16 +110,49 @@ def create_app() -> FastAPI:
         snap = datamod.load_performance()
         return page(request, "performance.html", {"active": "performance", "snap": snap})
 
+    # ── portfolio (live IBKR holdings) ───────────────────────────────────────
+    @app.get("/portfolio", response_class=HTMLResponse)
+    def portfolio(request: Request) -> HTMLResponse:
+        snap = datamod.load_portfolio()
+        age = datamod.snapshot_age_seconds("portfolio_snapshot.json", time.time())
+        return page(request, "portfolio.html",
+                    {"active": "portfolio", "snap": snap, "age": age})
+
+    # ── diagnostics (RPi4 system health) ─────────────────────────────────────
+    @app.get("/diagnostics", response_class=HTMLResponse)
+    def diagnostics(request: Request) -> HTMLResponse:
+        return page(request, "diagnostics.html", {"active": "diagnostics", "d": _diag()})
+
     # ── api / health ─────────────────────────────────────────────────────────
     @app.get("/api/performance")
     def api_performance() -> JSONResponse:
         return JSONResponse(datamod.load_performance())
+
+    @app.get("/api/portfolio")
+    def api_portfolio() -> JSONResponse:
+        return JSONResponse(datamod.load_portfolio())
+
+    @app.get("/api/diagnostics")
+    def api_diagnostics() -> JSONResponse:
+        return JSONResponse(_diag())
 
     @app.get("/healthz")
     def healthz() -> dict[str, bool]:
         return {"ok": True}
 
     return app
+
+
+def _diag() -> dict[str, Any]:
+    now = time.time()
+    return diag.collect(
+        now,
+        db_path=str(default_db_path()),
+        snapshots={
+            "portfolio": datamod.snapshot_age_seconds("portfolio_snapshot.json", now),
+            "performance": datamod.snapshot_age_seconds("performance_snapshot.json", now),
+        },
+    )
 
 
 def _filter_rows(rows: list[dict[str, Any]], *, q: str, conf: str, only_issues: bool) -> list[dict[str, Any]]:

@@ -14,7 +14,7 @@
       <div class="mx-auto max-w-7xl px-4 flex items-center gap-6 h-14">
         <span class="font-semibold tracking-tight">momentum<span class="text-emerald-400">·</span>stack</span>
         <nav class="flex gap-1 text-sm">
-          {% set tabs = [('universe','Universe → IBKR'),('execution','Execution'),('performance','Performance')] %}
+          {% set tabs = [('universe','Universe → IBKR'),('portfolio','Portfolio'),('execution','Execution'),('performance','Performance'),('diagnostics','Diagnostics')] %}
           {% for key,label in tabs %}
           <a href="/{{ key }}" class="px-3 py-1.5 rounded-md {{ 'bg-slate-700 text-white' if active==key else 'text-slate-300 hover:bg-slate-800' }}">{{ label }}</a>
           {% endfor %}

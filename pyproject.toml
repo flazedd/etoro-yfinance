@@ -40,6 +40,7 @@ ibkr-dashboard = "ibkr_portfolio_connect.dashboard_server:main"
 momentum-web = "ibkr_portfolio_connect.web.server:main"
 momentum-trade-worker = "ibkr_portfolio_connect.web.worker:main"
 momentum-publish = "ibkr_portfolio_connect.publisher:main"
+momentum-portfolio-snapshot = "ibkr_portfolio_connect.portfolio_snapshot:main"
 
 [build-system]
 requires = ["uv_build>=0.9.2,<0.10.0"]

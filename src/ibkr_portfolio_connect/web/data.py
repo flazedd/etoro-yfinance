@@ -101,3 +101,21 @@ def load_performance() -> dict[str, Any]:
     Empty dict if the publisher hasn't run yet — the page renders a hint.
     """
     return _load(data_dir() / "performance_snapshot.json")
+
+
+def load_portfolio() -> dict[str, Any]:
+    """The live IBKR portfolio snapshot written by the credentialed snapshotter
+    (`momentum-portfolio-snapshot`). The web never calls IBKR; it only reads this
+    file. Empty dict if the snapshotter hasn't run yet — the page renders a hint.
+    """
+    return _load(data_dir() / "portfolio_snapshot.json")
+
+
+def snapshot_age_seconds(name: str, now: float) -> float | None:
+    """Seconds since the named snapshot file in the data dir was last written,
+    or None if it doesn't exist. `now` is passed in (caller owns the clock)."""
+    path = data_dir() / name
+    try:
+        return max(0.0, now - path.stat().st_mtime)
+    except OSError:
+        return None

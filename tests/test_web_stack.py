@@ -186,3 +186,77 @@ def test_web_endpoints_and_live_gate(tmp_db: Path, tmp_path: Path,
                 assert {j.dry_run for j in jobs} == {True, False}
 
     asyncio.run(drive())
+
+
+# ── portfolio snapshot + diagnostics ──────────────────────────────────────────
+
+
+class _FakePos:
+    def __init__(self, conid: int, sym: str, qty: str, mv: str, ccy: str, px: str) -> None:
+        self.conid, self.symbol, self.asset_class = conid, sym, "STK"
+        self.quantity, self.market_value = Decimal(qty), Decimal(mv)
+        self.currency, self.mkt_price = ccy, Decimal(px)
+
+
+class _FakeIBKR:
+    def portfolio_summary(self, account_id: str) -> dict:
+        return {"netliquidation": {"amount": 100000, "currency": "EUR"},
+                "totalcashvalue": {"amount": 5000, "currency": "EUR"}}
+
+    def positions(self, account_id: str) -> list:
+        # Returned out of value order to prove the snapshot sorts by |market value|.
+        return [_FakePos(2, "SAP", "-5", "-500", "EUR", "100"),
+                _FakePos(1, "AAPL", "10", "2500", "USD", "250")]
+
+
+def test_portfolio_snapshot_builder(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from ibkr_portfolio_connect import portfolio_snapshot as ps
+
+    snap = ps.build_snapshot(_FakeIBKR(), "U123", base_currency="EUR")
+    assert snap["nav"] == {"amount": 100000.0, "currency": "EUR"}
+    assert snap["n_positions"] == 2
+    # Sorted by absolute market value, weight computed off NAV.
+    assert [p["symbol"] for p in snap["positions"]] == ["AAPL", "SAP"]
+    assert snap["positions"][0]["weight_pct"] == pytest.approx(2.5)
+
+    monkeypatch.setenv("MOMENTUM_DATA_DIR", str(tmp_path))
+    out = ps.write_local(snap, tmp_path)
+    assert out.exists()
+    assert webdata.load_portfolio()["account_id"] == "U123"
+
+
+def test_diagnostics_collect_and_status() -> None:
+    from ibkr_portfolio_connect.web import diagnostics as diag
+
+    # Pure threshold logic.
+    assert diag._pct_status(50, 80, 92) == diag.OK
+    assert diag._pct_status(85, 80, 92) == diag.WARN
+    assert diag._pct_status(95, 80, 92) == diag.CRIT
+    assert diag.overall([{"status": diag.OK}, {"status": diag.CRIT}, {"status": diag.WARN}]) == diag.CRIT
+
+    d = diag.collect(1_000_000.0, db_path=None,
+                     snapshots={"portfolio": 120.0, "performance": None})
+    assert d["overall"] in (diag.OK, diag.WARN, diag.CRIT)
+    assert d["disk"]["available"] is True  # shutil.disk_usage works everywhere
+    assert d["snapshots"]["portfolio"] == 120.0
+
+
+def test_portfolio_and_diagnostics_pages_render(tmp_db: Path, tmp_path: Path,
+                                                monkeypatch: pytest.MonkeyPatch) -> None:
+    import asyncio
+
+    import httpx
+
+    monkeypatch.setenv("MOMENTUM_DATA_DIR", str(tmp_path / "empty"))
+    from ibkr_portfolio_connect.web import server
+    app = server.create_app()
+
+    async def drive() -> None:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://t") as ac:
+            # Both pages render even with no snapshot present (hint shown).
+            for path in ("/portfolio", "/diagnostics", "/api/portfolio", "/api/diagnostics"):
+                assert (await ac.get(path)).status_code == 200
+            assert "System diagnostics" in (await ac.get("/diagnostics")).text
+
+    asyncio.run(drive())

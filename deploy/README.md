@@ -1,15 +1,38 @@
 # Deploying the momentum stack on a Raspberry Pi 4
 
-Three long-lived pieces + two timers, split by credential boundary:
+Two long-lived services + three timers, split by credential boundary:
 
 | Unit | User | Holds creds? | Role |
 |------|------|--------------|------|
-| `momentum-web.service` | `momentum` | **no** | read-only FastAPI UI (universe / execution / performance) |
+| `momentum-web.service` | `momentum` | **no** | read-only FastAPI UI (universe / portfolio / execution / performance / diagnostics) |
 | `momentum-trade-worker.service` | `trader` | **yes** | claims job requests, runs the rebalance, writes results |
 | `momentum-rebalance.timer` → `.service` | `trader` | yes | queues the monthly run (worker executes it) |
+| `momentum-portfolio.timer` → `.service` | `trader` | yes | snapshots live IBKR positions → `data/portfolio_snapshot.json` (the `/portfolio` page) |
 | `momentum-publish.timer` → `.service` | `trader` | yes | snapshots bbterminal performance → commits to the Pages repo |
 
-The web can only *request* a run (a row in SQLite). Only the worker trades.
+The web can only *request* a run (a row in SQLite). Only the worker trades. The
+`/diagnostics` page needs no extra wiring — it reads the local Pi (disk/RAM/temp).
+
+## TL;DR — bring the website up
+
+```bash
+# 1. code + deps
+sudo install -d -o trader -g trader /var/lib/momentum /var/lib/momentum/data
+sudo git clone <this-repo> /opt/momentum-stack && cd /opt/momentum-stack
+uv sync --extra web
+sudo -u trader cp data/leonteq_*.json /var/lib/momentum/data/   # seed the mapping page
+
+# 2. creds (see §2) — write /etc/momentum/trader.env and an empty web.env
+
+# 3. services
+sudo cp deploy/*.service deploy/*.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now momentum-web.service momentum-trade-worker.service
+sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-publish.timer
+sudo -u trader /opt/momentum-stack/.venv/bin/momentum-portfolio-snapshot   # populate /portfolio now
+```
+
+Then open `http://<pi-host>:8800` (over Tailscale — see §5).
 
 ## 1. Install
 
@@ -63,18 +86,42 @@ Pages rebuilds. (Tell me the repo + the JSON path your site wants and I'll match
 sudo cp deploy/*.service deploy/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now momentum-web.service momentum-trade-worker.service
-sudo systemctl enable --now momentum-rebalance.timer momentum-publish.timer
+sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-publish.timer
 journalctl -u momentum-trade-worker -f
 ```
 
 Align `momentum-rebalance.timer`'s `OnCalendar` with the strategy's
-`next_rebalance_at` (shown on the Performance page).
+`next_rebalance_at` (shown on the Performance page). `momentum-portfolio.timer`
+defaults to every 15 min on weekday daytimes — edit its `OnCalendar` for your
+market/timezone, or run it on demand: `sudo systemctl start momentum-portfolio`.
+
+Check the timers and force a refresh:
+
+```bash
+systemctl list-timers 'momentum-*'                 # next/last fire times
+sudo systemctl start momentum-portfolio.service    # refresh /portfolio now
+journalctl -u momentum-portfolio -n 20             # see what it fetched
+```
 
 ## 5. Access (don't expose a brokerage box)
 
 Install Caddy, use `deploy/Caddyfile`. Prefer reaching the Pi over **Tailscale**
 on its tailnet name rather than opening a port. If you must expose it publicly,
 add auth in the Caddyfile first.
+
+## Operating it day-to-day
+
+```bash
+systemctl status momentum-web momentum-trade-worker     # are the services up?
+sudo systemctl restart momentum-web                     # after a code pull + uv sync
+journalctl -u momentum-web -f                            # tail the UI logs
+git -C /opt/momentum-stack pull && uv sync --extra web && sudo systemctl restart momentum-web momentum-trade-worker
+```
+
+The **Diagnostics** page (`/diagnostics`) is the fastest health check — it shows
+disk/RAM/CPU-temp/load with ok·warn·crit colours plus how stale each snapshot is.
+If `/portfolio` says "no snapshot", run `sudo systemctl start momentum-portfolio`
+and check `journalctl -u momentum-portfolio` for an IBKR auth/account error.
 
 ## Safety notes
 
