@@ -34,6 +34,17 @@ uv run momentum-portfolio-snapshot  # IBKR positions -> data/ snapshot  (creds)
 uv run momentum-publish --push      # bbterminal perf -> site repo      (creds)
 ```
 
+**To view the website locally**, you only need the read-only UI:
+
+```bash
+uv sync --extra web     # first time only — installs web deps into .venv
+uv run momentum-web     # serves the site; no credentials, never trades
+```
+
+Then open **http://127.0.0.1:8800**. It reads the JSON artifacts already in
+`data/`, so the pages render without the worker or any broker access. Override
+the bind with `MOMENTUM_WEB_HOST` / `MOMENTUM_WEB_PORT` if `:8800` is taken.
+
 Pieces: `web/server.py` (UI), `web/diagnostics.py` (system health), `web/worker.py`
 (trader), `db.py` (SQLite/SQLModel queue + run log), `portfolio_snapshot.py` (IBKR
 positions → JSON), `publisher.py` (performance → git). Deployment (systemd units +

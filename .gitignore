@@ -196,3 +196,4 @@ data/dashboard.html
 data/momentum.db
 data/momentum.db-*
 data/performance_snapshot.json
+.build/
