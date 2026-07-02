@@ -18,6 +18,14 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from . import name_match
+
+# IBKR listing-exchange codes that count as a US (SMART-routable, liquid) venue.
+# Used to pick a preferred listing when an ETF is available on several.
+_US_LISTINGS = {"ARCA", "NASDAQ", "NYSE", "BATS", "AMEX", "PINK", "IEX"}
+# Name-similarity floor for a confident ticker-search ETF match (fallback path).
+_ETF_NAME_OK = 0.55
+
 # bbterminal exchange code -> acceptable IBKR listing-exchange codes (the
 # `description` field of a secdef/search row) for the STK contract we want.
 # Derived empirically from resolving strategy #14's 24 holdings against IBKR.
@@ -286,3 +294,86 @@ def resolve_contract(
             # ISIN unknown to IBKR (e.g. very new listing) — fall back to ticker.
             pass
     return resolve_by_ticker(client, ticker, bbterminal_exchange, currency)
+
+
+# ─── ETF tradability ─────────────────────────────────────────────────────────
+# ETFs (bbterminal benchmarks with an ISIN) carry NO exchange/country, so the
+# exchange-matching path above doesn't apply. We only want to know: does IBKR
+# list this ISIN anywhere, and where? ISIN search is collision-free (an ISIN
+# names exactly one instrument), so a hit is a real, tradeable listing of that
+# fund; ticker search is a lower-confidence fallback guarded by a name match.
+
+
+class ETFTradability(BaseModel):
+    isin: str
+    tradable: bool
+    conid: int | None = None
+    ibkr_symbol: str | None = None
+    ibkr_name: str | None = None
+    ibkr_listings: list[str] = []  # every venue IBKR lists this instrument on
+    preferred_listing: str | None = None  # a US venue if present, else the first
+    method: str = "none"  # "isin" (preferred) | "ticker" (fallback) | "none"
+    name_score: float | None = None  # only set on the ticker fallback
+
+
+def _ibkr_header_name(row: dict[str, Any]) -> str:
+    """`companyHeader` is 'INVESCO S&P 500 MOMENTUM ETF - ARCA'; drop the venue."""
+    header = str(row.get("companyHeader") or row.get("companyName") or "")
+    return header.rsplit(" - ", 1)[0].strip() if " - " in header else header
+
+
+def resolve_etf_tradability(
+    client: Any, isin: str, *, ticker: str = "", name: str = ""
+) -> ETFTradability:
+    """Is this ETF tradeable on IBKR? ISIN-first (collision-free), with a
+    name-guarded ticker-search fallback for the rare ISIN IBKR doesn't index.
+
+    `client` must expose `secdef_search_raw(query) -> list[dict]`. Never raises
+    for a not-found instrument — returns `tradable=False, method="none"`.
+    """
+    # ISIN-first: every parseable row is a venue for the SAME instrument.
+    listings: list[tuple[int, str, str]] = []
+    if isin:
+        for row in client.secdef_search_raw(isin):
+            if not isinstance(row, dict):
+                continue
+            parsed = _parse_isin_row(row)
+            if parsed is not None:
+                listings.append(parsed)
+    if listings:
+        venues = sorted({venue for _, _, venue in listings})
+        # Prefer a US listing (SMART-routable, liquid) when the fund lists on
+        # several; otherwise take the first venue IBKR returned.
+        conid, symbol, venue = next(
+            (lst for lst in listings if lst[2] in _US_LISTINGS), listings[0]
+        )
+        return ETFTradability(
+            isin=isin, tradable=True, conid=conid, ibkr_symbol=symbol,
+            ibkr_listings=venues, preferred_listing=venue, method="isin",
+        )
+
+    # Fallback: symbol search + name match (lower confidence — a bare ticker can
+    # match a different fund, so only trust it when the name lines up).
+    if ticker:
+        best: tuple[float, bool, dict[str, Any]] | None = None
+        for row in client.secdef_search_raw(ticker):
+            if not isinstance(row, dict) or row.get("symbol") is None:
+                continue
+            if not _row_has_stk(row):
+                continue
+            listing = str(row.get("description") or "").upper()
+            score = name_match.similarity(name, _ibkr_header_name(row)) if name else 0.0
+            key = (score, listing in _US_LISTINGS, row)
+            if best is None or key[:2] > best[:2]:
+                best = key
+        if best is not None and best[0] >= _ETF_NAME_OK:
+            score, _, row = best
+            listing = str(row.get("description") or "").upper()
+            return ETFTradability(
+                isin=isin, tradable=True, conid=int(row["conid"]),
+                ibkr_symbol=str(row.get("symbol")), ibkr_name=_ibkr_header_name(row),
+                ibkr_listings=[listing] if listing else [], preferred_listing=listing or None,
+                method="ticker", name_score=round(score, 3),
+            )
+
+    return ETFTradability(isin=isin, tradable=False, method="none")

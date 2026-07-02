@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Mapping → IBKR{% endblock %}
+{# use the full window width — this table has a lot of columns #}
+{% block main_class %}mx-auto max-w-none{% endblock %}
+{% block content %}
+<div class="flex items-end justify-between mb-4">
+  <div>
+    <h1 class="text-xl font-semibold">Instrument mapping → IBKR</h1>
+    <p class="text-sm text-slate-500">Every LEONTEQ universe member + every ETF from bbterminal, each linked to a tradeable
+      IBKR contract, resolved ISIN-first. The web never calls IBKR — the <b>Refresh</b> button queues a job the credentialed worker runs.</p>
+  </div>
+  <div class="text-right shrink-0 ml-4">
+    {% if snap.generated_at %}
+      <div class="text-xs {{ 'text-amber-600' if age and age > 86400 else 'text-slate-400' }}">
+        {{ snap.label }} · {% if age is not none %}{{ (age/3600)|round|int }}h ago{% else %}{{ snap.generated_at }}{% endif %}
+      </div>
+    {% endif %}
+    <form method="post" action="/mapping/refresh" class="mt-2">
+      <button {{ 'disabled' if refresh.pending }}
+        class="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50">
+        <span class="{{ 'animate-spin' if refresh.pending }}">↻</span>{{ 'Refreshing…' if refresh.pending else 'Refresh from IBKR' }}
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if queued or refresh.pending %}
+  <div class="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
+    Refresh queued — the worker is resolving against IBKR (throttled; a few minutes for a cold run, seconds once cached).
+    This page reloads itself while it runs. <span class="text-blue-500">Needs the trade worker running (it is, under <code>momentum-dev</code>).</span>
+  </div>
+  <script>setTimeout(function(){ location.reload(); }, 8000);</script>
+{% elif refresh.last_status == 'error' %}
+  <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
+    Last refresh failed: {{ refresh.last_error or 'see the worker logs' }}
+  </div>
+{% elif refresh.last_status == 'done' and refresh.last_finished %}
+  <div class="mb-3 text-xs text-emerald-600">Last refresh completed {{ refresh.last_finished }}.</div>
+{% endif %}
+
+{% if not snap %}
+  <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-4 text-sm">
+    No mapping snapshot yet. Run <code>momentum-mapping-snapshot</code> (the credentialed job) to fetch the universe + ETFs
+    from bbterminal, resolve them to IBKR, and write <code>data/mapping_snapshot.json</code>.
+  </div>
+{% else %}
+{% set c = snap.counts %}
+<div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-5">
+  {% set cards = [
+    ('Instruments', c.total, 'text-slate-900'),
+    ('Equities', c.equities, 'text-slate-900'),
+    ('ETFs', c.etfs, 'text-slate-900'),
+    ('Tradable on IBKR', c.tradable, 'text-emerald-600'),
+    ('Unresolved', c.unresolved, 'text-rose-600'),
+    ('Retryable', c.retryable, 'text-amber-600'),
+  ] %}
+  {% for label,val,color in cards %}
+  <div class="bg-white rounded-lg border border-slate-200 px-3 py-2">
+    <div class="text-xs text-slate-500">{{ label }}</div>
+    <div class="text-lg font-semibold tabular {{ color }}">{{ val }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if c.retryable %}
+  <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md px-4 py-2 mb-3 text-sm">
+    {{ c.retryable }} rows hit a transient IBKR error (rate-limit / session), not a real no-listing —
+    just re-run <code>momentum-mapping-snapshot</code> and the cache fills them in.
+  </div>
+{% endif %}
+
+<form class="flex flex-wrap gap-3 items-center mb-3"
+      hx-get="/mapping/rows" hx-target="#rows-wrap" hx-trigger="input changed delay:200ms, change"
+      hx-push-url="false">
+  <input name="q" value="{{ q }}" placeholder="search name / ticker / ISIN / conid / IBKR symbol"
+         class="border border-slate-300 rounded-md px-3 py-1.5 text-sm w-80">
+  <select name="kind" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
+    <option value="" {{ 'selected' if not kind }}>all instruments</option>
+    <option value="equity" {{ 'selected' if kind=='equity' }}>equities</option>
+    <option value="etf" {{ 'selected' if kind=='etf' }}>ETFs</option>
+  </select>
+  <select name="status" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
+    <option value="" {{ 'selected' if not status }}>any status</option>
+    <option value="tradable" {{ 'selected' if status=='tradable' }}>tradable on IBKR</option>
+    <option value="unresolved" {{ 'selected' if status=='unresolved' }}>unresolved</option>
+  </select>
+</form>
+
+<div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh]">
+  {% include "_mapping_rows.html" %}
+</div>
+<p class="text-xs text-slate-400 mt-3">Rows are read from a snapshot file, not live. <code>conid</code> is the tradeable IBKR link.
+  "Via" shows how it matched: <code>isin</code> (collision-free) · <code>ticker</code> · <code>override</code> (reviewed pin) ·
+  <code>none</code>/<code>error</code> when unresolved. Click any column to sort.</p>
+{% endif %}
+{% endblock %}

@@ -1,13 +1,14 @@
 # Deploying the momentum stack on a Raspberry Pi 4
 
-Two long-lived services + three timers, split by credential boundary:
+Two long-lived services + four timers, split by credential boundary:
 
 | Unit | User | Holds creds? | Role |
 |------|------|--------------|------|
-| `momentum-web.service` | `momentum` | **no** | read-only FastAPI UI (universe / portfolio / execution / performance / diagnostics) |
+| `momentum-web.service` | `momentum` | **no** | read-only FastAPI UI (home / mapping / portfolio / execution / performance / diagnostics) |
 | `momentum-trade-worker.service` | `trader` | **yes** | claims job requests, runs the rebalance, writes results |
 | `momentum-rebalance.timer` → `.service` | `trader` | yes | queues the monthly run (worker executes it) |
 | `momentum-portfolio.timer` → `.service` | `trader` | yes | snapshots live IBKR positions → `data/portfolio_snapshot.json` (the `/portfolio` page) |
+| `momentum-mapping.timer` → `.service` | `trader` | yes | resolves the LEONTEQ universe + ETFs to IBKR conids → `data/mapping_snapshot.json` (the `/mapping` page) |
 | `momentum-publish.timer` → `.service` | `trader` | yes | snapshots bbterminal performance → commits to the Pages repo |
 
 The web can only *request* a run (a row in SQLite). Only the worker trades. The
@@ -28,8 +29,9 @@ sudo -u trader cp data/leonteq_*.json /var/lib/momentum/data/   # seed the mappi
 sudo cp deploy/*.service deploy/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now momentum-web.service momentum-trade-worker.service
-sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-publish.timer
+sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-mapping.timer momentum-publish.timer
 sudo -u trader /opt/momentum-stack/.venv/bin/momentum-portfolio-snapshot   # populate /portfolio now
+sudo -u trader /opt/momentum-stack/.venv/bin/momentum-mapping-snapshot     # populate /mapping now (resolves ~1500 names; takes a few min)
 ```
 
 Then open `http://<pi-host>:8800` (over Tailscale — see §5).
@@ -86,7 +88,7 @@ Pages rebuilds. (Tell me the repo + the JSON path your site wants and I'll match
 sudo cp deploy/*.service deploy/*.timer /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now momentum-web.service momentum-trade-worker.service
-sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-publish.timer
+sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-mapping.timer momentum-publish.timer
 journalctl -u momentum-trade-worker -f
 ```
 

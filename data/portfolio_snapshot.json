@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-07-02T17:47:12+00:00",
+  "account_id": "U25767562",
+  "base_currency": "EUR",
+  "nav": {
+    "amount": 51.0,
+    "currency": "EUR"
+  },
+  "total_market_value": 0,
+  "n_positions": 0,
+  "summary": {
+    "netliquidation": {
+      "amount": 51.0,
+      "currency": "EUR"
+    },
+    "totalcashvalue": {
+      "amount": 51.0,
+      "currency": "EUR"
+    },
+    "grosspositionvalue": {
+      "amount": 0.0,
+      "currency": "EUR"
+    },
+    "availablefunds": {
+      "amount": 51.0,
+      "currency": "EUR"
+    },
+    "buyingpower": {
+      "amount": 51.0,
+      "currency": "EUR"
+    }
+  },
+  "positions": []
+}

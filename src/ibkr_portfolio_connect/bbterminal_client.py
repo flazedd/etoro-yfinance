@@ -167,6 +167,16 @@ class BBTerminalClient:
         """Composite go/no-go. Gate trades on is_healthy_strict."""
         return cast(dict[str, Any], self._request("GET", "/api/admin/health"))
 
+    def etfs(self) -> list[dict[str, Any]]:
+        """Every benchmark that carries a tradeable ISIN — an ETF — enriched
+        universe-member-style. Each entry carries benchmark_id, ticker, name,
+        isin, currency, sector, latest_close_local, latest_close_eur,
+        latest_close_date, fx_rate_per_eur (no exchange/country/industry — those
+        don't apply to a fund). Index-only benchmarks (no ISIN) are excluded.
+        Sorted by ticker. Use the ISIN to check IBKR tradability."""
+        resp = self._request("GET", "/api/admin/etfs")
+        return cast(list[dict[str, Any]], cast(dict[str, Any], resp)["etfs"])
+
     def universes(self, include_all: bool = False) -> list[dict[str, Any]]:
         """List universes — id, label, kind, frozen_at, month range.
 

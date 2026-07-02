@@ -14,9 +14,13 @@
 // content globs resolve relative to CWD; run the rebuild from the repo root.
 module.exports = {
   content: ["src/ibkr_portfolio_connect/web/templates/**/*.html"],
-  // diagnostics.html builds class names at render time (bg-{{c}}-100 etc.) that
-  // the static scanner can't see; the JIT CDN used to generate these in-browser.
-  safelist: [{ pattern: /(bg|text)-(emerald|amber|rose|slate)-(100|500|700)/ }],
+  // diagnostics.html + home.html build class names at render time (bg-{{c}}-100,
+  // bg-{{accent}}-50 etc.) that the static scanner can't see.
+  safelist: [
+    { pattern: /(bg|text)-(emerald|amber|rose|slate)-(100|500|700)/ },
+    // home.html accent icon-badges + hover arrow (one per section card).
+    { pattern: /(bg|text)-(emerald|blue|amber|violet|rose)-(50|500|600)/, variants: ["group-hover"] },
+  ],
   theme: { extend: {} },
   plugins: [],
 };

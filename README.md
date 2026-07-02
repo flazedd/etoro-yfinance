@@ -9,11 +9,17 @@ with the target.
 
 ## Web app (momentum-stack)
 
-A FastAPI + HTMX UI for the RPi4 with five pages, split by credential boundary
-(the web holds **no** creds; the worker is the only thing that trades):
+A FastAPI + HTMX UI for the RPi4, split by credential boundary (the web holds
+**no** creds; the worker is the only thing that trades). A nav bar on every page
+(and a `/` landing page with a live-status card per section) links them all:
 
-- **`/universe`** — the LEONTEQ universe → IBKR mapping (confidence, ticker/exchange
-  match, currency, ADV, OpenFIGI verdict, GuruFocus links), from the pipeline artifacts.
+- **`/`** — home: a card per section with one live stat each (mapping coverage,
+  portfolio NAV, last run, performance, system health) and the shared nav bar.
+- **`/mapping`** — the complete instrument mapping: every LEONTEQ universe member
+  (~1500) **and** every ETF from bbterminal, each linked to its tradeable IBKR conid
+  (ISIN-first, collision-free), with the venue, match method, name-match confidence,
+  ADV, and status. One sortable table (click any column); filter by kind + status.
+  Read from a snapshot written by the credentialed `momentum-mapping-snapshot` job.
 - **`/portfolio`** — live IBKR positions for the account (quantity, price, market value,
   weight, P&L), read from a snapshot file written by the credentialed
   `momentum-portfolio-snapshot` job. The web never calls IBKR itself.
@@ -26,29 +32,68 @@ A FastAPI + HTMX UI for the RPi4 with five pages, split by credential boundary
   size, and snapshot freshness, each with an ok/warn/crit verdict. No creds, no broker
   calls — it reads only the local machine (JSON at `/api/diagnostics`).
 
+### Run it — one command
+
 ```bash
-uv sync --extra web
-uv run momentum-web                 # read-only UI            (no creds)    :8800
+uv sync --extra web        # first time only — installs web deps into .venv
+
+uv run momentum-dev        # DEV:  web (--reload) + worker + cache-aware bbterminal refresh
+uv run momentum-prod       # PROD: web + worker + cache-aware bbterminal refresh (no reload)
+```
+
+Then open **http://127.0.0.1:8800/**. One process supervises the web UI and the
+trade worker, streams their logs with a `[web]` / `[worker]` prefix, and stops
+them together on Ctrl-C.
+
+**Smart cache (the bbterminal side).** The web never calls bbterminal or IBKR —
+that's the credential boundary. The snapshot jobs fetch from bbterminal/IBKR and
+write `data/*.json`, which the web reads. `momentum-dev` / `momentum-prod`
+refresh those snapshots **in the background, and only when they're older than a
+TTL** (mapping 12 h, portfolio 1 h) — so a restart is instant and reuses the
+cache, and a stale cache is refreshed without blocking the UI. `--fresh` forces a
+refresh now; `--snapshot-interval N` also refreshes every N seconds. Needs creds
+(`.env`); skipped cleanly without them.
+
+**Just viewing the site**, no credentials:
+
+```bash
+uv run momentum-dev --web-only    # UI only — no worker, no refresh, reads data/*.json
+```
+
+Common flags (either command): `--web-only`, `--no-reload` / `--reload`,
+`--no-worker`, `--no-snapshots`, `--fresh`, `--host` / `--port`. Or set
+`MOMENTUM_WEB_HOST` / `MOMENTUM_WEB_PORT`.
+
+<details><summary>The individual roles (in production these are the systemd units in <a href="deploy/README.md"><code>deploy/</code></a>, one per credential-scoped user)</summary>
+
+```bash
+uv run momentum-web [--reload]      # read-only UI            (no creds)    :8800
 uv run momentum-trade-worker        # claims + executes jobs  (creds)
 uv run momentum-portfolio-snapshot  # IBKR positions -> data/ snapshot  (creds)
+uv run momentum-mapping-snapshot    # universe+ETFs -> IBKR conids -> data/  (creds)
 uv run momentum-publish --push      # bbterminal perf -> site repo      (creds)
+uv run momentum-up                  # bare supervisor (flags default off; compose your own)
 ```
 
-**To view the website locally**, you only need the read-only UI:
+Pieces: `launcher.py` (dev/prod supervisor), `web/server.py` (UI),
+`web/diagnostics.py` (system health), `web/worker.py` (trader), `db.py`
+(SQLite/SQLModel queue + run log), `portfolio_snapshot.py` (IBKR positions →
+JSON), `mapping_snapshot.py` (universe+ETFs → IBKR conids → JSON), `publisher.py`
+(performance → git).
+</details>
+
+The UI's CSS is a prebuilt `web/static/tailwind.css` (committed so the Pi needs no
+Node toolchain). If you change template classes, rebuild it — otherwise new classes
+render unstyled:
 
 ```bash
-uv sync --extra web     # first time only — installs web deps into .venv
-uv run momentum-web     # serves the site; no credentials, never trades
+.build/tailwindcss -c src/ibkr_portfolio_connect/web/styles/tailwind.config.js \
+  -i src/ibkr_portfolio_connect/web/styles/input.css \
+  -o src/ibkr_portfolio_connect/web/static/tailwind.css --minify
 ```
 
-Then open **http://127.0.0.1:8800**. It reads the JSON artifacts already in
-`data/`, so the pages render without the worker or any broker access. Override
-the bind with `MOMENTUM_WEB_HOST` / `MOMENTUM_WEB_PORT` if `:8800` is taken.
-
-Pieces: `web/server.py` (UI), `web/diagnostics.py` (system health), `web/worker.py`
-(trader), `db.py` (SQLite/SQLModel queue + run log), `portfolio_snapshot.py` (IBKR
-positions → JSON), `publisher.py` (performance → git). Deployment (systemd units +
-Caddy + the credential split) is in [`deploy/README.md`](deploy/README.md).
+CSS/JS links are cache-busted by the built file's mtime (`?v=…`), so a normal
+refresh picks up a rebuild — no need to clear the browser cache.
 
 ## Architecture
 

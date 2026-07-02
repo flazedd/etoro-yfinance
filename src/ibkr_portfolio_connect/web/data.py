@@ -33,66 +33,17 @@ def gurufocus_url(country: str | None, exch: str | None, ticker: str | None) -> 
     return f"https://www.gurufocus.com/stock/{sym}/summary"
 
 
-def load_universe_rows(slug: str = "leonteq") -> list[dict[str, Any]]:
-    """Join universe + verification + liquidity + openfigi into per-company rows."""
-    d = data_dir()
-    uni = _load(d / f"{slug}_universe.json").get("members", [])
-    ver = _load(d / f"{slug}_mapping_verification.json").get("results", {})
-    liq = _load(d / f"{slug}_liquidity.json").get("results", {})
-    fig = _load(d / f"{slug}_openfigi.json").get("results", {})
+def load_mapping() -> dict[str, Any]:
+    """The unified instrument-mapping snapshot written by the credentialed
+    `momentum-mapping-snapshot` job: every LEONTEQ universe member + every ETF,
+    each resolved to its tradeable IBKR conid (or an `error` row with a reason).
 
-    by_cid = {str(m.get("company_id")): m for m in uni}
-    rows: list[dict[str, Any]] = []
-    # Drive off the universe so unmapped names still show (with blank IBKR cols).
-    for cid, m in by_cid.items():
-        v = ver.get(cid, {})
-        lq = liq.get(cid, {})
-        fg = fig.get(cid, {})
-        country = m.get("country")
-        ticker = m.get("ticker")
-        exch = m.get("exchange")
-        rows.append({
-            "cid": cid,
-            "bb_name": m.get("company_name"),
-            "ibkr_name": v.get("ibkr_name"),
-            "ticker": ticker,
-            "ibkr_sym": v.get("ibkr_symbol"),
-            "tmatch": v.get("ticker_match"),
-            "lmatch": v.get("listing_match"),
-            "exch": exch,
-            "listing": v.get("ibkr_listing"),
-            "country": country,
-            "currency": m.get("currency"),
-            "ccy_ok": v.get("ccy_ok", True),
-            "isin": m.get("isin"),
-            "conid": v.get("conid"),
-            "score": v.get("name_score"),
-            "conf": v.get("confidence") or ("unresolved" if not v else "?"),
-            "figi": fg.get("verdict"),
-            "adv": lq.get("adv_eur"),
-            "gf": gurufocus_url(country, exch, ticker),
-        })
-    rows.sort(key=lambda r: (r["bb_name"] or "").lower())
-    return rows
-
-
-def universe_stats(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    total = len(rows)
-    by_conf: dict[str, int] = {}
-    for r in rows:
-        by_conf[r["conf"]] = by_conf.get(r["conf"], 0) + 1
-    resolved = sum(1 for r in rows if r.get("conid"))
-    tmatch = sum(1 for r in rows if r.get("tmatch"))
-    with_adv = sum(1 for r in rows if r.get("adv"))
-    return {
-        "total": total,
-        "resolved": resolved,
-        "ticker_match": tmatch,
-        "with_adv": with_adv,
-        "high": by_conf.get("high", 0),
-        "medium": by_conf.get("medium", 0),
-        "low": by_conf.get("low", 0),
-    }
+    The web never calls bbterminal or IBKR — it only reads
+    data/mapping_snapshot.json. Empty dict if the job hasn't run yet, in which
+    case the page renders a hint. Shape: `{generated_at, universe_id, label,
+    counts:{...}, rows:[{kind, name, isin, ticker, conid, status, ...}]}`.
+    """
+    return _load(data_dir() / "mapping_snapshot.json")
 
 
 def load_performance() -> dict[str, Any]:
@@ -109,6 +60,17 @@ def load_portfolio() -> dict[str, Any]:
     file. Empty dict if the snapshotter hasn't run yet — the page renders a hint.
     """
     return _load(data_dir() / "portfolio_snapshot.json")
+
+
+def load_strategies() -> dict[str, Any]:
+    """The scheduled-strategies snapshot written by the credentialed
+    `momentum-strategies-snapshot` job: every enabled scheduled strategy and its
+    current bbterminal holdings. The web never calls bbterminal; it only reads
+    data/strategies_snapshot.json. Empty dict if the job hasn't run yet — the
+    page renders a hint. Shape: `{generated_at, count, strategies:[{strategy_id,
+    name, next_rebalance_at, holdings:[...]}]}`.
+    """
+    return _load(data_dir() / "strategies_snapshot.json")
 
 
 def snapshot_age_seconds(name: str, now: float) -> float | None:

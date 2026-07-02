@@ -1,4 +1,6 @@
 /* Small bits Tailwind utility classes don't cover cleanly. */
 .tabular { font-variant-numeric: tabular-nums; }
-table.grid th { position: sticky; top: 0; }
+/* Sticky header for the sortable data tables (header pins to the scroll box). */
+table.sortable thead th { position: sticky; top: 0; z-index: 1; background: #f8fafc; }
+.caret { font-size: .7em; color: #64748b; }
 .htmx-request #rows-wrap { opacity: .5; transition: opacity .1s; }

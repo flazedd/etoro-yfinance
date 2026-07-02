@@ -345,6 +345,64 @@ class IBKRClient:
             raise self._wrap(e, f"whatif_order({side.value} {quantity} conid={conid})") from e
         return dict(result.data or {})
 
+    def what_if_market_order(
+        self,
+        account_id: str,
+        *,
+        conid: int,
+        side: OrderSide,
+        quantity: float,
+        listing_exchange: str | None = None,
+    ) -> dict[str, Any]:
+        """Preview commission + margin for a MKT DAY order; no place. Unlike the
+        MIDPRICE preview, `quantity` may be fractional — fractional shares on
+        IBKR require a MKT/LMT order (MIDPRICE is whole-share only)."""
+        order = OrderRequest(
+            conid=conid,
+            side=side.value,
+            quantity=float(quantity),
+            order_type="MKT",
+            acct_id=account_id,
+            tif="DAY",
+            manual_indicator=False,
+            listing_exchange=listing_exchange,
+        )
+        try:
+            result = self._ibind.whatif_order(order, account_id=account_id)
+        except Exception as e:
+            raise self._wrap(e, f"whatif_market({side.value} {quantity} conid={conid})") from e
+        return dict(result.data or {})
+
+    def place_market_day_order(
+        self,
+        account_id: str,
+        *,
+        conid: int,
+        side: OrderSide,
+        quantity: float,
+        listing_exchange: str | None = None,
+    ) -> list[PlaceOrderReply]:
+        """Submit a single MKT DAY order (supports a fractional `quantity`).
+
+        Used by the manual single-stock test-buy path — a small, user-confirmed
+        order sized as a % of NAV. IBind walks the reply chain internally, so a
+        success returns one kind="confirmed" reply; errors raise IBKRError."""
+        order = OrderRequest(
+            conid=conid,
+            side=side.value,
+            quantity=float(quantity),
+            order_type="MKT",
+            acct_id=account_id,
+            tif="DAY",
+            manual_indicator=False,
+            listing_exchange=listing_exchange,
+        )
+        try:
+            result = self._ibind.place_order(order, _AUTO_ANSWER_ALL, account_id=account_id)
+        except Exception as e:
+            raise self._wrap(e, f"place_market({side.value} {quantity} conid={conid})") from e
+        return _parse_order_reply_list(result.data)
+
     def confirm_reply(self, reply_id: str, *, confirmed: bool = True) -> list[PlaceOrderReply]:
         """Rarely called in practice (IBind auto-walks the reply chain), but
         kept for back-compat with the executor's chain-walker logic.

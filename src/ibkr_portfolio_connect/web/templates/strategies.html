@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% from "_mapping_rows.html" import conf_pill %}
+{% block title %}Strategies{% endblock %}
+{% block content %}
+
+{% macro pct(v) -%}
+  {%- if v is defined and v is not none -%}
+    <span class="{{ 'text-emerald-600' if v >= 0 else 'text-rose-600' }}">{{ '%+.2f'|format(v) }}%</span>
+  {%- else -%}<span class="text-slate-400">—</span>{%- endif -%}
+{%- endmacro %}
+
+<div class="flex items-end justify-between mb-4">
+  <div>
+    <h1 class="text-xl font-semibold">Scheduled strategies</h1>
+    <p class="text-sm text-slate-500">Each enabled bbterminal strategy and its current target holdings. The web never
+      calls bbterminal — the <b>Refresh</b> button queues a job the credentialed worker runs. IBKR
+      <span class="font-medium">conid</span>/<span class="font-medium">confidence</span> are merged from the mapping snapshot.</p>
+  </div>
+  <div class="text-right shrink-0 ml-4">
+    {% if snap.generated_at %}
+      <div class="text-xs {{ 'text-amber-600' if age and age > 6*3600 else 'text-slate-400' }}">
+        {% if age is not none %}{{ (age/60)|round|int }} min ago{% else %}snapshot {{ snap.generated_at }}{% endif %}
+      </div>
+    {% endif %}
+    <form method="post" action="/strategies/refresh" class="mt-2">
+      <button {{ 'disabled' if refresh.pending }}
+        class="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50">
+        <span class="{{ 'animate-spin' if refresh.pending }}">↻</span>{{ 'Refreshing…' if refresh.pending else 'Refresh from bbterminal' }}
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if queued or refresh.pending %}
+  <div class="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
+    Refresh queued — the worker is fetching schedules from bbterminal. This page reloads itself while it runs.
+  </div>
+  <script>setTimeout(function(){ location.reload(); }, 6000);</script>
+{% elif refresh.last_status == 'error' %}
+  <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
+    Last refresh failed: {{ refresh.last_error or 'see the worker logs' }}
+  </div>
+{% endif %}
+
+{% if not snap %}
+  <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-4 text-sm">
+    No strategies snapshot yet. Run <code>momentum-strategies-snapshot</code> (the credentialed job) to fetch the
+    scheduled strategies from bbterminal and write <code>data/strategies_snapshot.json</code>.
+  </div>
+{% else %}
+
+{% for s in strategies %}
+<section class="bg-white rounded-lg border border-slate-200 mb-5 overflow-hidden">
+  <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <h2 class="font-semibold text-base mr-1">{{ s.name or ('strategy #' ~ s.strategy_id) }}</h2>
+      <span class="text-xs px-2 py-0.5 rounded-full {{ 'bg-emerald-100 text-emerald-700' if s.enabled else 'bg-slate-200 text-slate-500' }}">
+        {{ 'enabled' if s.enabled else 'disabled' }}</span>
+      {% if s.frequency %}<span class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">{{ s.frequency }}</span>{% endif %}
+      <span class="text-xs text-slate-500">{{ s.holdings|length }} holdings</span>
+      <form method="post" action="/strategies/buy-basket" class="ml-auto flex items-center gap-1.5">
+        <input type="hidden" name="strategy_id" value="{{ s.strategy_id }}">
+        <input type="number" name="total_pct" value="50" min="1" max="100" step="1"
+               class="w-16 rounded border border-slate-300 px-1.5 py-0.5 text-xs text-right tabular">
+        <span class="text-[10px] text-slate-400">% of NAV</span>
+        <button class="rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700">Buy strategy</button>
+      </form>
+    </div>
+    <div class="mt-2.5 flex flex-wrap items-center gap-x-6 gap-y-1.5 text-xs text-slate-500">
+      {% if s.next_rebalance_at %}<span>next rebalance <b class="text-slate-700">{{ s.next_rebalance_at[:10] }}</b></span>{% endif %}
+      {% if s.as_of_date %}<span>as of <b class="text-slate-700">{{ s.as_of_date[:10] }}</b></span>{% endif %}
+      <span>MTD {{ pct(s.mtd_return_pct) }}</span>
+      <span>since inception {{ pct(s.since_inception_return_pct) }}</span>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="sortable w-full text-sm">
+      <thead class="bg-white text-xs text-slate-500 text-left border-b border-slate-100"><tr>
+        <th data-sort class="px-4 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Ticker<span class="caret"></span></th>
+        <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Name<span class="caret"></span></th>
+        <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Sector<span class="caret"></span></th>
+        <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Country<span class="caret"></span></th>
+        <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Ccy<span class="caret"></span></th>
+        <th data-sort data-type="num" class="px-3 py-2 font-medium text-right cursor-pointer select-none hover:text-slate-700">Weight<span class="caret"></span></th>
+        <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Side<span class="caret"></span></th>
+        <th data-sort data-type="num" class="px-3 py-2 font-medium text-right cursor-pointer select-none hover:text-slate-700">Score<span class="caret"></span></th>
+        <th data-sort data-type="num" class="px-3 py-2 font-medium text-right cursor-pointer select-none hover:text-slate-700 border-l border-slate-100">conid<span class="caret"></span></th>
+        <th data-sort data-type="num" class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Conf<span class="caret"></span></th>
+        <th class="px-3 py-2 font-medium">IBKR</th>
+        <th class="px-3 py-2 font-medium">Test buy</th>
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+      {% for h in s.holdings %}
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-1.5 tabular font-medium" data-sort-value="{{ (h.ticker or '')|lower }}">{{ h.ticker or '' }}</td>
+          <td class="px-3 py-1.5 max-w-xs truncate" title="{{ h.company_name }}" data-sort-value="{{ (h.company_name or '')|lower }}">{{ h.company_name or '' }}</td>
+          <td class="px-3 py-1.5 text-slate-600" data-sort-value="{{ (h.sector or '')|lower }}">{{ h.sector or '' }}</td>
+          <td class="px-3 py-1.5 text-slate-600" data-sort-value="{{ (h.country or '')|lower }}">{{ h.country or '' }}</td>
+          <td class="px-3 py-1.5 text-slate-500" data-sort-value="{{ (h.currency or '')|lower }}">{{ h.currency or '' }}</td>
+          <td class="px-3 py-1.5 text-right tabular" data-sort-value="{{ h.target_weight or 0 }}">{{ '%.2f'|format((h.target_weight or 0)*100) }}%</td>
+          <td class="px-3 py-1.5" data-sort-value="{{ h.side or '' }}">
+            <span class="text-xs px-1.5 py-0.5 rounded {{ 'bg-sky-100 text-sky-700' if h.side=='long' else 'bg-rose-100 text-rose-700' }}">{{ h.side or '' }}</span>
+          </td>
+          <td class="px-3 py-1.5 text-right tabular text-slate-600" data-sort-value="{{ h.score if h.score is not none else -999 }}">{{ '%.1f'|format(h.score) if h.score is not none else '' }}</td>
+          <td class="px-3 py-1.5 text-right tabular text-slate-500 border-l border-slate-100" data-sort-value="{{ h.conid or '' }}">{{ h.conid or '—' }}</td>
+          <td class="px-3 py-1.5" data-sort-value="{{ {'high':3,'medium':2,'low':1}.get(h.confidence, 0) }}">{{ conf_pill(h.confidence) }}</td>
+          <td class="px-3 py-1.5 whitespace-nowrap">
+            {% if h.gurufocus_url %}<a class="text-blue-600 hover:underline text-xs" href="{{ h.gurufocus_url }}" target="_blank" rel="noopener">GF↗</a>{% endif %}
+            {% if h.ibkr_quote_url %}<a class="text-blue-600 hover:underline text-xs ml-1" href="{{ h.ibkr_quote_url }}" target="_blank" rel="noopener">IB↗</a>{% endif %}
+          </td>
+          <td class="px-3 py-1.5 whitespace-nowrap">
+            {% if h.conid %}
+            <form method="post" action="/strategies/buy" class="flex items-center gap-1">
+              <input type="hidden" name="conid" value="{{ h.conid }}">
+              <input type="hidden" name="symbol" value="{{ h.ibkr_symbol or h.ticker or '' }}">
+              <input type="hidden" name="name" value="{{ h.company_name or '' }}">
+              <input type="hidden" name="currency" value="{{ h.currency or '' }}">
+              <input type="hidden" name="listing_exchange" value="{{ h.ibkr_listing or '' }}">
+              <input type="hidden" name="strategy_id" value="{{ s.strategy_id }}">
+              <input type="hidden" name="price_eur" value="{{ h.entry_price_eur or '' }}">
+              <input type="hidden" name="ref_price_local" value="{{ h.entry_price_local or '' }}">
+              <input type="number" name="pct" value="5" min="0.1" max="{{ '%g'|format(max_pct) }}" step="0.1"
+                     class="w-14 rounded border border-slate-300 px-1.5 py-0.5 text-xs text-right tabular">
+              <span class="text-[10px] text-slate-400">%</span>
+              <button class="rounded-md bg-slate-900 px-2 py-0.5 text-xs font-medium text-white hover:bg-slate-700">Buy</button>
+            </form>
+            {% else %}<span class="text-slate-300 text-xs">—</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      {% if not s.holdings %}
+        <tr><td colspan="12" class="px-4 py-6 text-center text-slate-400">No holdings in this strategy.</td></tr>
+      {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+
+{% if not strategies %}
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-6 text-center text-slate-400 text-sm">
+    The snapshot has no enabled scheduled strategies.
+  </div>
+{% endif %}
+
+<p class="text-xs text-slate-400 mt-1">Read from a snapshot file, not live. Refresh cadence is set by the launcher TTL
+  (6h) or the <code>momentum-strategies.timer</code> on the Pi. conid/confidence come from the mapping snapshot.</p>
+{% endif %}
+{% endblock %}

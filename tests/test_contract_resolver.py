@@ -16,6 +16,7 @@ from ibkr_portfolio_connect.contract_resolver import (
     ContractResolutionError,
     resolve_by_isin,
     resolve_contract,
+    resolve_etf_tradability,
 )
 
 Row = dict[str, Any]
@@ -179,3 +180,67 @@ def test_falls_back_to_ticker_when_isin_not_on_ibkr() -> None:
     rc = resolve_contract(client, "FOO", "XAMS", "EUR", isin="XX0000000000")
     assert rc.conid == 123
     assert rc.method == "ticker"
+
+
+# ─── ETF tradability (ISIN-first, no exchange constraint) ────────────────────
+
+
+def test_etf_tradable_by_isin_prefers_us_listing() -> None:
+    # An ETF listed on several venues resolves via ISIN and prefers a US venue.
+    client = FakeClient(
+        {
+            "US46137V6825": [
+                _isin_row("222@IBIS", "SPMO", "IBIS"),
+                _isin_row("111@ARCA", "SPMO", "ARCA"),
+            ]
+        }
+    )
+    t = resolve_etf_tradability(client, "US46137V6825", ticker="SPMO", name="Invesco Momentum")
+    assert t.tradable is True
+    assert t.conid == 111  # ARCA preferred over IBIS
+    assert t.preferred_listing == "ARCA"
+    assert t.ibkr_listings == ["ARCA", "IBIS"]
+    assert t.method == "isin"
+
+
+def test_etf_falls_back_to_ticker_on_isin_miss() -> None:
+    # ISIN unknown to IBKR -> name-guarded ticker search (rows carry companyHeader).
+    row = _row(333, "SPMO", "ARCA")
+    row["companyHeader"] = "INVESCO S&P 500 MOMENTUM ETF - ARCA"
+    client = FakeClient({"NOISIN0000000": [], "SPMO": [row]})
+    t = resolve_etf_tradability(
+        client, "NOISIN0000000", ticker="SPMO", name="Invesco S&P 500 Momentum ETF"
+    )
+    assert t.conid == 333
+    assert t.method == "ticker"
+    assert t.name_score is not None
+    assert t.name_score >= 0.55
+
+
+def test_etf_not_on_ibkr_returns_untradable() -> None:
+    client = FakeClient({})
+    t = resolve_etf_tradability(client, "XX0000000000", ticker="ZZZ", name="Nothing")
+    assert t.tradable is False
+    assert t.conid is None
+    assert t.method == "none"
+
+
+def test_etf_ticker_fallback_rejects_wrong_name() -> None:
+    # A same-ticker but clearly different fund must NOT be trusted.
+    client = FakeClient(
+        {
+            "X0000000000": [],
+            "ABC": [
+                {
+                    "conid": 444, "symbol": "ABC", "description": "ARCA",
+                    "companyHeader": "COMPLETELY UNRELATED BOND FUND - ARCA",
+                    "sections": [{"secType": "STK"}],
+                }
+            ],
+        }
+    )
+    t = resolve_etf_tradability(
+        client, "X0000000000", ticker="ABC", name="Invesco S&P 500 Momentum ETF"
+    )
+    assert t.tradable is False
+    assert t.method == "none"

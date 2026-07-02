@@ -10,15 +10,34 @@
 <div class="flex items-end justify-between mb-4">
   <div>
     <h1 class="text-xl font-semibold">IBKR portfolio</h1>
-    <p class="text-sm text-slate-500">Live positions for account {{ snap.account_id or '—' }}, snapshotted by the credentialed
-      <code>momentum-portfolio-snapshot</code> job. The web never calls IBKR.</p>
+    <p class="text-sm text-slate-500">Live positions for account {{ snap.account_id or '—' }}. The web never calls IBKR —
+      the <b>Refresh</b> button queues a job the credentialed worker runs.</p>
   </div>
-  {% if snap.generated_at %}
-    <span class="text-xs {{ 'text-amber-600' if age and age > 3600 else 'text-slate-400' }}">
-      snapshot {{ snap.generated_at }}{% if age is not none %} · {{ (age/60)|round|int }} min ago{% endif %}
-    </span>
-  {% endif %}
+  <div class="text-right shrink-0 ml-4">
+    {% if snap.generated_at %}
+      <div class="text-xs {{ 'text-amber-600' if age and age > 3600 else 'text-slate-400' }}">
+        {% if age is not none %}{{ (age/60)|round|int }} min ago{% else %}snapshot {{ snap.generated_at }}{% endif %}
+      </div>
+    {% endif %}
+    <form method="post" action="/portfolio/refresh" class="mt-2">
+      <button {{ 'disabled' if refresh.pending }}
+        class="inline-flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50">
+        <span class="{{ 'animate-spin' if refresh.pending }}">↻</span>{{ 'Refreshing…' if refresh.pending else 'Refresh from IBKR' }}
+      </button>
+    </form>
+  </div>
 </div>
+
+{% if queued or refresh.pending %}
+  <div class="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
+    Refresh queued — the worker is fetching positions from IBKR. This page reloads itself while it runs.
+  </div>
+  <script>setTimeout(function(){ location.reload(); }, 6000);</script>
+{% elif refresh.last_status == 'error' %}
+  <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
+    Last refresh failed: {{ refresh.last_error or 'see the worker logs' }}
+  </div>
+{% endif %}
 
 {% if not snap %}
   <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-4 text-sm">

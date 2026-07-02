@@ -1,0 +1,22 @@
+[Unit]
+Description=Snapshot the scheduled bbterminal strategies + holdings for the read-only web /strategies page
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=trader
+Group=trader
+WorkingDirectory=/opt/momentum-stack
+Environment=MOMENTUM_DATA_DIR=/var/lib/momentum/data
+# trader.env holds the secrets: BBTERMINAL_*/SUPABASE_* (bbterminal admin API).
+# This job only talks to bbterminal — no IBKR session needed.
+EnvironmentFile=/etc/momentum/trader.env
+ExecStart=/opt/momentum-stack/.venv/bin/momentum-strategies-snapshot
+
+TimeoutStartSec=300
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/momentum
