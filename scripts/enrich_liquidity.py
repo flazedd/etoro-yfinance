@@ -43,15 +43,26 @@ def _to_float(v: Any) -> float | None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--slug", default="leonteq")
+    parser.add_argument("--source", choices=("snapshot", "resolution"), default="snapshot",
+                        help="conids from the live mapping_snapshot.json (default, full universe) "
+                             "or the legacy <slug>_ibkr_resolution.json artifact")
     parser.add_argument("--sleep", type=float, default=0.5, help="pause between snapshot batches")
     parser.add_argument("--refresh", action="store_true", help="re-fetch all (ignore cache)")
     args = parser.parse_args()
 
-    res = json.loads((DATA_DIR / f"{args.slug}_ibkr_resolution.json").read_text())
+    # EUR close comes from the cached universe (same for both sources); the conid
+    # set is what differs — the snapshot carries every resolved name, not just the
+    # subset the stale resolution artifact happened to price.
     uni = {str(m["company_id"]): m
            for m in json.loads((DATA_DIR / f"{args.slug}_universe.json").read_text())["members"]}
-    resolved = [x for x in res["results"].values()
-                if x.get("status") == "resolved" and x.get("conid")]
+    if args.source == "snapshot":
+        rows = json.loads((DATA_DIR / "mapping_snapshot.json").read_text()).get("rows", [])
+        resolved = [{"company_id": r["company_id"], "conid": r["conid"], "ticker": r.get("ticker")}
+                    for r in rows if r.get("conid") and r.get("kind") != "etf"]
+    else:
+        res = json.loads((DATA_DIR / f"{args.slug}_ibkr_resolution.json").read_text())
+        resolved = [x for x in res["results"].values()
+                    if x.get("status") == "resolved" and x.get("conid")]
 
     out_path = DATA_DIR / f"{args.slug}_liquidity.json"
     out: dict[str, Any] = {} if args.refresh or not out_path.exists() else \

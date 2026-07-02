@@ -3,4 +3,14 @@
 /* Sticky header for the sortable data tables (header pins to the scroll box). */
 table.sortable thead th { position: sticky; top: 0; z-index: 1; background: #f8fafc; }
 .caret { font-size: .7em; color: #64748b; }
+/* Data tables: size each column to its content on a single line (expand to
+   avoid wrapping, then stop — never stretch a column just to fill width) and
+   let the table use the available width, scrolling inside its wrapper only when
+   the content genuinely needs more room than the viewport. */
+.tbl-fit { width: auto; margin-left: auto; margin-right: auto; }
+.tbl-fit th, .tbl-fit td { white-space: nowrap; }
+/* The card/box wrapping a table shrinks to the table's width (so it doesn't
+   stretch full-width around a narrow table) and centers, capped at the viewport
+   so a wide table scrolls inside it instead of overflowing the page. */
+.tbl-box { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
 .htmx-request #rows-wrap { opacity: .5; transition: opacity .1s; }

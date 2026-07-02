@@ -60,6 +60,7 @@ from ibkr_portfolio_connect.db import (
     get_order_ticket,
     get_session,
     init_db,
+    reset_orphaned_jobs,
     save_order_batch,
     save_order_ticket,
     tickets_for_batch,
@@ -273,6 +274,13 @@ def _process_order(session: Any, job: Job, settings: Settings) -> None:
     session.commit()
 
 
+def _order_listing(ticket: Any) -> str | None:
+    """Fractional orders MUST route via IBKR SMART ("Only IBKR SmartRouting
+    supports fractional shares"), so we don't pin them to a listing exchange;
+    whole-share orders keep the listing hint."""
+    return None if ticket.fractional else (ticket.listing_exchange or None)
+
+
 def _preview_ticket(session: Any, ibkr: Any, ticket: Any, nav: Any, settings: Settings) -> str:
     """Size ONE ticket against a known NAV and what-if it → PREVIEWED / BLOCKED.
     No client creation or NAV fetch (the caller owns those) so a whole-strategy
@@ -307,7 +315,7 @@ def _preview_ticket(session: Any, ibkr: Any, ticket: Any, nav: Any, settings: Se
     try:
         raw = ibkr.what_if_market_order(
             settings.ibkr_account_id, conid=ticket.conid, side=OrderSide.BUY,
-            quantity=sizing.quantity, listing_exchange=ticket.listing_exchange or None,
+            quantity=sizing.quantity, listing_exchange=_order_listing(ticket),
         )
     except IBKRError as e:
         ticket.status = TICKET_BLOCKED
@@ -345,7 +353,7 @@ def _submit_ticket(session: Any, ibkr: Any, ticket: Any, settings: Settings) -> 
     try:
         replies = ibkr.place_market_day_order(
             settings.ibkr_account_id, conid=ticket.conid, side=OrderSide.BUY,
-            quantity=ticket.quantity, listing_exchange=ticket.listing_exchange or None,
+            quantity=ticket.quantity, listing_exchange=_order_listing(ticket),
         )
     except IBKRError as e:
         ticket.status = TICKET_FAILED
@@ -404,6 +412,7 @@ def _run_order_preview(session: Any, ticket: Any, settings: Settings) -> str:
     from ibkr_portfolio_connect.ibkr_client import IBKRClient
 
     with IBKRClient(timeout=settings.http_timeout_seconds) as ibkr:
+        ibkr.init_brokerage_session()  # order endpoints need /iserver/accounts first
         nav = extract_nav(ibkr.portfolio_summary(settings.ibkr_account_id),
                           required_currency=settings.sizing_currency)
         return _preview_ticket(session, ibkr, ticket, nav, settings)
@@ -424,6 +433,7 @@ def _run_order_place(session: Any, ticket: Any, settings: Settings) -> str:
         save_order_ticket(session, ticket)
         return f"blocked: {ticket.error}"
     with IBKRClient(timeout=settings.http_timeout_seconds) as ibkr:
+        ibkr.init_brokerage_session()  # order endpoints need /iserver/accounts first
         return _submit_ticket(session, ibkr, ticket, settings)
 
 
@@ -480,6 +490,7 @@ def _run_batch_preview(session: Any, batch: Any, settings: Settings) -> str:
 
     tickets = tickets_for_batch(session, batch.id)
     with IBKRClient(timeout=settings.http_timeout_seconds) as ibkr:
+        ibkr.init_brokerage_session()  # order endpoints need /iserver/accounts first
         nav = extract_nav(ibkr.portfolio_summary(settings.ibkr_account_id),
                           required_currency=settings.sizing_currency)
         batch.nav_eur = float(nav)
@@ -515,6 +526,7 @@ def _run_batch_place(session: Any, batch: Any, settings: Settings) -> str:
     tickets = tickets_for_batch(session, batch.id)
     placed = failed = 0
     with IBKRClient(timeout=settings.http_timeout_seconds) as ibkr:
+        ibkr.init_brokerage_session()  # order endpoints need /iserver/accounts first
         for ticket in tickets:
             if ticket.status != TICKET_CONFIRMED:
                 continue  # blocked / already-terminal holdings are skipped
@@ -611,7 +623,7 @@ def main() -> int:
     settings = Settings()  # type: ignore[call-arg]  # pydantic-settings reads env
 
     if args.enqueue:
-        from ibkr_portfolio_connect.db import get_session, request_job
+        from ibkr_portfolio_connect.db import request_job  # get_session is module-level
         with get_session() as s:
             job = request_job(s, dry_run=settings.dry_run, requested_by="timer",
                               note="scheduled monthly rebalance")
@@ -622,6 +634,11 @@ def main() -> int:
         handled = run_once(settings)
         print("processed one job" if handled else "no jobs queued")
         return 0
+
+    with get_session() as s:
+        cleared = reset_orphaned_jobs(s)
+    if cleared:
+        log.warning("cleared %d orphaned job(s) left by a previous worker (e.g. a restart)", cleared)
 
     log.info("worker polling every %ss (Ctrl-C to stop)", args.poll)
     while True:

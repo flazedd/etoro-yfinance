@@ -76,8 +76,8 @@
   {% endif %}
 
   {# ---- per-holding table ---- #}
-  <div class="mt-4 bg-white rounded-lg border border-slate-200 overflow-x-auto">
-    <table class="w-full text-sm">
+  <div class="mt-4 bg-white rounded-lg border border-slate-200 overflow-x-auto tbl-box">
+    <table class="tbl-fit text-sm">
       <thead class="bg-slate-50 text-xs text-slate-500 text-left"><tr>
         <th class="px-4 py-2">Symbol</th><th>Name</th>
         <th class="text-right">Weight</th><th class="text-right">% NAV</th>
@@ -88,7 +88,7 @@
       {% for t in tickets %}
         <tr class="hover:bg-slate-50">
           <td class="px-4 py-1.5 font-medium tabular">{{ t.symbol }}</td>
-          <td class="max-w-xs truncate text-slate-600" title="{{ t.name }}">{{ t.name }}</td>
+          <td class="text-slate-600" title="{{ t.name }}">{{ t.name }}</td>
           <td class="text-right tabular text-slate-500">{{ '%.2f'|format((t.weight or 0)*100) }}%</td>
           <td class="text-right tabular text-slate-500">{{ '%.2f'|format(t.pct_of_nav) }}%</td>
           <td class="text-right tabular">{% if t.target_eur is not none %}€{{ '%.2f'|format(t.target_eur) }}{% else %}—{% endif %}</td>

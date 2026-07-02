@@ -44,10 +44,10 @@ def _settings(**over: Any) -> Any:
 
 
 def test_sizing_fractional_vs_whole_vs_blocked() -> None:
-    # US fractional: 5% of €51 at €40 → 0.06375 shares.
+    # US fractional: 5% of €51 at €40 → 0.06375, snapped DOWN to the 0.0001 step.
     frac = size_order(nav_eur=Decimal("51"), pct=Decimal("5"), price_eur=Decimal("40"), fractional=True)
     assert frac.ok
-    assert frac.quantity == pytest.approx(0.06375)
+    assert frac.quantity == pytest.approx(0.0637)
     assert frac.est_cost_eur == Decimal("2.55")
 
     # Non-fractional pricey name → 0 whole shares → blocked (never over-buys).
@@ -85,6 +85,7 @@ class _FakeIBKR:
     def __init__(self, *a: Any, **k: Any) -> None: ...
     def __enter__(self) -> _FakeIBKR: return self
     def __exit__(self, *a: Any) -> None: ...
+    def init_brokerage_session(self) -> None: ...
 
     def portfolio_summary(self, acct: str) -> dict[str, Any]:
         return {"netliquidation": {"amount": "51.00", "currency": "EUR"}}
@@ -125,7 +126,7 @@ def test_preview_sizes_and_previews(tmp_db: Path, monkeypatch: pytest.MonkeyPatc
         t = dbmod.get_order_ticket(s, tid)
     assert t.status == dbmod.TICKET_PREVIEWED
     assert t.nav_eur == 51.0
-    assert t.quantity == pytest.approx(0.06375)
+    assert t.quantity == pytest.approx(0.0637)
     assert json.loads(t.preview_json)["commission"] == "1.00 USD"
 
 

@@ -33,7 +33,7 @@
 {% endif %}
 
 {% for s in book.strategies %}
-<section class="bg-white rounded-lg border border-slate-200 mb-5 overflow-hidden">
+<section class="bg-white rounded-lg border border-slate-200 mb-5 overflow-hidden tbl-box">
   <div class="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 border-b border-slate-100 bg-slate-50">
     <h2 class="font-semibold">{{ s.name }}</h2>
     <span class="text-xs text-slate-500">{{ s.positions|length }} positions</span>
@@ -44,7 +44,7 @@
     </div>
   </div>
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="tbl-fit text-sm">
       <thead class="bg-white text-xs text-slate-500 text-left border-b border-slate-100"><tr>
         <th class="px-4 py-2">Symbol</th><th>Name</th>
         <th class="text-right">Qty</th><th class="text-right">Cost (est.)</th>
@@ -54,7 +54,7 @@
       {% for p in s.positions %}
         <tr class="hover:bg-slate-50">
           <td class="px-4 py-1.5 font-medium tabular">{{ p.symbol }}</td>
-          <td class="max-w-xs truncate text-slate-600" title="{{ p.name }}">{{ p.name }}</td>
+          <td class="text-slate-600" title="{{ p.name }}">{{ p.name }}</td>
           <td class="text-right tabular">{{ '%g'|format(p.qty) }}</td>
           <td class="text-right tabular">{{ eur(p.cost_eur) }}</td>
           <td class="text-right tabular">{{ eur(p.value_eur) }}</td>
@@ -69,14 +69,14 @@
 {% endfor %}
 
 {# ---- reconciliation: attributed vs IBKR's netted position per conid ---- #}
-<section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+<section class="bg-white rounded-lg border border-slate-200 overflow-hidden tbl-box">
   <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
     <h2 class="font-semibold">Reconciliation</h2>
     <p class="text-xs text-slate-500">Σ attributed shares across strategies vs IBKR's actual position for each conid.
       <b class="text-rose-600">Unattributed</b> = IBKR holds it but no buy of yours claims it (pre-existing or manual).</p>
   </div>
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="tbl-fit text-sm">
       <thead class="bg-white text-xs text-slate-500 text-left border-b border-slate-100"><tr>
         <th class="px-4 py-2">Symbol</th><th class="text-right">Attributed</th>
         <th class="text-right">IBKR</th><th class="text-right">Diff</th><th>Status</th>

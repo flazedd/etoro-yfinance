@@ -56,7 +56,7 @@
         {% if latest_plan %}<span class="text-xs text-slate-500">run #{{ latest_plan.id }} · NAV €{{ '{:,.0f}'.format(latest_plan.nav_eur) if latest_plan.nav_eur else '?' }} · {{ latest_plan.n_trades }} trades</span>{% endif %}
       </div>
       {% if latest_plan and plan_orders %}
-      <table class="w-full text-sm">
+      <table class="tbl-fit text-sm">
         <thead class="text-xs text-slate-500 text-left"><tr>
           <th class="py-1">Side</th><th>Symbol</th><th class="text-right">Qty</th><th class="text-right">Ref €</th></tr></thead>
         <tbody class="divide-y divide-slate-100">
@@ -74,9 +74,9 @@
       {% endif %}
     </div>
 
-    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden tbl-box">
       <h2 class="font-medium p-4 pb-2">Run history</h2>
-      <table class="w-full text-sm">
+      <table class="tbl-fit text-sm">
         <thead class="bg-slate-50 text-xs text-slate-500 text-left"><tr>
           <th class="px-4 py-2">When</th><th>Mode</th><th>Status</th>
           <th class="text-right">Trades</th><th class="text-right">Slippage €</th>

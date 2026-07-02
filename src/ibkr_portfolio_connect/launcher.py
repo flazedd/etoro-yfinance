@@ -26,6 +26,7 @@ convenient all-in-one for a dev box or a single-host/Docker run.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import signal
 import subprocess
@@ -128,18 +129,23 @@ def _run(args: argparse.Namespace) -> int:
         pass
 
     services = _build_services(args)
-    names = [n for n, _ in services] + (["refresh"] if args.snapshots else [])
+    names = ([n for n, _ in services] + (["refresh"] if args.snapshots else [])
+             + (["reload"] if args.reload else []))
     width = max(len(n) for n in names) + 2
 
     stopping = threading.Event()
     shutdown_done = threading.Event()
+    proc_lock = threading.Lock()
+    procs: dict[str, subprocess.Popen[str]] = {}
 
-    procs: list[tuple[str, subprocess.Popen[str]]] = []
-    for name, argv in services:
+    def _spawn(name: str, argv: list[str]) -> subprocess.Popen[str]:
         proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 text=True, bufsize=1)
-        procs.append((name, proc))
         threading.Thread(target=_relay, args=(name, proc, width), daemon=True).start()
+        return proc
+
+    for name, argv in services:
+        procs[name] = _spawn(name, argv)
 
     print(f"\nmomentum: {', '.join(n for n, _ in services)} running — "
           f"open http://{args.host}:{args.port}/   (Ctrl-C to stop)\n", flush=True)
@@ -157,15 +163,57 @@ def _run(args: argparse.Namespace) -> int:
     if args.snapshots and not args.web_only:
         threading.Thread(target=_refresh_loop, daemon=True).start()
 
+    # Dev hot-reload for the WORKER: uvicorn already self-reloads the web on a
+    # source change, but the worker is a plain process — so watch the package's
+    # .py files here and restart just the worker when one changes. The worker's
+    # own startup clears any job it was mid-way through, so a restart never
+    # wedges the queue. Only in --reload mode; prod stays static.
+    def _worker_reloader(argv: list[str]) -> None:
+        pkg = Path(__file__).resolve().parent
+
+        def mtimes() -> dict[str, float]:
+            out: dict[str, float] = {}
+            for p in pkg.rglob("*.py"):
+                with contextlib.suppress(OSError):
+                    out[str(p)] = p.stat().st_mtime
+            return out
+
+        last = mtimes()
+        tag = "[reload]".ljust(width)
+        while not stopping.wait(1.0):
+            cur = mtimes()
+            changed = [k for k, v in cur.items() if last.get(k) != v] + [k for k in last if k not in cur]
+            if not changed:
+                continue
+            last = cur
+            sys.stdout.write(f"{tag} {Path(changed[0]).name} changed — restarting worker\n")
+            sys.stdout.flush()
+            with proc_lock:
+                old = procs.get("worker")
+                if old is not None and old.poll() is None:
+                    old.terminate()
+                    try:
+                        old.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        old.kill()
+                if not stopping.is_set():
+                    procs["worker"] = _spawn("worker", argv)
+
+    worker_argv = next((a for n, a in services if n == "worker"), None)
+    if args.reload and worker_argv is not None:
+        threading.Thread(target=_worker_reloader, args=(worker_argv,), daemon=True).start()
+
     def shutdown() -> None:
         if shutdown_done.is_set():
             return
         shutdown_done.set()
-        for _, proc in procs:
+        with proc_lock:
+            live = list(procs.values())
+        for proc in live:
             if proc.poll() is None:
                 proc.terminate()
         deadline = time.time() + 8
-        for _, proc in procs:
+        for proc in live:
             try:
                 proc.wait(timeout=max(0.0, deadline - time.time()))
             except subprocess.TimeoutExpired:
@@ -181,13 +229,19 @@ def _run(args: argparse.Namespace) -> int:
 
     exit_code = 0
     while not stopping.is_set():
-        for name, proc in procs:
+        with proc_lock:
+            snapshot = list(procs.items())
+        for name, proc in snapshot:
             rc = proc.poll()
-            if rc is not None:
-                print(f"\n[{name}] exited ({rc}); shutting down the rest.", flush=True)
-                exit_code = rc or 0
-                stopping.set()
-                break
+            if rc is None:
+                continue
+            with proc_lock:
+                if procs.get(name) is not proc:
+                    continue  # an old worker the reloader already swapped out
+            print(f"\n[{name}] exited ({rc}); shutting down the rest.", flush=True)
+            exit_code = rc or 0
+            stopping.set()
+            break
         stopping.wait(0.3)
     shutdown()
     return exit_code

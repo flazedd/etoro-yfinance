@@ -24,12 +24,14 @@
   </div>
 </div>
 
-{% if queued or refresh.pending %}
+{% if refresh.pending %}
   <div class="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
     Refresh queued — the worker is resolving against IBKR (throttled; a few minutes for a cold run, seconds once cached).
     This page reloads itself while it runs. <span class="text-blue-500">Needs the trade worker running (it is, under <code>momentum-dev</code>).</span>
   </div>
-  <script>setTimeout(function(){ location.reload(); }, 8000);</script>
+  <script>setTimeout(function(){ var u=new URL(location.href); u.searchParams.delete('queued'); location.href=u.toString(); }, 8000);</script>
+{% elif queued %}
+  <script>var u=new URL(location.href); u.searchParams.delete('queued'); location.replace(u.toString());</script>
 {% elif refresh.last_status == 'error' %}
   <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
     Last refresh failed: {{ refresh.last_error or 'see the worker logs' }}
@@ -86,7 +88,7 @@
   </select>
 </form>
 
-<div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh]">
+<div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh] tbl-box">
   {% include "_mapping_rows.html" %}
 </div>
 <p class="text-xs text-slate-400 mt-3">Rows are read from a snapshot file, not live. <code>conid</code> is the tradeable IBKR link.

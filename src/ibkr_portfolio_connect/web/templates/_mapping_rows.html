@@ -3,7 +3,7 @@
   {% if conf %}<span class="px-2 py-0.5 rounded-full text-xs font-medium {{ cls }}">{{ conf }}</span>{% endif %}
 {% endmacro %}
 <div class="px-3 py-2 text-xs text-slate-500 border-b border-slate-100">{{ shown }} instruments · click a column to sort</div>
-<table class="sortable w-full text-sm">
+<table class="sortable tbl-fit text-sm">
   <thead class="bg-slate-50 text-slate-500 text-xs">
     <tr class="text-left">
       <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Kind<span class="caret"></span></th>
@@ -27,7 +27,7 @@
       <td class="px-3 py-1.5" data-sort-value="{{ r.kind }}">
         <span class="px-1.5 py-0.5 rounded text-xs {{ 'bg-indigo-100 text-indigo-700' if r.kind=='etf' else 'bg-slate-100 text-slate-500' }}">{{ 'ETF' if r.kind=='etf' else 'eq' }}</span>
       </td>
-      <td class="px-3 py-1.5 max-w-xs truncate" title="{{ r.name }}" data-sort-value="{{ (r.name or '')|lower }}">{{ r.name or '' }}</td>
+      <td class="px-3 py-1.5" title="{{ r.name }}" data-sort-value="{{ (r.name or '')|lower }}">{{ r.name or '' }}</td>
       <td class="px-3 py-1.5 font-mono text-xs text-slate-500" data-sort-value="{{ r.isin or '' }}">{{ r.isin or '' }}</td>
       <td class="px-3 py-1.5 tabular" data-sort-value="{{ (r.ticker or '')|lower }}">{{ r.ticker or '' }}</td>
       <td class="px-3 py-1.5 text-slate-600" data-sort-value="{{ (r.exchange or '')|lower }} {{ (r.ibkr_listing or '')|lower }}">

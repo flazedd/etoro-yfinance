@@ -31,11 +31,13 @@
   </div>
 </div>
 
-{% if queued or refresh.pending %}
+{% if refresh.pending %}
   <div class="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
     Refresh queued — the worker is fetching schedules from bbterminal. This page reloads itself while it runs.
   </div>
-  <script>setTimeout(function(){ location.reload(); }, 6000);</script>
+  <script>setTimeout(function(){ var u=new URL(location.href); u.searchParams.delete('queued'); location.href=u.toString(); }, 6000);</script>
+{% elif queued %}
+  <script>var u=new URL(location.href); u.searchParams.delete('queued'); location.replace(u.toString());</script>
 {% elif refresh.last_status == 'error' %}
   <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
     Last refresh failed: {{ refresh.last_error or 'see the worker logs' }}
@@ -50,7 +52,7 @@
 {% else %}
 
 {% for s in strategies %}
-<section class="bg-white rounded-lg border border-slate-200 mb-5 overflow-hidden">
+<section class="bg-white rounded-lg border border-slate-200 mb-5 overflow-hidden tbl-box">
   <div class="px-4 py-3 border-b border-slate-100 bg-slate-50">
     <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
       <h2 class="font-semibold text-base mr-1">{{ s.name or ('strategy #' ~ s.strategy_id) }}</h2>
@@ -75,7 +77,7 @@
   </div>
 
   <div class="overflow-x-auto">
-    <table class="sortable w-full text-sm">
+    <table class="sortable tbl-fit text-sm">
       <thead class="bg-white text-xs text-slate-500 text-left border-b border-slate-100"><tr>
         <th data-sort class="px-4 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Ticker<span class="caret"></span></th>
         <th data-sort class="px-3 py-2 font-medium cursor-pointer select-none hover:text-slate-700">Name<span class="caret"></span></th>
@@ -94,7 +96,7 @@
       {% for h in s.holdings %}
         <tr class="hover:bg-slate-50">
           <td class="px-4 py-1.5 tabular font-medium" data-sort-value="{{ (h.ticker or '')|lower }}">{{ h.ticker or '' }}</td>
-          <td class="px-3 py-1.5 max-w-xs truncate" title="{{ h.company_name }}" data-sort-value="{{ (h.company_name or '')|lower }}">{{ h.company_name or '' }}</td>
+          <td class="px-3 py-1.5" title="{{ h.company_name }}" data-sort-value="{{ (h.company_name or '')|lower }}">{{ h.company_name or '' }}</td>
           <td class="px-3 py-1.5 text-slate-600" data-sort-value="{{ (h.sector or '')|lower }}">{{ h.sector or '' }}</td>
           <td class="px-3 py-1.5 text-slate-600" data-sort-value="{{ (h.country or '')|lower }}">{{ h.country or '' }}</td>
           <td class="px-3 py-1.5 text-slate-500" data-sort-value="{{ (h.currency or '')|lower }}">{{ h.currency or '' }}</td>

@@ -338,6 +338,31 @@ def tickets_for_batch(session: Session, batch_id: int) -> list[OrderTicket]:
     ))
 
 
+def reset_orphaned_jobs(session: Session) -> int:
+    """Worker-startup recovery. A job left CLAIMED/RUNNING (or an OrderTicket /
+    OrderBatch left PLACING) means the worker died mid-flight — e.g. a dev
+    hot-restart. Mark them errored/failed rather than re-running them (a trade
+    may have partly executed), so they don't wedge the queue or leave a page
+    stuck on 'refreshing…'. Returns how many jobs were cleared."""
+    n = 0
+    for job in session.exec(select(Job).where(col(Job.status).in_((JOB_CLAIMED, JOB_RUNNING)))):
+        job.status = JOB_ERROR
+        job.error = job.error or "worker restarted before this job finished"
+        job.finished_at = _now()
+        session.add(job)
+        n += 1
+    for t in session.exec(select(OrderTicket).where(OrderTicket.status == TICKET_PLACING)):
+        t.status = TICKET_FAILED
+        t.error = t.error or "worker restarted mid-placement — verify this order in IBKR"
+        session.add(t)
+    for b in session.exec(select(OrderBatch).where(OrderBatch.status == TICKET_PLACING)):
+        b.status = TICKET_FAILED
+        b.error = b.error or "worker restarted mid-placement"
+        session.add(b)
+    session.commit()
+    return n
+
+
 def claim_next_job(session: Session) -> Job | None:
     """Worker side: atomically take the oldest requested job."""
     job = session.exec(

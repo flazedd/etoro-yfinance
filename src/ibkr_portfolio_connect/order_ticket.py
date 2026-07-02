@@ -17,8 +17,10 @@ from typing import Any
 # listing-exchange codes as fractional-eligible; everything else is whole-share.
 US_FRACTIONAL_LISTINGS = {"ARCA", "NASDAQ", "NYSE", "BATS", "AMEX", "PINK", "IEX", "NYSENAT"}
 
-# Round fractional quantities to a sane precision (IBKR accepts small fractions).
-_FRACTIONAL_DECIMALS = 5
+# IBKR fractional orders must be a whole multiple of the contract's size step;
+# 0.0001 is the finest step IBKR uses, so we snap DOWN to it. An off-step size
+# like 0.00175 is rejected ("does not conform to the minimum variation of 0.0001").
+_FRACTIONAL_STEP = Decimal("0.0001")
 
 
 def is_fractional_eligible(listing_exchange: str | None) -> bool:
@@ -59,9 +61,15 @@ def size_order(
 
     exact = target / price_eur
     if fractional:
-        qty = round(float(exact), _FRACTIONAL_DECIMALS)
+        # Snap DOWN to IBKR's 0.0001 size step so the order is always valid.
+        steps = int(exact / _FRACTIONAL_STEP)
+        qty = float(_FRACTIONAL_STEP * steps)
         if qty <= 0:
-            out.blocked_reason = f"target €{target} is below the minimum fractional size"
+            min_eur = float(_FRACTIONAL_STEP * price_eur)
+            out.blocked_reason = (
+                f"€{target} at €{price_eur:.2f}/share is below the €{min_eur:.2f} minimum "
+                f"fractional order (0.0001 shares) — raise the %"
+            )
             return out
         out.quantity = qty
     else:

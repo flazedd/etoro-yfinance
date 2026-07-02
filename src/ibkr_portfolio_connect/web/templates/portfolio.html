@@ -28,11 +28,13 @@
   </div>
 </div>
 
-{% if queued or refresh.pending %}
+{% if refresh.pending %}
   <div class="mb-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
     Refresh queued — the worker is fetching positions from IBKR. This page reloads itself while it runs.
   </div>
-  <script>setTimeout(function(){ location.reload(); }, 6000);</script>
+  <script>setTimeout(function(){ var u=new URL(location.href); u.searchParams.delete('queued'); location.href=u.toString(); }, 6000);</script>
+{% elif queued %}
+  <script>var u=new URL(location.href); u.searchParams.delete('queued'); location.replace(u.toString());</script>
 {% elif refresh.last_status == 'error' %}
   <div class="mb-3 rounded-md border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800">
     Last refresh failed: {{ refresh.last_error or 'see the worker logs' }}
@@ -65,8 +67,8 @@
   </div>
 </div>
 
-<div class="bg-white rounded-lg border border-slate-200 overflow-x-auto">
-  <table class="w-full text-sm">
+<div class="bg-white rounded-lg border border-slate-200 overflow-x-auto tbl-box">
+  <table class="tbl-fit text-sm">
     <thead class="bg-slate-50 text-xs text-slate-500 text-left"><tr>
       <th class="px-4 py-2">Symbol</th><th>Type</th>
       <th class="text-right">Quantity</th><th class="text-right">Price</th>

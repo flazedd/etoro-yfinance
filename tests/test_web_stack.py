@@ -291,6 +291,29 @@ def test_strategies_page_renders_and_merges_ibkr(tmp_db: Path, tmp_path: Path,
     assert any(j.kind == dbmod.JOB_KIND_STRATEGIES for j in jobs)
 
 
+def test_reset_orphaned_jobs_clears_inflight(tmp_db: Path) -> None:
+    with dbmod.get_session() as s:
+        running = dbmod.request_job(s, kind=dbmod.JOB_KIND_PORTFOLIO)
+        running.status = dbmod.JOB_RUNNING
+        s.add(running)
+        waiting = dbmod.request_job(s, kind=dbmod.JOB_KIND_MAPPING)  # stays 'requested'
+        placing = dbmod.create_order_ticket(s, status=dbmod.TICKET_PLACING, conid=1,
+                                            symbol="X", quantity=0.1)
+        s.commit()
+        running_id, waiting_id, ticket_id = running.id, waiting.id, placing.id
+
+    with dbmod.get_session() as s:
+        cleared = dbmod.reset_orphaned_jobs(s)
+    assert cleared == 1  # only the RUNNING one; the REQUESTED job is untouched
+
+    with dbmod.get_session() as s:
+        jobs = {j.id: j for j in dbmod.list_jobs(s, limit=10)}
+        assert jobs[running_id].status == dbmod.JOB_ERROR
+        assert jobs[running_id].finished_at is not None
+        assert jobs[waiting_id].status == dbmod.JOB_REQUESTED  # still claimable
+        assert dbmod.get_order_ticket(s, ticket_id).status == dbmod.TICKET_FAILED
+
+
 # ── web-triggered refresh jobs (mapping / portfolio) ──────────────────────────
 
 
