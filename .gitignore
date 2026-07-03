@@ -204,3 +204,4 @@ data/prices_eur/
 .build/
 data/liquidity_cache.json
 data/spread_cache.json
+data/etf_category_cache.json

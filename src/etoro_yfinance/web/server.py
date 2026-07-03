@@ -17,7 +17,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from ..yfinance_map import is_crypto_quote_dupe, is_future
+from etoro_yfinance.yfinance_map import is_crypto_quote_dupe, is_future
+
 from . import data as datamod
 from . import diagnostics as diag
 
@@ -56,10 +57,12 @@ def create_app() -> FastAPI:
                                 status=status, show_internal=show_internal,
                                 min_adv=_to_float(min_adv), sector=sector)
         counts = snap.get("counts", {})
+        sectors = sorted({r.get("sector") for r in snap.get("rows", []) if r.get("sector")})
         return page(request, "universe.html", {
             "active": "universe", "snap": snap, "age": age, "rows": rows[:_UNIVERSE_CAP],
             "q": q, "asset_type": asset_type, "status": status, "shown": len(rows),
             "show_internal": show_internal, "min_adv": min_adv, "sector": sector,
+            "sectors": sectors,
             "validated": bool(counts.get("validated")),
             "eligible": bool(counts.get("eligibility_checked")),
             "liquid": bool(counts.get("liquidity_checked")),
@@ -95,7 +98,8 @@ def create_app() -> FastAPI:
         """Modal fragment: side-by-side price+volume charts for one yfinance
         ticker — native (left) and EUR-converted (right), read from the local
         Parquet stores. Log price by default (scale=linear switches both)."""
-        from .. import currency, prices
+        from etoro_yfinance import currency, prices
+
         from . import charts
 
         log = scale != "linear"
@@ -167,7 +171,6 @@ def _filter_universe(
     rows: list[dict[str, Any]], *, q: str, asset_type: str, status: str,
     show_internal: bool = False, min_adv: float = 0.0, sector: str = "",
 ) -> list[dict[str, Any]]:
-    sl = sector.lower().strip()
     ql = q.lower().strip()
     crypto_syms = {(r.get("symbol") or "").upper() for r in rows
                    if r.get("status") == "crypto"}
@@ -193,7 +196,7 @@ def _filter_universe(
             continue
         if status and r.get("status") != status:
             continue
-        if sl and sl not in (r.get("sector") or "").lower():
+        if sector and (r.get("sector") or "") != sector:
             continue
         if ql and ql not in (
             f"{r.get('symbol','')} {r.get('name','')} {r.get('yf','')}".lower()

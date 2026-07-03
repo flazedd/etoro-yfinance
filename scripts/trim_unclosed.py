@@ -40,7 +40,7 @@ def _windows(df):
     pf, pt = w(price.notna().to_numpy())
     vf, vt = w(df["volume"].fillna(0).to_numpy() > 0)
     return {"price_from": pf, "price_to": pt, "vol_from": vf, "vol_to": vt,
-            "bars": int(len(df))}
+            "bars": len(df)}
 
 
 def main() -> int:

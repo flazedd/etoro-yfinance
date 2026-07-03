@@ -17,7 +17,16 @@ from etoro_yfinance.web.data import data_dir
 
 _CACHE = "etf_category_cache.json"
 _PACE = 0.6                # seconds between requests
-_STOP_AFTER_EMPTY = 20     # consecutive failures => assume throttled; stop (resume later)
+_CANARY = "SPY"            # known-categorized ETF to tell throttle from no-category
+_CANARY_AFTER = 8          # empties-in-a-row => canary-check (throttle vs genuine None)
+
+
+def _category(yf, t):
+    """The Yahoo fund category for a ticker, or None (many UCITS ETFs have none)."""
+    try:
+        return yf.Ticker(t).info.get("category")
+    except Exception:
+        return None
 
 
 def main() -> int:
@@ -36,32 +45,46 @@ def main() -> int:
     todo = [t for t in etfs if t not in cache]
     print(f"etf-category: {len(etfs) - len(todo)}/{len(etfs)} cached, probing {len(todo)}")
 
-    empty_streak = 0
+    def save() -> None:
+        cache_path.write_text(json.dumps(cache))
+
+    # `pending` holds empties awaiting confirmation they're genuine (a real
+    # category later, or a live canary) rather than throttle victims — so a
+    # throttle is never cached as None (those retry on the next run).
+    pending: list[str] = []
+    throttled = False
     for n, t in enumerate(todo, 1):
-        cat = None
-        try:
-            cat = yf.Ticker(t).info.get("category")
-        except Exception:
-            cat = None
+        cat = _category(yf, t)
         if cat:
-            empty_streak = 0
+            for p in pending:
+                cache[p] = None       # genuine no-category (Yahoo is responding)
+            pending.clear()
             cache[t] = cat
         else:
-            empty_streak += 1
-            cache[t] = None      # recognised-but-no-category, or missing
-            if empty_streak >= _STOP_AFTER_EMPTY:
-                print(f"  {empty_streak} empty in a row at {t} — likely throttled; "
-                      f"stopping. Re-run to resume.")
-                break
+            pending.append(t)
+            if len(pending) >= _CANARY_AFTER:
+                if _category(yf, _CANARY):        # Yahoo up → empties are genuine
+                    for p in pending:
+                        cache[p] = None
+                    pending.clear()
+                else:                              # canary empty → throttled
+                    print(f"  canary empty near {t} — throttled; stopping "
+                          f"({len(pending)} unconfirmed not cached). Re-run to resume.")
+                    throttled = True
+                    break
         if n % 50 == 0:
-            cache_path.write_text(json.dumps(cache))
+            save()
             got = sum(1 for v in cache.values() if v)
-            print(f"  {n}/{len(todo)} probed · {got} categorized")
+            print(f"  {n}/{len(todo)} probed · {got} categorized", flush=True)
         time.sleep(_PACE)
 
-    cache_path.write_text(json.dumps(cache))
+    if not throttled:                    # loop finished cleanly → trailing empties genuine
+        for p in pending:
+            cache[p] = None
+    save()
     got = sum(1 for v in cache.values() if v)
-    print(f"done: {got}/{len(cache)} ETFs categorized")
+    print(f"done: {got} categorized / {len(cache)} resolved "
+          f"({len(etfs) - len(cache)} left)")
     return 0
 
 

@@ -68,7 +68,7 @@ def _overlay_eligibility(doc: dict[str, Any]) -> dict[str, Any]:
             iid = r.get("instrument_id")
             if iid is not None and str(iid) in cache:
                 e = cache[str(iid)]
-                r.update(summarize(e) if e else {k: None for k in SUMMARY_KEYS})
+                r.update(summarize(e) if e else dict.fromkeys(SUMMARY_KEYS))
             else:
                 # Keep the summary keys defined (None) so templates can test them,
                 # without clobbering values already baked into the mapping row.

@@ -64,8 +64,14 @@
   <input type="number" name="min_adv" value="{{ min_adv or '' }}" placeholder="min €/day liquidity"
          min="0" step="100000"
          class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
-  <input name="sector" value="{{ sector or '' }}" placeholder="sector contains…"
-         class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
+  {% if sectors %}
+  <select name="sector" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm max-w-52">
+    <option value="" {{ 'selected' if not sector }}>all sectors</option>
+    {% for s in sectors %}
+      <option value="{{ s }}" {{ 'selected' if sector==s }}>{{ s }}</option>
+    {% endfor %}
+  </select>
+  {% endif %}
 </form>
 
 <div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh] tbl-box">

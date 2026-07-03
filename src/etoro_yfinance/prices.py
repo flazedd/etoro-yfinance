@@ -19,8 +19,8 @@ Read side:
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from etoro_yfinance.web.data import data_dir
 
@@ -46,15 +46,14 @@ def drop_unclosed(df):
     """Drop any bar dated today-or-later (UTC): the current session hasn't closed,
     so its candle is still moving. Backtests must only see completed daily bars.
     `df` is a DatetimeIndex-ed yfinance frame; returns the closed-bars subset."""
-    import pandas as pd
     from datetime import UTC, datetime
+
+    import pandas as pd
 
     today = datetime.now(UTC).date()
     idx = pd.to_datetime(df.index)
-    try:
+    if idx.tz is not None:
         idx = idx.tz_localize(None)
-    except (TypeError, AttributeError):
-        pass  # already tz-naive
     return df[idx.date < today]
 
 

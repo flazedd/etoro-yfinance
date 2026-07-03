@@ -50,7 +50,7 @@ def price_volume_svg(df, log: bool = True) -> str | None:
     splits) for the price line; log scale on price by default."""
     field = "adj_close" if "adj_close" in df.columns else "close"
     rows = [(d, float(p), float(v))
-            for d, p, v in zip(df.index, df[field], df["volume"])
+            for d, p, v in zip(df.index, df[field], df["volume"], strict=False)
             if p == p]  # drop NaN prices
     if len(rows) < 2:
         return None

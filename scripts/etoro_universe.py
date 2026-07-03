@@ -29,15 +29,14 @@ from etoro_yfinance.config import Settings  # noqa: E402
 from etoro_yfinance.etoro_client import etoro_from_settings  # noqa: E402
 from etoro_yfinance.web.data import data_dir  # noqa: E402
 from etoro_yfinance.yfinance_map import (  # noqa: E402
+    MAPPED_STATUSES,
     TYPE_CRYPTO,
     TYPE_ETF,
     TYPE_STOCKS,
-    MAPPED_STATUSES,
     is_crypto_quote_dupe,
     is_future,
     to_yfinance,
 )
-
 
 # Asset types with a real spot underlying (you own the asset). Everything else
 # eToro offers — Commodity, Indices, Forex — is CFD/futures-based only, so we
@@ -373,7 +372,7 @@ def _probe_eligibility(rows: list[dict], *, reprobe: bool = False) -> None:
         iid = x.get("instrument_id")
         e = cache.get(str(iid)) if iid is not None else None
         x["rules"] = e or None
-        summ = elig.summarize(e) if e else {key: None for key in elig.SUMMARY_KEYS}
+        summ = elig.summarize(e) if e else dict.fromkeys(elig.SUMMARY_KEYS)
         x.update(summ)
 
 

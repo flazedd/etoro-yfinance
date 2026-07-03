@@ -27,7 +27,7 @@ def turnover_stats(volume_eur) -> dict[str, Any]:
     return {
         "adv_eur": float(s.median()),
         "zero_vol_frac": float((s <= 0).mean()),
-        "obs": int(len(s)),
+        "obs": len(s),
     }
 
 

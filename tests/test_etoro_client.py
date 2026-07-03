@@ -247,7 +247,8 @@ def test_list_instruments_fetches_by_type_and_normalises() -> None:
         rows = c.list_instruments()
     assert any("instrumentTypeIds=5" in p for p in seen_paths)  # enumerated by type
     assert rows[0] == {"instrument_id": 1001, "symbol": "AAPL", "type_id": 5,
-                       "exchange_id": 4, "name": "Apple", "is_internal": False}
+                       "exchange_id": 4, "name": "Apple", "is_internal": False,
+                       "stocks_industry_id": None}
     assert rows[1]["is_internal"] is True
 
 
