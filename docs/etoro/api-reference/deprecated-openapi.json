@@ -1,0 +1,2445 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Deprecated eToro Public API operations",
+    "version": "v1.158.0",
+    "description": "Snapshot of API operations that existed in the previous docs OpenAPI file and are no longer present in the current upstream Swagger."
+  },
+  "paths": {
+    "/api/v1/trading/execution/demo/limit-orders": {
+      "post": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Places a Market-if-touched order (similar to Limit order) to open a position when a threshold price is reached.",
+        "description": "A Market-if-touched order is an order to open a new long or short position when a specific price or better appears in the Market. The price threshold is used to trigger a Market Order. This endpoint allows traders to set up Market-if-touched orders with parameters like leverage, stop-loss, and take-profit settings.",
+        "operationId": "openLimitOrderDemo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "InstrumentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The unique identifier of the financial instrument."
+                  },
+                  "IsBuy": {
+                    "type": "boolean",
+                    "description": "Indicates whether the order will open a long (true) or short (false) position."
+                  },
+                  "Leverage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The leverage ratio for the order."
+                  },
+                  "Amount": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The amount of the trade in the account currency [USD]. Required if AmountInUnits is not provided."
+                  },
+                  "AmountInUnits": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The number of units of the asset. Required if Amount is not provided. For most assets this can be a fractional number. Note that for Future Contracts this number should indicate the number of underlying units, and not the number of contracts, according to the formula: AmountInUnits = contract multiplier * number of contracts."
+                  },
+                  "StopLossRate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The stop-loss trigger price at which the position will generate a Market Order to close (after it was opened). StopLoss trigger price must be worse than current price."
+                  },
+                  "TakeProfitRate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The take-profit trigger price at which the position will generate a Market Order to close (after it has opened). TakeProfit trigger price must be better than the current price."
+                  },
+                  "Rate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The trigger price at which a Market order to open the position will be sent for execution. The trigger price must be better than the current price. This means that the trigger price must be lower than current price for Long positions, and higher than current price for Short positions."
+                  },
+                  "IsTslEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if a trailing stop loss (TSL) is enabled. This means that the stoploss rate indicated will get updated automatically whenever the asset price increases (for long positions) or decreases (for short position) effectively keeping the stoploss in a constant gap from the best price achieved so far."
+                  },
+                  "IsDiscounted": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "SHOULD NOT BE EXTERNALZIED"
+                  },
+                  "IsNoStopLoss": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if stop-loss is disabled."
+                  },
+                  "IsNoTakeProfit": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if take-profit is disabled."
+                  },
+                  "CID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "SHOULD NOT BE EXTERNALIZED."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Market-if-touched order successfully placed. The response includes a confirmation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A confirmation token indicating the order creation."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                },
+                "example": {
+                  "token": "9af05785-be29-482d-a892-9d9be4fd34bc"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "26fab899-92be-42c8-9d60-ca63bc08cd14"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ]
+      }
+    },
+    "/api/v1/trading/execution/demo/limit-orders/{orderId}": {
+      "delete": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Cancels a Market-if-touched order that has not yet been executed.",
+        "description": "This endpoint allows traders to cancel a Market-if-touched order before it is executed. Once canceled, the order will no longer be processed.",
+        "operationId": "cancelLimitOrderDemo",
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "ba08e8a6-1a49-450e-8f4f-15fe111976d1"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The unique identifier of the Market-if-touched order to be canceled."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully canceled the Market-if-touched order. The response includes a confirmation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A confirmation token indicating the order cancellation."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                },
+                "example": {
+                  "token": "9af05785-be29-482d-a892-9d9be4fd34bc"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/execution/demo/market-open-orders/by-amount": {
+      "post": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Create a market order to open a position by specifying the amount of cash you would like to use in the trade.",
+        "description": "This endpoint allows traders to place a market order to open a position by specifying the investment amount instead of specifying the number of units. The trade will be executed at the market price, and leverage, stop-loss, and take-profit settings can be applied.",
+        "operationId": "openMarketPositionByAmountDemo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "InstrumentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The unique identifier of the financial instrument to trade."
+                  },
+                  "IsBuy": {
+                    "type": "boolean",
+                    "description": "True for a long position, false for a short position."
+                  },
+                  "Leverage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The leverage multiplier for the trade."
+                  },
+                  "Amount": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The amount of money to invest in the trade."
+                  },
+                  "StopLossRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The stop-loss trigger price at which the position will generate a Market Order to close (after it was opened). StopLoss trigger price must be worse than current price."
+                  },
+                  "TakeProfitRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The take-profit trigger price at which the position will generate a Market Order to close (after it has opened). TakeProfit trigger price must be better than the current price."
+                  },
+                  "IsTslEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if a trailing stop loss (TSL) is enabled. This means that the stoploss rate indicated will get updated automatically whenever the asset price increases (for long positions) or decreases (for short position) effectively keeping the stoploss in a constant gap from the best price achieved so far."
+                  },
+                  "IsNoStopLoss": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no stop-loss is set for this order."
+                  },
+                  "IsNoTakeProfit": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no take-profit is set for this order."
+                  }
+                },
+                "required": [
+                  "InstrumentID",
+                  "IsBuy",
+                  "Leverage",
+                  "Amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully opened a market order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderForOpen": {
+                      "type": "object",
+                      "properties": {
+                        "instrumentID": {
+                          "type": "integer",
+                          "description": "The ID of the traded instrument."
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "description": "The invested amount."
+                        },
+                        "isBuy": {
+                          "type": "boolean",
+                          "description": "True for a long position, false for a short position."
+                        },
+                        "leverage": {
+                          "type": "integer",
+                          "description": "The leverage applied to the trade."
+                        },
+                        "stopLossRate": {
+                          "type": "integer",
+                          "description": "The stop-loss threshold rate, if applicable."
+                        },
+                        "takeProfitRate": {
+                          "type": "integer",
+                          "description": "The take-profit thereshold rate, if applicable."
+                        },
+                        "isTslEnabled": {
+                          "type": "boolean",
+                          "description": "Indicates if trailing stop-loss is enabled."
+                        },
+                        "mirrorID": {
+                          "type": "integer",
+                          "description": "ID related to mirrored trades, if applicable."
+                        },
+                        "totalExternalCosts": {
+                          "type": "integer",
+                          "description": "Total external costs associated with opening the trade."
+                        },
+                        "orderID": {
+                          "type": "integer",
+                          "description": "The unique order identifier."
+                        },
+                        "orderType": {
+                          "type": "integer",
+                          "description": "The type of order executed."
+                        },
+                        "statusID": {
+                          "type": "integer",
+                          "description": "The status of the order."
+                        },
+                        "CID": {
+                          "type": "integer",
+                          "description": "Customer ID associated with the order."
+                        },
+                        "openDateTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The timestamp when the order was opened."
+                        },
+                        "lastUpdate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The last update timestamp of the order."
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A unique confirmation token for the order."
+                    }
+                  }
+                },
+                "example": {
+                  "orderForOpen": {
+                    "instrumentID": 100000,
+                    "amount": 150,
+                    "isBuy": true,
+                    "leverage": 1,
+                    "stopLossRate": 0,
+                    "takeProfitRate": 0,
+                    "isTslEnabled": false,
+                    "mirrorID": 0,
+                    "totalExternalCosts": 0,
+                    "orderID": 13902598,
+                    "orderType": 17,
+                    "statusID": 1,
+                    "CID": 7765437,
+                    "openDateTime": "2025-04-02T15:47:15.9370502Z",
+                    "lastUpdate": "2025-04-02T15:47:15.9370502Z"
+                  },
+                  "token": "066faaee-e1e9-49d2-a568-c6e1cc336ad8"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "eff9aecd-c392-45be-b379-dfc16a2da2e7"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ]
+      }
+    },
+    "/api/v1/trading/execution/demo/market-open-orders/by-units": {
+      "post": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Places a Market Order to open a position by specifying the number of units you would like to trade.",
+        "description": "This endpoint allows traders to place a market order to open a position by specifying the number of units (rather than an amount in cash). The trade is executed at the current market price, and optional settings like leverage, stop-loss, and take-profit can be applied.",
+        "operationId": "openMarketPositionByUnitsDemo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "InstrumentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The unique identifier of the financial instrument to trade."
+                  },
+                  "IsBuy": {
+                    "type": "boolean",
+                    "description": "True for a long position, false for a short position."
+                  },
+                  "Leverage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The leverage multiplier for the trade."
+                  },
+                  "AmountInUnits": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The number of units of the asset. Required if Amount is not provided. For most assets this can be a fractional number. Note that for Future Contracts this number should indicate the number of underlying units, and not the number of contracts, according to the formula: AmountInUnits = contract multiplier * number of contracts."
+                  },
+                  "StopLossRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The stop-loss trigger price at which the position will generate a Market Order to close (after it was opened). StopLoss trigger price must be worse than current price."
+                  },
+                  "TakeProfitRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The take-profit trigger price at which the position will generate a Market Order to close (after it has opened). TakeProfit trigger price must be better than the current price."
+                  },
+                  "IsTslEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if a trailing stop loss (TSL) is enabled. This means that the stoploss rate indicated will get updated automatically whenever the asset price increases (for long positions) or decreases (for short position) effectively keeping the stoploss in a constant gap from the best price achieved so far."
+                  },
+                  "IsNoStopLoss": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no stop-loss is set for this order."
+                  },
+                  "IsNoTakeProfit": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no take-profit is set for this order."
+                  }
+                },
+                "required": [
+                  "InstrumentID",
+                  "IsBuy",
+                  "Leverage",
+                  "AmountInUnits"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully opened a market order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderForOpen": {
+                      "type": "object",
+                      "properties": {
+                        "instrumentID": {
+                          "type": "integer",
+                          "description": "The ID of the traded instrument."
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "description": "The amount invested in the trade."
+                        },
+                        "amountInUnits": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "The number of units traded."
+                        },
+                        "isBuy": {
+                          "type": "boolean",
+                          "description": "True for a long position, false for a short position."
+                        },
+                        "leverage": {
+                          "type": "integer",
+                          "description": "The leverage applied to the trade."
+                        },
+                        "stopLossRate": {
+                          "type": "integer",
+                          "description": "The stop-loss threshold rate, if applicable."
+                        },
+                        "takeProfitRate": {
+                          "type": "integer",
+                          "description": "The take-profit thereshold rate, if applicable."
+                        },
+                        "isTslEnabled": {
+                          "type": "boolean",
+                          "description": "Indicates if trailing stop-loss is enabled."
+                        },
+                        "mirrorID": {
+                          "type": "integer",
+                          "description": "ID related to mirrored trades, if applicable."
+                        },
+                        "totalExternalCosts": {
+                          "type": "integer",
+                          "description": "Total external costs associated with the trade."
+                        },
+                        "lotCount": {
+                          "type": "integer",
+                          "description": "The number of lots in the order."
+                        },
+                        "orderID": {
+                          "type": "integer",
+                          "description": "The unique order identifier."
+                        },
+                        "orderType": {
+                          "type": "integer",
+                          "description": "The type of order executed."
+                        },
+                        "statusID": {
+                          "type": "integer",
+                          "description": "The status of the order."
+                        },
+                        "CID": {
+                          "type": "integer",
+                          "description": "Customer Account ID associated with the order."
+                        },
+                        "openDateTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The timestamp when the order was opened."
+                        },
+                        "lastUpdate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The last update timestamp of the order."
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A unique confirmation token for the order."
+                    }
+                  }
+                },
+                "example": {
+                  "orderForOpen": {
+                    "instrumentID": 100000,
+                    "amount": 0,
+                    "amountInUnits": 0.001,
+                    "isBuy": true,
+                    "leverage": 1,
+                    "stopLossRate": 0,
+                    "takeProfitRate": 0,
+                    "isTslEnabled": false,
+                    "mirrorID": 0,
+                    "totalExternalCosts": 0,
+                    "lotCount": 0,
+                    "orderID": 13906629,
+                    "orderType": 18,
+                    "statusID": 1,
+                    "CID": 7765437,
+                    "openDateTime": "2025-04-02T15:56:50.7496838Z",
+                    "lastUpdate": "2025-04-02T15:56:50.7496838Z"
+                  },
+                  "token": "43ceb769-cff6-45ec-8ad7-292b7401353f"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "f4ce3033-f7d7-426d-96b4-f261ef64c05e"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ]
+      }
+    },
+    "/api/v1/trading/execution/demo/market-open-orders/{orderId}": {
+      "delete": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Cancels a market order for open before it is executed.",
+        "description": "This endpoint allows traders to cancel a market order for open before execution. If the order has already been processed, cancellation will not be possible.",
+        "operationId": "cancelOpenMarketOrderDemo",
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "a8518935-f0d8-49d8-9c15-c04a665da4dd"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The unique identifier of the market order for open to be canceled."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully canceled the pending market order. The response includes a confirmation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A confirmation token indicating the order cancellation."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                },
+                "example": {
+                  "token": "9af05785-be29-482d-a892-9d9be4fd34bc"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/execution/limit-orders": {
+      "post": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Places a Market-if-touched order (similar to Limit order) to open a position when a threshold price is reached.",
+        "description": "A Market-if-touched order is an order to open a new long or short position when a specific price or better appears in the Market. The price threshold is used to trigger a Market Order. This endpoint allows traders to set up Market-if-touched orders with parameters like leverage, stop-loss, and take-profit settings.",
+        "operationId": "openLimitOrder",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "InstrumentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The unique identifier of the financial instrument."
+                  },
+                  "IsBuy": {
+                    "type": "boolean",
+                    "description": "Indicates whether the order will open a long (true) or short (false) position."
+                  },
+                  "Leverage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The leverage ratio for the order."
+                  },
+                  "Amount": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The amount of the trade in the account currency [USD]. Required if AmountInUnits is not provided."
+                  },
+                  "AmountInUnits": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The number of units of the asset. Required if Amount is not provided. For most assets this can be a fractional number. Note that for Future Contracts this number should indicate the number of underlying units, and not the number of contracts, according to the formula: AmountInUnits = contract multiplier * number of contracts."
+                  },
+                  "StopLossRate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The stop-loss trigger price at which the position will generate a Market Order to close (after it was opened). StopLoss trigger price must be worse than current price."
+                  },
+                  "TakeProfitRate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The take-profit trigger price at which the position will generate a Market Order to close (after it has opened). TakeProfit trigger price must be better than the current price."
+                  },
+                  "Rate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The trigger price at which a Market order to open the position will be sent for execution. The trigger price must be better than the current price. This means that the trigger price must be lower than current price for Long positions, and higher than current price for Short positions."
+                  },
+                  "IsTslEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if a trailing stop loss (TSL) is enabled. This means that the stoploss rate indicated will get updated automatically whenever the asset price increases (for long positions) or decreases (for short position) effectively keeping the stoploss in a constant gap from the best price achieved so far."
+                  },
+                  "IsDiscounted": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "SHOULD NOT BE EXTERNALZIED"
+                  },
+                  "IsNoStopLoss": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if stop-loss is disabled."
+                  },
+                  "IsNoTakeProfit": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if take-profit is disabled."
+                  },
+                  "CID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "SHOULD NOT BE EXTERNALIZED."
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Market-if-touched order successfully placed. The response includes a confirmation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A confirmation token indicating the order creation."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                },
+                "example": {
+                  "token": "9af05785-be29-482d-a892-9d9be4fd34bc"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "4e1e6a7c-018b-4e17-8ade-3006f9b54d2b"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ]
+      }
+    },
+    "/api/v1/trading/execution/limit-orders/{orderId}": {
+      "delete": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Cancels a Market-if-touched order that has not yet been executed.",
+        "description": "This endpoint allows traders to cancel a Market-if-touched order before it is executed. Once canceled, the order will no longer be processed.",
+        "operationId": "cancelLimitOrder",
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "c381880f-7d0c-4346-82c1-2329d468720e"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The unique identifier of the Market-if-touched order to be canceled."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully canceled the Market-if-touched order. The response includes a confirmation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A confirmation token indicating the order cancellation."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                },
+                "example": {
+                  "token": "9af05785-be29-482d-a892-9d9be4fd34bc"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/execution/market-open-orders/by-amount": {
+      "post": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Create a market order to open a position by specifying the amount of cash you would like to use in the trade.",
+        "description": "This endpoint allows traders to place a market order to open a position by specifying the investment amount instead of specifying the number of units. The trade will be executed at the market price, and leverage, stop-loss, and take-profit settings can be applied.",
+        "operationId": "openMarketPositionByAmount",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "InstrumentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The unique identifier of the financial instrument to trade."
+                  },
+                  "IsBuy": {
+                    "type": "boolean",
+                    "description": "True for a long position, false for a short position."
+                  },
+                  "Leverage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The leverage multiplier for the trade."
+                  },
+                  "Amount": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The amount of money to invest in the trade."
+                  },
+                  "StopLossRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The stop-loss trigger price at which the position will generate a Market Order to close (after it was opened). StopLoss trigger price must be worse than current price."
+                  },
+                  "TakeProfitRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The take-profit trigger price at which the position will generate a Market Order to close (after it has opened). TakeProfit trigger price must be better than the current price."
+                  },
+                  "IsTslEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if a trailing stop loss (TSL) is enabled. This means that the stoploss rate indicated will get updated automatically whenever the asset price increases (for long positions) or decreases (for short position) effectively keeping the stoploss in a constant gap from the best price achieved so far."
+                  },
+                  "IsNoStopLoss": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no stop-loss is set for this order."
+                  },
+                  "IsNoTakeProfit": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no take-profit is set for this order."
+                  }
+                },
+                "required": [
+                  "InstrumentID",
+                  "IsBuy",
+                  "Leverage",
+                  "Amount"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully opened a market order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderForOpen": {
+                      "type": "object",
+                      "properties": {
+                        "instrumentID": {
+                          "type": "integer",
+                          "description": "The ID of the traded instrument."
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "description": "The invested amount."
+                        },
+                        "isBuy": {
+                          "type": "boolean",
+                          "description": "True for a long position, false for a short position."
+                        },
+                        "leverage": {
+                          "type": "integer",
+                          "description": "The leverage applied to the trade."
+                        },
+                        "stopLossRate": {
+                          "type": "integer",
+                          "description": "The stop-loss threshold rate, if applicable."
+                        },
+                        "takeProfitRate": {
+                          "type": "integer",
+                          "description": "The take-profit thereshold rate, if applicable."
+                        },
+                        "isTslEnabled": {
+                          "type": "boolean",
+                          "description": "Indicates if trailing stop-loss is enabled."
+                        },
+                        "mirrorID": {
+                          "type": "integer",
+                          "description": "ID related to mirrored trades, if applicable."
+                        },
+                        "totalExternalCosts": {
+                          "type": "integer",
+                          "description": "Total external costs associated with opening the trade."
+                        },
+                        "orderID": {
+                          "type": "integer",
+                          "description": "The unique order identifier."
+                        },
+                        "orderType": {
+                          "type": "integer",
+                          "description": "The type of order executed."
+                        },
+                        "statusID": {
+                          "type": "integer",
+                          "description": "The status of the order."
+                        },
+                        "CID": {
+                          "type": "integer",
+                          "description": "Customer ID associated with the order."
+                        },
+                        "openDateTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The timestamp when the order was opened."
+                        },
+                        "lastUpdate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The last update timestamp of the order."
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A unique confirmation token for the order."
+                    }
+                  }
+                },
+                "example": {
+                  "orderForOpen": {
+                    "instrumentID": 100000,
+                    "amount": 150,
+                    "isBuy": true,
+                    "leverage": 1,
+                    "stopLossRate": 0,
+                    "takeProfitRate": 0,
+                    "isTslEnabled": false,
+                    "mirrorID": 0,
+                    "totalExternalCosts": 0,
+                    "orderID": 13902598,
+                    "orderType": 17,
+                    "statusID": 1,
+                    "CID": 7765437,
+                    "openDateTime": "2025-04-02T15:47:15.9370502Z",
+                    "lastUpdate": "2025-04-02T15:47:15.9370502Z"
+                  },
+                  "token": "066faaee-e1e9-49d2-a568-c6e1cc336ad8"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "7a83a55e-139d-4e88-9450-baa64cf75715"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ]
+      }
+    },
+    "/api/v1/trading/execution/market-open-orders/by-units": {
+      "post": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Places a Market Order to open a position by specifying the number of units you would like to trade.",
+        "description": "This endpoint allows traders to place a market order to open a position by specifying the number of units (rather than an amount in cash). The trade is executed at the current market price, and optional settings like leverage, stop-loss, and take-profit can be applied.",
+        "operationId": "openMarketPositionByUnits",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "InstrumentID": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The unique identifier of the financial instrument to trade."
+                  },
+                  "IsBuy": {
+                    "type": "boolean",
+                    "description": "True for a long position, false for a short position."
+                  },
+                  "Leverage": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The leverage multiplier for the trade."
+                  },
+                  "AmountInUnits": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "The number of units of the asset. Required if Amount is not provided. For most assets this can be a fractional number. Note that for Future Contracts this number should indicate the number of underlying units, and not the number of contracts, according to the formula: AmountInUnits = contract multiplier * number of contracts."
+                  },
+                  "StopLossRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The stop-loss trigger price at which the position will generate a Market Order to close (after it was opened). StopLoss trigger price must be worse than current price."
+                  },
+                  "TakeProfitRate": {
+                    "type": "number",
+                    "format": "double",
+                    "nullable": true,
+                    "description": "The take-profit trigger price at which the position will generate a Market Order to close (after it has opened). TakeProfit trigger price must be better than the current price."
+                  },
+                  "IsTslEnabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "Indicates if a trailing stop loss (TSL) is enabled. This means that the stoploss rate indicated will get updated automatically whenever the asset price increases (for long positions) or decreases (for short position) effectively keeping the stoploss in a constant gap from the best price achieved so far."
+                  },
+                  "IsNoStopLoss": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no stop-loss is set for this order."
+                  },
+                  "IsNoTakeProfit": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "description": "True if no take-profit is set for this order."
+                  }
+                },
+                "required": [
+                  "InstrumentID",
+                  "IsBuy",
+                  "Leverage",
+                  "AmountInUnits"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully opened a market order.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "orderForOpen": {
+                      "type": "object",
+                      "properties": {
+                        "instrumentID": {
+                          "type": "integer",
+                          "description": "The ID of the traded instrument."
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "description": "The amount invested in the trade."
+                        },
+                        "amountInUnits": {
+                          "type": "number",
+                          "format": "double",
+                          "description": "The number of units traded."
+                        },
+                        "isBuy": {
+                          "type": "boolean",
+                          "description": "True for a long position, false for a short position."
+                        },
+                        "leverage": {
+                          "type": "integer",
+                          "description": "The leverage applied to the trade."
+                        },
+                        "stopLossRate": {
+                          "type": "integer",
+                          "description": "The stop-loss threshold rate, if applicable."
+                        },
+                        "takeProfitRate": {
+                          "type": "integer",
+                          "description": "The take-profit thereshold rate, if applicable."
+                        },
+                        "isTslEnabled": {
+                          "type": "boolean",
+                          "description": "Indicates if trailing stop-loss is enabled."
+                        },
+                        "mirrorID": {
+                          "type": "integer",
+                          "description": "ID related to mirrored trades, if applicable."
+                        },
+                        "totalExternalCosts": {
+                          "type": "integer",
+                          "description": "Total external costs associated with the trade."
+                        },
+                        "lotCount": {
+                          "type": "integer",
+                          "description": "The number of lots in the order."
+                        },
+                        "orderID": {
+                          "type": "integer",
+                          "description": "The unique order identifier."
+                        },
+                        "orderType": {
+                          "type": "integer",
+                          "description": "The type of order executed."
+                        },
+                        "statusID": {
+                          "type": "integer",
+                          "description": "The status of the order."
+                        },
+                        "CID": {
+                          "type": "integer",
+                          "description": "Customer Account ID associated with the order."
+                        },
+                        "openDateTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The timestamp when the order was opened."
+                        },
+                        "lastUpdate": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The last update timestamp of the order."
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A unique confirmation token for the order."
+                    }
+                  }
+                },
+                "example": {
+                  "orderForOpen": {
+                    "instrumentID": 100000,
+                    "amount": 0,
+                    "amountInUnits": 0.001,
+                    "isBuy": true,
+                    "leverage": 1,
+                    "stopLossRate": 0,
+                    "takeProfitRate": 0,
+                    "isTslEnabled": false,
+                    "mirrorID": 0,
+                    "totalExternalCosts": 0,
+                    "lotCount": 0,
+                    "orderID": 13906629,
+                    "orderType": 18,
+                    "statusID": 1,
+                    "CID": 7765437,
+                    "openDateTime": "2025-04-02T15:56:50.7496838Z",
+                    "lastUpdate": "2025-04-02T15:56:50.7496838Z"
+                  },
+                  "token": "43ceb769-cff6-45ec-8ad7-292b7401353f"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "44c91841-9144-46bc-8320-957315279427"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ]
+      }
+    },
+    "/api/v1/trading/execution/market-open-orders/{orderId}": {
+      "delete": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Cancels a market order for open before it is executed.",
+        "description": "This endpoint allows traders to cancel a market order for open before execution. If the order has already been processed, cancellation will not be possible.",
+        "operationId": "cancelOpenMarketOrder",
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "99871678-c1cc-4c89-9a72-903e0e6529d1"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The unique identifier of the market order for open to be canceled."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully canceled the pending market order. The response includes a confirmation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "A confirmation token indicating the order cancellation."
+                    }
+                  },
+                  "required": [
+                    "token"
+                  ]
+                },
+                "example": {
+                  "token": "9af05785-be29-482d-a892-9d9be4fd34bc"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/info/demo/orders/{orderId}": {
+      "get": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Get Order Information and Position Details for Demo Account",
+        "description": "Retrieves comprehensive information about a specific order for opening a position, including the order status, execution details, and all positions that were opened from this order. This endpoint is essential for tracking order execution and identifying which positions were created as a result of a specific order request. The response includes detailed position information with PositionID values that can be used to query position-specific details.",
+        "operationId": "getDemoOrderForOpenInfo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "d2821231-fe26-4031-9c20-337104b4efaa"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the order for opening a position. This is the OrderID that was returned when the order was initially created.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 123456789
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved order information and associated position details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderForOpenInfoResponse"
+                },
+                "example": {
+                  "token": "550e8400-e29b-41d4-a716-446655440000",
+                  "orderID": 123456789,
+                  "cid": 987654321,
+                  "statusID": 1,
+                  "orderType": 1,
+                  "openActionType": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "instrumentID": 67890,
+                  "amount": 1000,
+                  "units": 10.5,
+                  "requestOccurred": "2024-01-15T10:30:00Z",
+                  "positions": [
+                    {
+                      "positionID": 9876543210,
+                      "orderType": 1,
+                      "occurred": "2024-01-15T10:30:15Z",
+                      "rate": 1.2345,
+                      "units": 10.5,
+                      "conversionRate": 1,
+                      "amount": 1000,
+                      "isOpen": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid orderId format, or validation error occurred."
+          },
+          "404": {
+            "description": "Not Found - The specified order was not found for the provided OrderID."
+          },
+          "500": {
+            "description": "Internal Server Error - An unexpected error occurred while processing the request."
+          }
+        }
+      }
+    },
+    "/api/v1/trading/info/real/orders/{orderId}": {
+      "get": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Get Order Information and Position Details for Real Account",
+        "description": "Retrieves comprehensive information about a specific order for opening a position, including the order status, execution details, and all positions that were opened from this order. This endpoint is essential for tracking order execution and identifying which positions were created as a result of a specific order request. The response includes detailed position information with PositionID values that can be used to query position-specific details.",
+        "operationId": "getRealOrderForOpenInfo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "67a6927c-4349-40a3-9c31-c98b26f4b863"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          },
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the order for opening a position. This is the OrderID that was returned when the order was initially created.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": 123456789
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved order information and associated position details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderForOpenInfoResponse"
+                },
+                "example": {
+                  "token": "550e8400-e29b-41d4-a716-446655440000",
+                  "orderID": 123456789,
+                  "cid": 987654321,
+                  "statusID": 1,
+                  "orderType": 1,
+                  "openActionType": 1,
+                  "errorCode": null,
+                  "errorMessage": null,
+                  "instrumentID": 67890,
+                  "amount": 1000,
+                  "units": 10.5,
+                  "requestOccurred": "2024-01-15T10:30:00Z",
+                  "positions": [
+                    {
+                      "positionID": 9876543210,
+                      "orderType": 1,
+                      "occurred": "2024-01-15T10:30:15Z",
+                      "rate": 1.2345,
+                      "units": 10.5,
+                      "conversionRate": 1,
+                      "amount": 1000,
+                      "isOpen": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid orderId format, or validation error occurred."
+          },
+          "404": {
+            "description": "Not Found - The specified order was not found for the provided OrderID."
+          },
+          "500": {
+            "description": "Internal Server Error - An unexpected error occurred while processing the request."
+          }
+        }
+      }
+    },
+    "/api/v1/trading/info/demo/eligibility": {
+      "post": {
+        "tags": [
+          "Trading - Demo"
+        ],
+        "summary": "Check trading permissions, limits, and available leverage for one or more instruments",
+        "description": "Returns per-instrument trading configuration for the authenticated account - position limits, permitted order types, stop-loss and take-profit boundaries, and available leverage by settlement type and direction. Instruments not found are listed in notFoundInstrumentIds and notFoundSymbols. At least one of instrumentIds or symbols must be supplied; the combined length must not exceed 100 instruments.",
+        "operationId": "getInstrumentEligibilityDemo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "21e80d1f-5f99-4f93-b337-5f5e63582279"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstrumentEligibilityRequest"
+              },
+              "example": {
+                "instrumentIds": [
+                  1001
+                ],
+                "symbols": [
+                  "AAPL"
+                ],
+                "currency": "USD"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Eligibility resolved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstrumentEligibilityResponse"
+                },
+                "example": {
+                  "currency": "USD",
+                  "eligibilities": [
+                    {
+                      "instrumentId": 1001,
+                      "symbol": "AAPL",
+                      "minPositionExposure": 50,
+                      "maxUnitsPerOrder": 10000,
+                      "allowOpenPosition": true,
+                      "allowClosePosition": true,
+                      "allowPartialClosePosition": true,
+                      "allowMitOrders": true,
+                      "allowEntryOrders": false,
+                      "allowExitOrders": false,
+                      "allowTrailingStopLoss": true,
+                      "requiresW8Ben": null,
+                      "unitsQuantityType": "FractionalUnits",
+                      "orderFillBehaviorType": "BestEffort",
+                      "allowedOrderQuantityType": "Both",
+                      "tradeUnitType": "Units",
+                      "initialMarginInAssetCurrency": null,
+                      "stopLossMarginInAssetCurrency": null,
+                      "additionalBufferPercent": null,
+                      "leverageConfigs": [
+                        {
+                          "settlementType": "CFD",
+                          "direction": "LONG",
+                          "leverageValues": [
+                            1,
+                            2,
+                            5
+                          ],
+                          "isPotential": false,
+                          "minPositionAmount": 50,
+                          "allowEditStopLoss": true,
+                          "minStopLossPercentage": 5,
+                          "maxStopLossPercentage": 50,
+                          "defaultStopLossPercentage": 50,
+                          "allowEditTakeProfit": true,
+                          "minTakeProfitPercentage": 5,
+                          "maxTakeProfitPercentage": 1000,
+                          "defaultTakeProfitPercentage": 1000,
+                          "allowStopLossTakeProfit": true
+                        }
+                      ]
+                    }
+                  ],
+                  "notFoundInstrumentIds": [],
+                  "notFoundSymbols": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or missing authentication.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/api/v1/trading/info/eligibility": {
+      "post": {
+        "tags": [
+          "Trading - Real"
+        ],
+        "summary": "Check trading permissions, limits, and available leverage for one or more instruments",
+        "description": "Returns per-instrument trading configuration for the authenticated account - position limits, permitted order types, stop-loss and take-profit boundaries, and available leverage by settlement type and direction. Instruments not found are listed in notFoundInstrumentIds and notFoundSymbols. At least one of instrumentIds or symbols must be supplied; the combined length must not exceed 100 instruments.",
+        "operationId": "getInstrumentEligibility",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-request-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "b8990cdd-54f3-4a3b-89c1-7a9486f6fdc9"
+            },
+            "description": "A unique request identifier."
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "lhgfaslk21490FAScVPkdsb53F9dNkfHG4faZSG5vfjndfcfgdssdgsdHF4663"
+            },
+            "description": "API key for authentication."
+          },
+          {
+            "name": "x-user-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "password",
+              "example": "eyJlYW4iOiJVbnJlZ2lzdGVyZWRBcHBsaWNhdGlvbiIsImVrIjoiOE5sZ2cwcW5EUVdROUFNWGpXT2lmOWktZnpidG5KcUlqWGJ3WHJZZkpZcldrbG90ZEhvLVBjSWhQaU8xU1ZtMW84aU1WZGZqN2xWNzFjLXFxLmcybXE1dnh4Q1hUT25xaWRUaTFlcEhmVk1fIn0_"
+            },
+            "description": "User-specific authentication key."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstrumentEligibilityRequest"
+              },
+              "example": {
+                "instrumentIds": [
+                  1001
+                ],
+                "symbols": [
+                  "AAPL"
+                ],
+                "currency": "USD"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Eligibility resolved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstrumentEligibilityResponse"
+                },
+                "example": {
+                  "currency": "USD",
+                  "eligibilities": [
+                    {
+                      "instrumentId": 1001,
+                      "symbol": "AAPL",
+                      "minPositionExposure": 50,
+                      "maxUnitsPerOrder": 10000,
+                      "allowOpenPosition": true,
+                      "allowClosePosition": true,
+                      "allowPartialClosePosition": true,
+                      "allowMitOrders": true,
+                      "allowEntryOrders": false,
+                      "allowExitOrders": false,
+                      "allowTrailingStopLoss": true,
+                      "requiresW8Ben": null,
+                      "unitsQuantityType": "FractionalUnits",
+                      "orderFillBehaviorType": "BestEffort",
+                      "allowedOrderQuantityType": "Both",
+                      "tradeUnitType": "Units",
+                      "initialMarginInAssetCurrency": null,
+                      "stopLossMarginInAssetCurrency": null,
+                      "additionalBufferPercent": null,
+                      "leverageConfigs": [
+                        {
+                          "settlementType": "CFD",
+                          "direction": "LONG",
+                          "leverageValues": [
+                            1,
+                            2,
+                            5
+                          ],
+                          "isPotential": false,
+                          "minPositionAmount": 50,
+                          "allowEditStopLoss": true,
+                          "minStopLossPercentage": 5,
+                          "maxStopLossPercentage": 50,
+                          "defaultStopLossPercentage": 50,
+                          "allowEditTakeProfit": true,
+                          "minTakeProfitPercentage": 5,
+                          "maxTakeProfitPercentage": 1000,
+                          "defaultTakeProfitPercentage": 1000,
+                          "allowStopLossTakeProfit": true
+                        }
+                      ]
+                    }
+                  ],
+                  "notFoundInstrumentIds": [],
+                  "notFoundSymbols": []
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Validation failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or missing authentication.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrderForOpenInfoResponse": {
+        "type": "object",
+        "description": "Comprehensive order information response containing order details and all positions opened from this order.",
+        "required": [
+          "orderID",
+          "CID",
+          "statusID",
+          "orderType",
+          "instrumentID",
+          "requestOccurred"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Tracking token for the request, used for correlation and debugging purposes. This token is generated by the system and can be used to track the request through various system components.",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "orderID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The unique identifier of the order. This is the same OrderID that was provided in the request path parameter.",
+            "example": 123456789
+          },
+          "CID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Customer ID (CID) associated with the order. This identifies the user account that created the order.",
+            "example": 987654321
+          },
+          "referenceID": {
+            "type": "string",
+            "description": "Reference tracking ID for the order request.",
+            "example": "00000000-0000-0000-0000-000000000000"
+          },
+          "statusID": {
+            "type": "integer",
+            "description": "Current status of the order. Common values: 0 = Pending, 1 = Executed, 2 = Cancelled, 3 = Rejected, 4 = Partially Executed. The exact meaning of status codes may vary based on order type and system configuration.",
+            "example": 1
+          },
+          "orderType": {
+            "type": "integer",
+            "description": "Type of the order. Common values: 1 = Market Order, 2 = Limit Order, 3 = Stop Order. The exact order types depend on the trading system configuration.",
+            "example": 1
+          },
+          "openActionType": {
+            "type": "integer",
+            "description": "The action type that triggered the order creation. This indicates the reason or context for opening the position, such as manual trade, copy trading, automated strategy, etc.",
+            "example": 1
+          },
+          "errorCode": {
+            "type": "integer",
+            "format": "nullable",
+            "description": "Error code if the order execution failed or encountered an error. This field is null if the order was successful. Error codes are system-specific and should be referenced against the system's error code documentation.",
+            "example": null
+          },
+          "errorMessage": {
+            "type": "string",
+            "format": "nullable",
+            "description": "Human-readable error message describing any error that occurred during order processing. This field is null if the order was successful. Provides additional context beyond the errorCode.",
+            "example": null
+          },
+          "instrumentID": {
+            "type": "integer",
+            "description": "The unique identifier of the financial instrument that the order was placed for. This corresponds to the instrument being traded (e.g., stock, currency pair, commodity).",
+            "example": 67890
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "The USD amount that was requested to be invested in the position. This represents the monetary value allocated to the order.",
+            "example": 1000
+          },
+          "units": {
+            "type": "number",
+            "format": "decimal",
+            "description": "The number of units that were requested to be traded. If the order was placed by units rather than amount, this value represents the requested quantity.",
+            "example": 10.5
+          },
+          "requestOccurred": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the order request was initially created and submitted to the system. This is in ISO 8601 format (UTC).",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "positions": {
+            "type": "array",
+            "description": "List of all positions that were opened as a result of this order. Each position in this array represents a successfully executed position created from the order. This array is empty if the order has not yet been executed or if execution failed.",
+            "items": {
+              "$ref": "#/components/schemas/OrderForOpenPositionInfo"
+            }
+          }
+        }
+      },
+      "OrderForOpenPositionInfo": {
+        "type": "object",
+        "description": "Detailed information about a position that was opened from an order. This object contains all the essential details needed to identify and track the position.",
+        "required": [
+          "positionID",
+          "orderType",
+          "occurred",
+          "rate",
+          "units",
+          "amount",
+          "isOpen"
+        ],
+        "properties": {
+          "positionID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The unique identifier of the position that was opened from this order. This PositionID is the key property that can be used to query detailed position information, track position status, and perform position-specific operations. This is the primary identifier for the position in the trading system.",
+            "example": 9876543210
+          },
+          "orderType": {
+            "type": "integer",
+            "description": "The type of order that was used to open this position. This matches the orderType from the parent order and indicates the execution method (e.g., Market Order, Limit Order).",
+            "example": 1
+          },
+          "occurred": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The exact timestamp when this position was opened and executed. This is in ISO 8601 format (UTC) and represents when the position became active in the trading system.",
+            "example": "2024-01-15T10:30:15Z"
+          },
+          "rate": {
+            "type": "number",
+            "format": "decimal",
+            "description": "The execution rate (price) at which the position was opened. This is the actual price at which the trade was executed, which may differ from the requested rate depending on market conditions and order type.",
+            "example": 1.2345
+          },
+          "units": {
+            "type": "number",
+            "format": "decimal",
+            "description": "The number of units in the position. This represents the quantity of the instrument that was acquired when the position was opened.",
+            "example": 10.5
+          },
+          "conversionRate": {
+            "type": "number",
+            "format": "decimal",
+            "description": "The currency conversion rate that was applied when opening the position. This rate is used to convert between the instrument's base currency and the account currency (typically USD) at the time of execution.",
+            "example": 1
+          },
+          "amount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "The USD amount that was invested in this position. This represents the monetary value allocated to this specific position.",
+            "example": 1000
+          },
+          "isOpen": {
+            "type": "boolean",
+            "description": "Indicates whether the position is currently open (true) or has been closed (false). This status reflects the current state of the position at the time the order information was retrieved.",
+            "example": true
+          }
+        }
+      },
+      "InstrumentEligibilityRequest": {
+        "type": "object",
+        "description": "Request payload for checking instrument eligibility. At least one of `instrumentIds` or `symbols` must be provided; combined length must not exceed 100 instruments.",
+        "properties": {
+          "instrumentIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true,
+            "description": "Optional list of instrument IDs to check."
+          },
+          "symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "description": "Optional list of instrument symbols to check."
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD",
+            "description": "Requested currency for financial amounts in the eligibility response (e.g. minimum position size). Currently only USD is supported."
+          }
+        }
+      },
+      "InstrumentEligibilityResponse": {
+        "type": "object",
+        "description": "Response containing trading configuration for all requested instruments.",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "The currency used for all monetary values in this response."
+          },
+          "eligibilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstrumentEligibility"
+            },
+            "description": "Trading configuration for each resolved instrument."
+          },
+          "notFoundInstrumentIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Instrument IDs that were requested but could not be found."
+          },
+          "notFoundSymbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Symbols that were requested but could not be found."
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": {}
+      },
+      "InstrumentEligibility": {
+        "type": "object",
+        "description": "Full trading configuration for a single instrument, including position limits, trading permissions, order configuration, margin settings, and available leverage.",
+        "properties": {
+          "instrumentId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Unique identifier for the instrument."
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Trading symbol of the instrument (e.g. AAPL, EURUSD)."
+          },
+          "minPositionExposure": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Minimum exposure value required to open a position on this instrument."
+          },
+          "maxUnitsPerOrder": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Maximum number of units allowed per single order."
+          },
+          "allowOpenPosition": {
+            "type": "boolean",
+            "description": "Whether opening new positions is currently permitted."
+          },
+          "allowClosePosition": {
+            "type": "boolean",
+            "description": "Whether closing existing positions is currently permitted."
+          },
+          "allowPartialClosePosition": {
+            "type": "boolean",
+            "description": "Whether partially closing an existing position is permitted."
+          },
+          "allowMitOrders": {
+            "type": "boolean",
+            "description": "Whether Market-if-Touched (limit) orders are supported."
+          },
+          "allowEntryOrders": {
+            "type": "boolean",
+            "description": "Whether submitting open orders when the market is closed is allowed."
+          },
+          "allowExitOrders": {
+            "type": "boolean",
+            "description": "Whether submitting close orders when the market is closed is allowed."
+          },
+          "allowTrailingStopLoss": {
+            "type": "boolean",
+            "description": "Whether a trailing stop-loss can be set on positions for this instrument."
+          },
+          "requiresW8Ben": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether a W-8BEN tax form is required to trade this instrument. Null if not applicable."
+          },
+          "unitsQuantityType": {
+            "type": "string",
+            "description": "What trade quantity type is allowed. Possible values: `WholeUnits`, `FractionalUnits`."
+          },
+          "orderFillBehaviorType": {
+            "type": "string",
+            "description": "How orders are filled for this instrument. Possible values: `BestEffort`, `FillOrKill`."
+          },
+          "allowedOrderQuantityType": {
+            "type": "string",
+            "description": "How order size can be specified. Possible values: `Units`, `Amount`, `Both`."
+          },
+          "tradeUnitType": {
+            "type": "string",
+            "description": "Unit type used to express trade size. Possible values: `Units`, `Lots`."
+          },
+          "initialMarginInAssetCurrency": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true,
+            "description": "Initial margin expressed in the asset currency. Null if not applicable."
+          },
+          "stopLossMarginInAssetCurrency": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true,
+            "description": "Stop-loss margin expressed in the asset currency. Null if not applicable."
+          },
+          "additionalBufferPercent": {
+            "type": "number",
+            "format": "decimal",
+            "nullable": true,
+            "description": "Additional buffer applied to the current rate to limit the order execution price - usually for low-liquidity assets. This also causes additional funds to be reserved for the order. Null if no buffer."
+          },
+          "leverageConfigs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeverageConfiguration"
+            },
+            "description": "Available leverage configurations, each specific to a settlement type and direction."
+          }
+        }
+      },
+      "LeverageConfiguration": {
+        "type": "object",
+        "description": "Leverage configuration for a specific settlement type and trade direction combination.",
+        "properties": {
+          "settlementType": {
+            "type": "string",
+            "description": "The settlement type this configuration applies to. Possible values: CFD, REAL, REAL_FUTURES, MARGIN_TRADE."
+          },
+          "direction": {
+            "type": "string",
+            "description": "The trade direction. Possible values: LONG, SHORT."
+          },
+          "leverageValues": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Available leverage multipliers for this settlement type and direction."
+          },
+          "isPotential": {
+            "type": "boolean",
+            "description": "Additional user questionnaire may be required to allow the user to trade with this setup of settlement and leverages."
+          },
+          "minPositionAmount": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Minimum monetary collateral required to open a position under this leverage configuration."
+          },
+          "allowEditStopLoss": {
+            "type": "boolean",
+            "description": "Whether the stop-loss can be edited for positions under this configuration."
+          },
+          "minStopLossPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Minimum stop-loss percentage allowed from the allocated margin of the position."
+          },
+          "maxStopLossPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Maximum stop-loss percentage allowed from the allocated margin of the position."
+          },
+          "defaultStopLossPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Default stop-loss percentage applied when no explicit value is provided."
+          },
+          "allowEditTakeProfit": {
+            "type": "boolean",
+            "description": "Whether the take-profit can be edited."
+          },
+          "minTakeProfitPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Minimum take-profit percentage allowed from the allocated margin of the position."
+          },
+          "maxTakeProfitPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Maximum take-profit percentage allowed from the allocated margin of the position."
+          },
+          "defaultTakeProfitPercentage": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Default take-profit percentage applied when no explicit value is provided."
+          },
+          "allowStopLossTakeProfit": {
+            "type": "boolean",
+            "description": "Whether stop-loss and take-profit can be set on a position."
+          }
+        }
+      }
+    }
+  }
+}

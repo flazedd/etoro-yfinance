@@ -1,9 +1,0 @@
-[Unit]
-Description=Refresh + publish strategy performance twice daily
-
-[Timer]
-OnCalendar=*-*-* 06,18:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target

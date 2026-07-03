@@ -1,1 +1,0 @@
-### PortfolioAnalyst Copy Location

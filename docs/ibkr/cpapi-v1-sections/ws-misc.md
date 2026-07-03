@@ -1,1 +1,0 @@
-### Miscellaneous Operations Copy Location

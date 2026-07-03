@@ -1,52 +1,48 @@
-"""Tests for environment-driven settings."""
+"""Tests for environment-driven settings (eToro)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
 
-from ibkr_portfolio_connect.config import Settings
+from etoro_yfinance.config import Settings
 
 
-def _common_env(monkeypatch: pytest.MonkeyPatch, *, env_file: Path) -> None:
-    monkeypatch.setenv("IBKR_ACCOUNT_ID", "U1234567")
-    monkeypatch.setenv("TARGET_PORTFOLIO_URL", "https://example.invalid/target.json")
+def _isolate(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     # Point pydantic-settings at a non-existent file so the host's real .env never leaks.
-    Settings.model_config["env_file"] = str(env_file)
-
-
-def test_settings_load_from_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    _common_env(monkeypatch, env_file=tmp_path / ".env.missing")
-    s = Settings()  # type: ignore[call-arg]
-    assert s.ibkr_account_id == "U1234567"
-    assert str(s.target_portfolio_url) == "https://example.invalid/target.json"
-    assert s.dry_run is False  # default
-    assert s.trading_hours_only is True  # default
-
-
-def test_settings_rejects_missing_required(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    # Clear required vars
-    monkeypatch.delenv("IBKR_ACCOUNT_ID", raising=False)
-    monkeypatch.delenv("TARGET_PORTFOLIO_URL", raising=False)
     Settings.model_config["env_file"] = str(tmp_path / ".env.missing")
-    with pytest.raises(ValidationError):
-        Settings()  # type: ignore[call-arg]
+    for k in ("ETORO_API_KEY", "ETORO_USER_KEY_DEMO", "ETORO_USER_KEY_REAL",
+              "ETORO_USER_KEY", "ETORO_ENV"):
+        monkeypatch.delenv(k, raising=False)
 
 
-def test_settings_ignores_ibeam_vars(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    _common_env(monkeypatch, env_file=tmp_path / ".env.missing")
-    monkeypatch.setenv("IBKR_USERNAME", "someone")
-    monkeypatch.setenv("IBKR_PASSWORD", "secret")
-    monkeypatch.setenv("IBKR_TOTP_SECRET", "ABCD")
-    # Should not blow up; these are consumed by IBeam, not the rebalancer.
-    s = Settings()  # type: ignore[call-arg]
-    assert s.ibkr_account_id == "U1234567"
+def test_settings_defaults(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    _isolate(monkeypatch, tmp_path)
+    s = Settings()  # no required fields
+    assert s.etoro_env == "demo"
+    assert s.etoro_default_leverage == 1
+    assert s.etoro_order_currency == "usd"
+    assert s.http_timeout_seconds == 30.0
+    assert s.etoro_api_key is None
+    assert s.etoro_user_key_demo is None
 
 
-def test_dry_run_truthy_strings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    _common_env(monkeypatch, env_file=tmp_path / ".env.missing")
-    monkeypatch.setenv("DRY_RUN", "true")
-    s = Settings()  # type: ignore[call-arg]
-    assert s.dry_run is True
+def test_settings_reads_etoro_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    _isolate(monkeypatch, tmp_path)
+    monkeypatch.setenv("ETORO_API_KEY", "PUB")
+    monkeypatch.setenv("ETORO_USER_KEY_REAL", "REALKEY")
+    monkeypatch.setenv("ETORO_ENV", "real")
+    s = Settings()
+    assert s.etoro_env == "real"
+    assert s.etoro_api_key.get_secret_value() == "PUB"
+    assert s.etoro_user_key_real.get_secret_value() == "REALKEY"
+
+
+def test_settings_ignores_unrelated_vars(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    _isolate(monkeypatch, tmp_path)
+    # Unknown / leftover env vars must not trip startup (extra="ignore").
+    monkeypatch.setenv("SOME_LEGACY_VAR", "U1234567")
+    monkeypatch.setenv("ANOTHER_UNRELATED_KEY", "x")
+    s = Settings()
+    assert s.etoro_env == "demo"

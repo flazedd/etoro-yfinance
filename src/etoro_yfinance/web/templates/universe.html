@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}eToro ↔ yfinance{% endblock %}
+{% block main_class %}mx-auto max-w-none{% endblock %}
+{% block content %}
+<div class="flex items-end justify-between mb-4">
+  <div>
+    <h1 class="text-xl font-semibold">eToro execution ↔ yfinance analysis</h1>
+    <p class="text-sm text-slate-500">Every eToro tradable instrument mapped to its yfinance ticker for price/volume analysis.
+      eToro publishes no ISIN, so the map is by symbol + exchange (eToro's <code>symbolFull</code> already carries the Yahoo
+      suffix). Built offline by <code>scripts/etoro_universe.py</code>; the web only reads the snapshot.</p>
+  </div>
+  {% if snap.generated_at %}
+    <div class="text-right shrink-0 ml-4 text-xs {{ 'text-amber-600' if age and age > 604800 else 'text-slate-400' }}">
+      {% if age is not none %}{{ (age/3600)|round|int }}h ago{% else %}{{ snap.generated_at }}{% endif %}
+    </div>
+  {% endif %}
+</div>
+
+{% if not snap %}
+  <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-md p-4 text-sm">
+    No universe snapshot yet. Run <code>uv run python scripts/etoro_universe.py</code> to fetch the eToro universe,
+    map it to yfinance, and write <code>data/etoro_universe_mapping.json</code>.
+  </div>
+{% else %}
+{% set c = snap.counts %}
+<div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4">
+  {% set cards = [
+    ('Instruments', c.total, 'text-slate-900'),
+    ('Mapped → yfinance', c.mapped, 'text-emerald-600'),
+    ('US', c.by_status.get('us', 0), 'text-slate-900'),
+    ('International', c.by_status.get('intl', 0), 'text-slate-900'),
+    ('Unmapped', c.by_status.get('unmapped', 0), 'text-rose-600'),
+    ('Internal (eToro)', c.by_status.get('internal', 0), 'text-slate-400'),
+  ] %}
+  {% for label,val,color in cards %}
+  <div class="bg-white rounded-lg border border-slate-200 px-3 py-2">
+    <div class="text-xs text-slate-500">{{ label }}</div>
+    <div class="text-lg font-semibold tabular {{ color }}">{{ '{:,}'.format(val) }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<form class="flex flex-wrap gap-3 items-center mb-3"
+      hx-get="/universe/rows" hx-target="#rows-wrap" hx-trigger="input changed delay:200ms, change"
+      hx-push-url="false">
+  <input name="q" value="{{ q }}" placeholder="search eToro symbol / name / yfinance ticker"
+         class="border border-slate-300 rounded-md px-3 py-1.5 text-sm w-80">
+  <select name="asset_type" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
+    <option value="" {{ 'selected' if not asset_type }}>all types</option>
+    {% for t in ['Stocks','ETF','Crypto','Forex','Commodity','Indices'] %}
+      <option value="{{ t }}" {{ 'selected' if asset_type==t }}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <select name="status" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
+    <option value="" {{ 'selected' if not status }}>any status</option>
+    {% for s in ['us','intl','crypto','forex','unmapped','internal'] %}
+      <option value="{{ s }}" {{ 'selected' if status==s }}>{{ s }}</option>
+    {% endfor %}
+  </select>
+  <label class="flex items-center gap-1.5 text-sm text-slate-600 select-none">
+    <input type="checkbox" name="show_internal" value="true" {{ 'checked' if show_internal }}>
+    show internal
+  </label>
+  <input type="number" name="min_adv" value="{{ min_adv or '' }}" placeholder="min €/day liquidity"
+         min="0" step="100000"
+         class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
+  <input name="sector" value="{{ sector or '' }}" placeholder="sector contains…"
+         class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
+</form>
+
+<div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh] tbl-box">
+  {% include "_universe_rows.html" %}
+</div>
+<div id="chart-modal"></div>
+<p class="text-xs text-slate-400 mt-3">Read from a snapshot, not live. <b>yfinance</b> is the analysis ticker for
+  Yahoo Finance history. <code>us</code>/<code>intl</code> = mapped · <code>crypto</code> (BASE-USD) ·
+  <code>forex</code> (PAIR=X) · <code>unmapped</code> (no Yahoo equivalent) · <code>internal</code> (eToro synthetic).
+  Click any column to sort.</p>
+{% endif %}
+{% endblock %}

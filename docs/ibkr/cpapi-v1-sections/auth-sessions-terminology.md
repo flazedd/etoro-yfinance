@@ -1,3 +1,0 @@
-### Understanding Interactive Brokers terminology Copy Location
-
-A brokerage session (or trading session) is established by a username (your credentials), which in turn has trading permissions for one or more accounts (the actual pools of equity). A single username can only have one trading (or “brokerage”) session active at a time. Permissions for trading in general/ for specific asset classes, market data subscriptions (and thus access to the subscribed feeds), etc. are carried by usernames, not the underlying accounts. Hence references to brokerage sessions refer to a logged-in username that is in contact with IBKR’s backend trading infrastructure.

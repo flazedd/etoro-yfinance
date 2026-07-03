@@ -1,0 +1,46 @@
+<div class="chart-backdrop" onclick="if(event.target===this)document.getElementById('chart-modal').innerHTML=''">
+  <div class="chart-card" style="width:min(1400px,97vw);max-height:94vh;overflow:auto">
+    <div class="flex items-start justify-between mb-1">
+      <div class="text-sm">
+        <span class="font-semibold">{{ ticker }}</span>
+        {% if name %}<span class="text-slate-500"> · {{ name }}</span>{% endif %}
+        {% if span %}<span class="text-slate-400"> · {{ span[0] }} → {{ span[1] }} · {{ '{:,}'.format(span[2]) }} bars</span>{% endif %}
+        · scale: <b>{{ 'log' if log else 'linear' }}</b>
+        <a class="text-blue-600 hover:underline"
+           hx-get="/universe/chart?t={{ ticker|urlencode }}&name={{ name|urlencode }}&scale={{ 'linear' if log else 'log' }}"
+           hx-target="#chart-modal" hx-swap="innerHTML">(switch to {{ 'linear' if log else 'log' }})</a>
+        {% if ticker %}· <a class="text-blue-600 hover:underline" target="_blank" rel="noopener"
+           href="https://finance.yahoo.com/quote/{{ ticker }}">Yahoo ↗</a>{% endif %}
+      </div>
+      <button class="text-slate-400 hover:text-slate-700 text-lg leading-none px-1"
+              onclick="document.getElementById('chart-modal').innerHTML=''">&times;</button>
+    </div>
+    {% if svg or svg_eur %}
+      <div class="flex gap-4 flex-wrap">
+        <div style="flex:1;min-width:320px">
+          <div class="text-xs font-semibold text-slate-600 mb-1">
+            Native ({{ ccy }}){% if last_price %} · {{ last_price }}
+            <span class="font-normal text-slate-400">as of {{ last_date }}</span>{% endif %}
+          </div>
+          {% if svg %}{{ svg|safe }}{% else %}<div class="text-xs text-slate-400 p-3">no native series</div>{% endif %}
+        </div>
+        <div style="flex:1;min-width:320px">
+          <div class="text-xs font-semibold text-slate-600 mb-1">
+            EUR{% if last_eur %} · €{{ last_eur }}
+            <span class="font-normal text-slate-400">as of {{ last_date_eur }}</span>{% endif %}
+          </div>
+          {% if svg_eur %}{{ svg_eur|safe }}{% else %}<div class="text-xs text-rose-600 p-3">no EUR series (currency not convertible)</div>{% endif %}
+        </div>
+      </div>
+      <div class="text-xs text-slate-400 mt-2">
+        Left: native currency &amp; raw volume. Right: prices in EUR (ECB rates), volume as EUR turnover
+        (price×shares; crypto = converted notional). Both log price by default.
+      </div>
+    {% else %}
+      <div class="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">
+        No stored price/volume data for <b>{{ ticker or '(no ticker)' }}</b>.
+        Run <code>uv run python scripts/etoro_universe.py --validate</code> to build the store.
+      </div>
+    {% endif %}
+  </div>
+</div>

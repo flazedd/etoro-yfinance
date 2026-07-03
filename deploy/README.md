@@ -1,134 +1,63 @@
-# Deploying the momentum stack on a Raspberry Pi 4
+# Deploying the momentum web UI (e.g. Raspberry Pi 4)
 
-Two long-lived services + four timers, split by credential boundary:
+The app is a single **read-only** FastAPI service that renders the eToro↔yfinance
+universe mapping and diagnostics. It holds **no broker credentials** and never
+trades — eToro trading is the separate manual CLI (`scripts/etoro_trade.py`).
 
-| Unit | User | Holds creds? | Role |
-|------|------|--------------|------|
-| `momentum-web.service` | `momentum` | **no** | read-only FastAPI UI (home / mapping / portfolio / execution / performance / diagnostics) |
-| `momentum-trade-worker.service` | `trader` | **yes** | claims job requests, runs the rebalance, writes results |
-| `momentum-rebalance.timer` → `.service` | `trader` | yes | queues the monthly run (worker executes it) |
-| `momentum-portfolio.timer` → `.service` | `trader` | yes | snapshots live IBKR positions → `data/portfolio_snapshot.json` (the `/portfolio` page) |
-| `momentum-mapping.timer` → `.service` | `trader` | yes | resolves the LEONTEQ universe + ETFs to IBKR conids → `data/mapping_snapshot.json` (the `/mapping` page) |
-| `momentum-publish.timer` → `.service` | `trader` | yes | snapshots bbterminal performance → commits to the Pages repo |
+## Deploy
 
-The web can only *request* a run (a row in SQLite). Only the worker trades. The
-`/diagnostics` page needs no extra wiring — it reads the local Pi (disk/RAM/temp).
-
-## TL;DR — bring the website up
+On the device (needs `git`, `sudo`, and systemd):
 
 ```bash
-# 1. code + deps
-sudo install -d -o trader -g trader /var/lib/momentum /var/lib/momentum/data
-sudo git clone <this-repo> /opt/momentum-stack && cd /opt/momentum-stack
-uv sync --extra web
-sudo -u trader cp data/leonteq_*.json /var/lib/momentum/data/   # seed the mapping page
-
-# 2. creds (see §2) — write /etc/momentum/trader.env and an empty web.env
-
-# 3. services
-sudo cp deploy/*.service deploy/*.timer /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now momentum-web.service momentum-trade-worker.service
-sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-mapping.timer momentum-publish.timer
-sudo -u trader /opt/momentum-stack/.venv/bin/momentum-portfolio-snapshot   # populate /portfolio now
-sudo -u trader /opt/momentum-stack/.venv/bin/momentum-mapping-snapshot     # populate /mapping now (resolves ~1500 names; takes a few min)
+git clone <this-repo> ~/etoro-yfinance
+cd ~/etoro-yfinance
+make deploy
 ```
 
-Then open `http://<pi-host>:8800` (over Tailscale — see §5).
+`make deploy` runs [`install.sh`](install.sh), which:
 
-## 1. Install
+1. installs [`uv`](https://docs.astral.sh/uv/) if it's missing,
+2. builds the venv with the web deps (`uv sync --extra web`),
+3. writes a `momentum-web.service` systemd unit (user, repo path, and bind
+   address auto-detected) and enables + starts it.
+
+It's **idempotent** — after a `git pull`, run `make deploy` again to update
+deps and restart the service.
+
+Then open `http://<device-ip>:8800`.
+
+## Configuration
+
+Override via env vars when running `make deploy` (they're baked into the unit):
+
+| Var | Default | Meaning |
+|-----|---------|---------|
+| `MOMENTUM_WEB_HOST` | `0.0.0.0` | bind address (`0.0.0.0` = reachable on the LAN/tailnet) |
+| `MOMENTUM_WEB_PORT` | `8800` | port |
+| `MOMENTUM_DATA_DIR` | `<repo>/data` | dir the UI reads its JSON from |
 
 ```bash
-sudo install -d -o trader -g trader /var/lib/momentum /var/lib/momentum/data
-sudo git clone <this-repo> /opt/momentum-stack
-cd /opt/momentum-stack
-uv sync --extra web                # builds .venv with the web + trade deps
-uv run --no-sync momentum-web --help   # sanity
+MOMENTUM_WEB_PORT=9000 make deploy
 ```
 
-Seed the data dir with the universe artifacts (so the mapping page has content):
+Rebuild the data the UI serves with:
 
 ```bash
-sudo -u trader cp data/leonteq_*.json /var/lib/momentum/data/
+uv run python scripts/etoro_universe.py
 ```
 
-## 2. Credentials (the boundary)
+## Operating it
 
 ```bash
-sudo install -d -o root -g root -m 750 /etc/momentum
-
-# trader.env — ALL the secrets (chmod 600, owned by trader)
-sudo install -o trader -g trader -m 600 /dev/null /etc/momentum/trader.env
-# put in it: IBIND_OAUTH1A_*, IBKR_ACCOUNT_ID, BBTERMINAL_*, SUPABASE_*,
-#   SIZING_CURRENCY=EUR, REQUIRE_STRATEGY_HEALTHY=true,
-#   DRY_RUN=true            # flip to false ONLY when you want live trading
-#   MOMENTUM_SITE_REPO_DIR=/var/lib/momentum/site-repo
-#   MOMENTUM_SITE_DATA_PATH=data/performance.json
-#   MOMENTUM_DEPLOY_KEY=/etc/momentum/deploy_key
-#   MOMENTUM_PUBLISH_PUSH=1
-
-# web.env — NO broker secrets. Only non-sensitive UI config (or leave empty).
-sudo install -o momentum -g momentum -m 600 /dev/null /etc/momentum/web.env
+systemctl status momentum-web        # is it up?
+journalctl -u momentum-web -f        # tail logs
+sudo systemctl restart momentum-web  # restart
 ```
 
-## 3. The GitHub Pages repo (performance site)
+## Access — don't expose a brokerage-adjacent box
 
-```bash
-# create an empty repo on GitHub with Pages enabled, then on the Pi:
-sudo -u trader git clone git@github.com:<you>/<perf-site>.git /var/lib/momentum/site-repo
-# add the deploy key (write access) to that repo's Deploy Keys, key file at MOMENTUM_DEPLOY_KEY
-```
-
-`momentum-publish --push` writes `data/performance.json` into that repo and pushes;
-Pages rebuilds. (Tell me the repo + the JSON path your site wants and I'll match it.)
-
-## 4. Services
-
-```bash
-sudo cp deploy/*.service deploy/*.timer /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now momentum-web.service momentum-trade-worker.service
-sudo systemctl enable --now momentum-rebalance.timer momentum-portfolio.timer momentum-mapping.timer momentum-publish.timer
-journalctl -u momentum-trade-worker -f
-```
-
-Align `momentum-rebalance.timer`'s `OnCalendar` with the strategy's
-`next_rebalance_at` (shown on the Performance page). `momentum-portfolio.timer`
-defaults to every 15 min on weekday daytimes — edit its `OnCalendar` for your
-market/timezone, or run it on demand: `sudo systemctl start momentum-portfolio`.
-
-Check the timers and force a refresh:
-
-```bash
-systemctl list-timers 'momentum-*'                 # next/last fire times
-sudo systemctl start momentum-portfolio.service    # refresh /portfolio now
-journalctl -u momentum-portfolio -n 20             # see what it fetched
-```
-
-## 5. Access (don't expose a brokerage box)
-
-Install Caddy, use `deploy/Caddyfile`. Prefer reaching the Pi over **Tailscale**
-on its tailnet name rather than opening a port. If you must expose it publicly,
-add auth in the Caddyfile first.
-
-## Operating it day-to-day
-
-```bash
-systemctl status momentum-web momentum-trade-worker     # are the services up?
-sudo systemctl restart momentum-web                     # after a code pull + uv sync
-journalctl -u momentum-web -f                            # tail the UI logs
-git -C /opt/momentum-stack pull && uv sync --extra web && sudo systemctl restart momentum-web momentum-trade-worker
-```
-
-The **Diagnostics** page (`/diagnostics`) is the fastest health check — it shows
-disk/RAM/CPU-temp/load with ok·warn·crit colours plus how stale each snapshot is.
-If `/portfolio` says "no snapshot", run `sudo systemctl start momentum-portfolio`
-and check `journalctl -u momentum-portfolio` for an IBKR auth/account error.
-
-## Safety notes
-
-- `DRY_RUN=true` is the default; the monthly timer and the worker both honor it.
-  Live trading happens only when `DRY_RUN=false` **and** (for ad-hoc runs) the
-  user types the confirmation phrase in the UI.
-- Every live order still passes the existing gates: bbterminal health +
-  freshness, the reviewed `conid_map.json`, pre-trade safety caps, and RTH.
+Prefer reaching the device over **Tailscale** on its tailnet name rather than
+port-forwarding your router. If you want TLS or a tailnet hostname, put
+[Caddy](https://caddyserver.com/) in front — see [`Caddyfile`](Caddyfile) — and
+bind the app to `127.0.0.1` (`MOMENTUM_WEB_HOST=127.0.0.1 make deploy`) so only
+Caddy is exposed.

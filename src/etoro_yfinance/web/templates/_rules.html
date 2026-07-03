@@ -1,0 +1,68 @@
+{% macro g(v) %}{% if v is defined and v is not none %}{{ '%g'|format(v) }}{% else %}—{% endif %}{% endmacro %}
+{% macro yn(v) %}{% if v %}<b class="text-emerald-700">yes</b>{% else %}<span class="text-slate-400">no</span>{% endif %}{% endmacro %}
+<div class="chart-backdrop" onclick="if(event.target===this)document.getElementById('chart-modal').innerHTML=''">
+  <div class="chart-card" style="max-height:88vh;overflow:auto">
+    <div class="flex items-start justify-between mb-2">
+      <div class="text-sm">
+        <span class="font-semibold">{{ sym or iid }}</span>
+        {% if name %}<span class="text-slate-500"> · {{ name }}</span>{% endif %}
+        <span class="text-slate-400"> · eToro trading rules</span>
+      </div>
+      <button class="text-slate-400 hover:text-slate-700 text-lg leading-none px-1"
+              onclick="document.getElementById('chart-modal').innerHTML=''">&times;</button>
+    </div>
+    {% if not rules %}
+      <div class="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">
+        No trading rules stored for this instrument. Run
+        <code>uv run python scripts/etoro_universe.py --eligibility</code>.
+      </div>
+    {% else %}
+      {% set r = rules %}
+      <div class="rules-grid">
+        <div><span>Open position</span>{{ yn(r.allowOpenPosition) }}</div>
+        <div><span>Close position</span>{{ yn(r.allowClosePosition) }}</div>
+        <div><span>Partial close</span>{{ yn(r.allowPartialClosePosition) }}</div>
+        <div><span>Min position</span><b>${{ g(r.minPositionExposure) }}</b></div>
+        <div><span>Max units / order</span><b>{{ g(r.maxUnitsPerOrder) }}</b></div>
+        <div><span>Entry orders</span>{{ yn(r.allowEntryOrders) }}</div>
+        <div><span>Exit orders</span>{{ yn(r.allowExitOrders) }}</div>
+        <div><span>MIT orders</span>{{ yn(r.allowMitOrders) }}</div>
+        <div><span>Trailing stop-loss</span>{{ yn(r.allowTrailingStopLoss) }}</div>
+        <div><span>Order qty type</span><b>{{ r.allowedOrderQuantityType or '—' }}</b></div>
+        <div><span>Units type</span><b>{{ r.unitsQuantityType or '—' }}</b></div>
+        <div><span>Trade unit</span><b>{{ r.tradeUnitType or '—' }}</b></div>
+        <div><span>Fill behaviour</span><b>{{ r.orderFillBehaviorType or '—' }}</b></div>
+        <div><span>W-8BEN required</span>{{ yn(r.requiresW8Ben) }}</div>
+        <div><span>Initial margin</span><b>{{ g(r.initialMarginInAssetCurrency) }}</b></div>
+        <div><span>Stop-loss margin</span><b>{{ g(r.stopLossMarginInAssetCurrency) }}</b></div>
+        <div><span>Buffer %</span><b>{{ g(r.additionalBufferPercent) }}</b></div>
+      </div>
+      {% if r.leverageConfigs %}
+      <div class="text-xs font-semibold text-slate-600 mt-4 mb-1">
+        Leverage &amp; SL/TP bounds — by settlement × direction
+      </div>
+      <div style="overflow-x:auto">
+        <table class="rules-table text-xs">
+          <thead><tr>
+            <th>Settlement</th><th>Direction</th><th>Leverage</th><th>Min $</th>
+            <th>SL % min/def/max</th><th>TP % min/def/max</th><th>Editable</th>
+          </tr></thead>
+          <tbody>
+          {% for c in r.leverageConfigs %}
+            <tr>
+              <td>{{ c.settlementType }}{% if c.isPotential %} <span class="text-slate-400">(potential)</span>{% endif %}</td>
+              <td>{{ c.direction }}</td>
+              <td>{{ (c.leverageValues or [])|join(', ') or '—' }}×</td>
+              <td>${{ g(c.minPositionAmount) }}</td>
+              <td>{{ g(c.minStopLossPercentage) }} / {{ g(c.defaultStopLossPercentage) }} / {{ g(c.maxStopLossPercentage) }}</td>
+              <td>{{ g(c.minTakeProfitPercentage) }} / {{ g(c.defaultTakeProfitPercentage) }} / {{ g(c.maxTakeProfitPercentage) }}</td>
+              <td>{% if c.allowEditStopLoss %}SL{% endif %}{% if c.allowEditTakeProfit %} TP{% endif %}{% if not c.allowEditStopLoss and not c.allowEditTakeProfit %}—{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Home{% endblock %} · eToro ↔ yfinance</title>
+  <link rel="stylesheet" href="/static/tailwind.css?v={{ asset_v }}">
+  <link rel="stylesheet" href="/static/app.css?v={{ asset_v }}">
+  <script src="/static/htmx.min.js" defer></script>
+  <script src="/static/sort.js?v={{ asset_v }}" defer></script>
+</head>
+<body class="h-full bg-slate-50 text-slate-800">
+  <div class="min-h-full">
+    <header class="bg-slate-900 text-slate-100">
+      <div class="mx-auto max-w-none px-6 flex items-center gap-6 h-14">
+        <a href="/" class="font-semibold tracking-tight hover:text-white">eToro<span class="text-emerald-400"> ↔ </span>yfinance</a>
+        <nav class="flex gap-1 text-sm">
+          {% set tabs = [('home','Home'),('universe','eToro ↔ yfinance'),('diagnostics','Diagnostics')] %}
+          {% for key,label in tabs %}
+          {% set href = '/' if key=='home' else '/' ~ key %}
+          <a href="{{ href }}" class="px-3 py-1.5 rounded-md {{ 'bg-slate-700 text-white' if active==key else 'text-slate-300 hover:bg-slate-800' }}">{{ label }}</a>
+          {% endfor %}
+        </nav>
+        <span class="ml-auto text-xs text-slate-400">read-only UI</span>
+      </div>
+    </header>
+    <main class="{% block main_class %}mx-auto max-w-none{% endblock %} px-6 py-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script>
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var m = document.getElementById('chart-modal');
+        if (m) m.innerHTML = '';
+      }
+    });
+  </script>
+</body>
+</html>

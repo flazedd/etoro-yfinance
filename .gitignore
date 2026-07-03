@@ -196,4 +196,11 @@ data/dashboard.html
 data/momentum.db
 data/momentum.db-*
 data/performance_snapshot.json
+data/yf_validation_cache.json
+data/eligibility_cache.json
+data/ecb_rates.parquet
+data/prices/
+data/prices_eur/
 .build/
+data/liquidity_cache.json
+data/spread_cache.json

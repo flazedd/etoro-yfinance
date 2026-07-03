@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Diagnostics{% endblock %}
+{% block content %}
+{% set palette = {'ok':'emerald','warn':'amber','crit':'rose'} %}
+{% macro pill(status) -%}
+  {% set c = palette.get(status,'slate') %}
+  <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-{{ c }}-100 text-{{ c }}-700">{{ status|upper }}</span>
+{%- endmacro %}
+{% macro bar(pct, status) -%}
+  {% set c = palette.get(status,'slate') %}
+  <div class="h-2 rounded-full bg-slate-100 overflow-hidden mt-2">
+    <div class="h-full bg-{{ c }}-500" style="width: {{ [pct,100]|min }}%"></div>
+  </div>
+{%- endmacro %}
+
+<div class="flex items-end justify-between mb-4">
+  <div>
+    <h1 class="text-xl font-semibold">System diagnostics</h1>
+    <p class="text-sm text-slate-500">{{ d.host }} · {{ d.platform }} · Python {{ d.python }}</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="text-sm text-slate-500">Overall</span>{{ pill(d.overall) }}
+    <button class="text-xs text-blue-600 hover:underline" hx-get="/diagnostics" hx-target="body" hx-swap="outerHTML">refresh</button>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+  {# ── Disk ── #}
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="flex items-center justify-between"><span class="font-medium">Disk</span>{{ pill(d.disk.status) }}</div>
+    {% if d.disk.available %}
+      <div class="text-sm text-slate-600 mt-1 tabular">{{ '%.1f'|format(d.disk.used_gb) }} / {{ '%.1f'|format(d.disk.total_gb) }} GB used
+        · {{ '%.1f'|format(d.disk.free_gb) }} GB free</div>
+      {{ bar(d.disk.used_pct, d.disk.status) }}
+      <div class="text-xs text-slate-400 mt-1">{{ d.disk.path }}</div>
+    {% else %}<div class="text-sm text-slate-400 mt-1">unavailable</div>{% endif %}
+  </div>
+
+  {# ── Memory ── #}
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="flex items-center justify-between"><span class="font-medium">Memory</span>{{ pill(d.memory.status) }}</div>
+    {% if d.memory.available %}
+      <div class="text-sm text-slate-600 mt-1 tabular">{{ '%.2f'|format(d.memory.used_gb) }} / {{ '%.2f'|format(d.memory.total_gb) }} GB used
+        · {{ '%.2f'|format(d.memory.free_gb) }} GB free</div>
+      {{ bar(d.memory.used_pct, d.memory.status) }}
+    {% else %}<div class="text-sm text-slate-400 mt-1">unavailable (non-Linux host)</div>{% endif %}
+  </div>
+
+  {# ── CPU temperature ── #}
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="flex items-center justify-between"><span class="font-medium">CPU temperature</span>{{ pill(d.temp.status) }}</div>
+    {% if d.temp.available %}
+      <div class="text-2xl font-semibold tabular mt-1">{{ '%.1f'|format(d.temp.celsius) }} °C</div>
+      <div class="text-xs text-slate-400 mt-1">Pi throttles ~80–85 °C</div>
+    {% else %}<div class="text-sm text-slate-400 mt-1">no thermal sensor</div>{% endif %}
+  </div>
+
+  {# ── Load ── #}
+  <div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+    <div class="flex items-center justify-between"><span class="font-medium">CPU load</span>{{ pill(d.load.status) }}</div>
+    {% if d.load.available %}
+      <div class="text-sm text-slate-600 mt-1 tabular">{{ '%.2f'|format(d.load.one) }} · {{ '%.2f'|format(d.load.five) }} · {{ '%.2f'|format(d.load.fifteen) }}
+        <span class="text-slate-400">(1·5·15 min, {{ d.load.cores }} cores)</span></div>
+      <div class="text-xs text-slate-400 mt-1">{{ '%.0f'|format(d.load.per_core*100) }}% per core (1 min)</div>
+    {% else %}<div class="text-sm text-slate-400 mt-1">unavailable · {{ d.load.cores }} cores</div>{% endif %}
+  </div>
+</div>
+
+<div class="bg-white rounded-lg border border-slate-200 px-4 py-3">
+  <h2 class="font-medium mb-2">App health</h2>
+  <dl class="grid grid-cols-2 md:grid-cols-4 gap-y-2 text-sm">
+    <dt class="text-slate-500">Uptime</dt>
+    <dd class="tabular">{% if d.uptime_seconds is not none %}{{ (d.uptime_seconds/3600)|round(1) }} h{% else %}—{% endif %}</dd>
+    <dt class="text-slate-500">SQLite DB</dt>
+    <dd class="tabular">{% if d.db_size_mb is not none %}{{ '%.2f'|format(d.db_size_mb) }} MB{% else %}not created{% endif %}</dd>
+    <dt class="text-slate-500">eToro universe snapshot</dt>
+    <dd class="tabular">{% set a = d.snapshots['etoro universe'] %}{% if a is not none %}{{ (a/3600)|round|int }} h ago{% else %}<span class="text-amber-600">never</span>{% endif %}</dd>
+  </dl>
+</div>
+<p class="text-xs text-slate-400 mt-3">All metrics read the local Pi only — no credentials, no broker calls. JSON at <code>/api/diagnostics</code>.</p>
+{% endblock %}

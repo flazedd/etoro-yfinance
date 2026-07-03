@@ -1,0 +1,73 @@
+/* Small bits Tailwind utility classes don't cover cleanly. */
+.tabular { font-variant-numeric: tabular-nums; }
+/* Sticky header for the sortable data tables (header pins to the scroll box). */
+table.sortable thead th { position: sticky; top: 0; z-index: 1; background: #f8fafc; }
+.caret { font-size: .7em; color: #64748b; }
+/* Data tables: size each column to its content on a single line (expand to
+   avoid wrapping, then stop — never stretch a column just to fill width) and
+   let the table use the available width, scrolling inside its wrapper only when
+   the content genuinely needs more room than the viewport. */
+.tbl-fit { width: auto; margin-left: auto; margin-right: auto; }
+.tbl-fit th, .tbl-fit td { white-space: nowrap; }
+/* The card/box wrapping a table shrinks to the table's width (so it doesn't
+   stretch full-width around a narrow table) and centers, capped at the viewport
+   so a wide table scrolls inside it instead of overflowing the page. */
+.tbl-box { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+.htmx-request #rows-wrap { opacity: .5; transition: opacity .1s; }
+/* Per-column data-source tag shown under each table header label. */
+.src-badge {
+  display: inline-block; width: fit-content; margin-top: 3px;
+  padding: 1px 5px; border-radius: 4px;
+  font-size: 9px; font-weight: 600; line-height: 1.4; letter-spacing: .03em;
+}
+.src-etoro    { background: #d1fae5; color: #047857; }  /* emerald */
+.src-yfinance { background: #e0e7ff; color: #4338ca; }  /* indigo  */
+.src-derived  { background: #fef3c7; color: #b45309; }  /* amber   */
+/* "missing" marker for absent price/volume coverage in the data cells. */
+.miss {
+  display: inline-block; padding: 1px 5px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; background: #ffe4e6; color: #be123c;
+}
+/* Badge-style "Chart" button in the links column (bigger tap target than an icon). */
+.chart-btn {
+  display: inline-block; padding: 3px 9px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; line-height: 1.3; cursor: pointer;
+  border: 0; background: #dbeafe; color: #1d4ed8;   /* blue-100 / blue-700 */
+}
+.chart-btn:hover { background: #bfdbfe; }            /* blue-200 */
+.rules-btn {
+  display: inline-block; padding: 3px 9px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; line-height: 1.3; cursor: pointer;
+  border: 0; background: #d1fae5; color: #047857;    /* emerald-100 / 700 */
+}
+.rules-btn:hover { background: #a7f3d0; }             /* emerald-200 */
+/* Trading-rules modal layout. */
+.rules-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 2px 18px; font-size: 12px;
+}
+.rules-grid > div {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding: 3px 0; border-bottom: 1px solid #f1f5f9;
+}
+.rules-grid span { color: #64748b; }
+.rules-table { border-collapse: collapse; width: 100%; }
+.rules-table th, .rules-table td {
+  text-align: left; padding: 4px 10px; border-bottom: 1px solid #f1f5f9; white-space: nowrap;
+}
+.rules-table th { color: #64748b; font-weight: 600; }
+/* Price/volume chart modal (server-rendered SVG). */
+.chart-backdrop {
+  position: fixed; inset: 0; z-index: 50; padding: 16px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 23, 42, .45);
+}
+.chart-card {
+  background: #fff; border-radius: 10px; padding: 14px 16px;
+  width: min(920px, 96vw); box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
+}
+.pv-chart { width: 100%; height: auto; display: block; }
+.pv-axis {
+  fill: #64748b; font-size: 11px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}

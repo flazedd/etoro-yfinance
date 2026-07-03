@@ -1,1 +1,0 @@
-### Scanner Copy Location

@@ -1,1 +1,0 @@
-### Contract Copy Location

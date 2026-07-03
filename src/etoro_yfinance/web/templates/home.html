@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+{%- set icons = {
+  'link': 'M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244',
+  'chart': 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z',
+  'bolt': 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z',
+  'trend': 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941',
+  'heart': 'M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z'
+} -%}
+
+{%- macro card(href, accent, title, desc, ic) -%}
+<a href="{{ href }}" class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md min-h-[176px]">
+  <div class="mb-3 flex items-center gap-3">
+    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-{{ accent }}-50 text-{{ accent }}-600">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><path d="{{ icons[ic] }}"/></svg>
+    </span>
+    <span class="font-semibold text-slate-800">{{ title }}</span>
+    <span class="ml-auto text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-{{ accent }}-500">&rarr;</span>
+  </div>
+  <p class="text-sm leading-relaxed text-slate-500">{{ desc }}</p>
+  <div class="mt-auto pt-4 border-t border-slate-100">{{ caller() }}</div>
+</a>
+{%- endmacro -%}
+
+{%- macro stat(value, label, color='text-slate-800') -%}
+  <div class="flex items-baseline gap-2">
+    <span class="text-2xl font-semibold tabular-nums {{ color }}">{{ value }}</span>
+    {% if label %}<span class="text-xs text-slate-400">{{ label }}</span>{% endif %}
+  </div>
+{%- endmacro -%}
+
+{%- macro pill(text, tone) -%}
+  <span class="inline-block rounded-full px-2 py-0.5 text-xs font-medium {{ {'ok':'bg-emerald-100 text-emerald-700','warn':'bg-amber-100 text-amber-700','bad':'bg-rose-100 text-rose-700'}[tone] }}">{{ text }}</span>
+{%- endmacro -%}
+
+{%- macro age(secs, warn) -%}
+  {%- if secs is none -%}<span class="text-slate-300">—</span>
+  {%- else -%}<span class="{{ 'text-amber-600' if secs > warn else 'text-slate-400' }}">{{ (secs/3600)|round|int }}h ago</span>{%- endif -%}
+{%- endmacro -%}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-semibold tracking-tight">eToro <span class="text-emerald-500">↔</span> yfinance</h1>
+  <p class="mt-1 text-sm text-slate-500">Read-only view of the eToro tradable universe mapped to yfinance analysis
+    tickers. Trading itself lives in the CLI (<code>scripts/etoro_trade.py</code>).</p>
+</div>
+
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+  {% call card('/universe', 'emerald', 'eToro ↔ yfinance', 'Every eToro tradable instrument mapped to its yfinance ticker for price/volume analysis.', 'link') %}
+    {% set c = home.universe.counts %}
+    {% if c %}
+      {{ stat('{:,}'.format(c.mapped), 'of {:,} mapped'.format(c.total), 'text-emerald-600') }}
+      <div class="mt-1 flex items-center gap-2 text-xs text-slate-400">
+        {% set bt = c.by_type or {} %}
+        <span>{{ '{:,}'.format(bt.get('Stocks', 0)) }} stocks</span><span class="text-slate-300">·</span>
+        <span>{{ age(home.universe.age, 604800) }}</span>
+      </div>
+    {% else %}<span class="text-sm text-slate-400">not generated yet — run scripts/etoro_universe.py</span>{% endif %}
+  {% endcall %}
+
+  {% call card('/diagnostics', 'rose', 'Diagnostics', 'System health — disk, RAM, CPU temperature, load, snapshot freshness.', 'heart') %}
+    {% set o = home.diagnostics.overall %}
+    {% if o %}
+      <div class="flex items-center gap-2"><span class="text-sm text-slate-500">status</span>
+        {{ pill(o|upper, 'ok' if o=='ok' else 'warn' if o=='warn' else 'bad') }}</div>
+    {% else %}<span class="text-sm text-slate-400">—</span>{% endif %}
+  {% endcall %}
+
+</div>
+
+<p class="mt-6 text-xs text-slate-400">The web is read-only and holds no broker credentials — it never places orders.
+  Rebuild the universe with <code>uv run python scripts/etoro_universe.py</code>; trade via <code>scripts/etoro_trade.py</code>.</p>
+{% endblock %}
