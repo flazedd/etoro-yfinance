@@ -58,6 +58,10 @@ def build(validate: bool, revalidate: bool = False,
     # ETF fund categories from Yahoo (scripts/etf_categories.py), if built.
     _etf_cat_path = data_dir() / "etf_category_cache.json"
     etf_cat = json.loads(_etf_cat_path.read_text()) if _etf_cat_path.exists() else {}
+    # Fallback sectors from Yahoo for instruments eToro left unclassified
+    # (scripts/backfill_sectors.py), keyed by yfinance ticker.
+    _ovr_path = data_dir() / "sector_override_cache.json"
+    sector_override = json.loads(_ovr_path.read_text()) if _ovr_path.exists() else {}
 
     # All crypto symbols (for the quote-duplicate base check below).
     crypto_syms = {(r["symbol"] or "").upper() for r in universe
@@ -85,6 +89,8 @@ def build(validate: bool, revalidate: bool = False,
             sector = etf_cat.get(yf_t)
         else:
             sector = None
+        if not sector and yf_t:                       # Yahoo fallback for unclassified
+            sector = sector_override.get(yf_t)
         rows.append({
             "instrument_id": r["instrument_id"], "symbol": r["symbol"],
             "name": r["name"], "type": ty_by_id.get(r["type_id"]),

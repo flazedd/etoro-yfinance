@@ -2,6 +2,7 @@
 {% block title %}eToro ↔ yfinance{% endblock %}
 {% block main_class %}mx-auto max-w-none{% endblock %}
 {% block content %}
+{% import "_facets.html" as facets %}
 <div class="flex items-end justify-between mb-4">
   <div>
     <h1 class="text-xl font-semibold">eToro execution ↔ yfinance analysis</h1>
@@ -45,26 +46,11 @@
       hx-push-url="false">
   <input name="q" value="{{ q }}" placeholder="search eToro symbol / name / yfinance ticker"
          class="border border-slate-300 rounded-md px-3 py-1.5 text-sm w-80">
-  <select name="asset_type" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
-    <option value="" {{ 'selected' if not asset_type }}>all types</option>
-    {% for t, n in types %}
-      <option value="{{ t }}" {{ 'selected' if asset_type==t }}>{{ t }} ({{ '{:,}'.format(n) }})</option>
-    {% endfor %}
-  </select>
-  <select name="status" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
-    <option value="" {{ 'selected' if not status }}>any status</option>
-    {% for s, n in statuses %}
-      <option value="{{ s }}" {{ 'selected' if status==s }}>{{ s }} ({{ '{:,}'.format(n) }})</option>
-    {% endfor %}
-  </select>
-  {% if sectors %}
-  <select name="sector" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm max-w-56">
-    <option value="" {{ 'selected' if not sector }}>all sectors</option>
-    {% for s, n in sectors %}
-      <option value="{{ s }}" {{ 'selected' if sector==s }}>{{ s }} ({{ '{:,}'.format(n) }})</option>
-    {% endfor %}
-  </select>
-  {% endif %}
+  {{ facets.sel('asset_type', 'all types', types, asset_type) }}
+  {{ facets.sel('status', 'any status', statuses, status) }}
+  {% if sectors %}{{ facets.sel('sector', 'all sectors', sectors, sector, extra=' max-w-56') }}{% endif %}
+  {{ facets.sel('view', 'view: all ({:,})'.format(all_count), view_counts, view, prefix='view: ', extra=' bg-slate-50') }}
+  <button type="button" class="chart-btn" hx-get="/universe/new" hx-target="#chart-modal">+ create universe</button>
   <input type="number" name="min_adv" value="{{ min_adv or '' }}" placeholder="min €/day liquidity"
          min="0" step="100000"
          class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">

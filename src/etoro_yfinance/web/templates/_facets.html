@@ -1,0 +1,11 @@
+{# A faceted <select>. Same markup inline (in the form) and as an HTMX
+   out-of-band swap (oob=true) so counts refresh when other filters change. #}
+{% macro sel(name, label, options, selected, prefix='', extra='', oob=false) %}
+<select id="f-{{ name }}" name="{{ name }}"{% if oob %} hx-swap-oob="true"{% endif %}
+        class="border border-slate-300 rounded-md px-2 py-1.5 text-sm{{ extra }}">
+  <option value="" {{ 'selected' if not selected }}>{{ label }}</option>
+  {% for val, n in options %}
+  <option value="{{ val }}" {{ 'selected' if selected==val }}>{{ prefix }}{{ val }} ({{ '{:,}'.format(n) }})</option>
+  {% endfor %}
+</select>
+{% endmacro %}

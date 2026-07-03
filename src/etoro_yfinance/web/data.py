@@ -122,9 +122,12 @@ def _overlay_sector(doc: dict[str, Any]) -> dict[str, Any]:
     if not rows:
         return doc
     cat = _load(data_dir() / "etf_category_cache.json")
+    override = _load(data_dir() / "sector_override_cache.json")
     for r in rows:
         if cat and r.get("type") == "ETF" and r.get("yf") and cat.get(r["yf"]):
             r["sector"] = cat[r["yf"]]
+        if override and not r.get("sector") and r.get("yf") and override.get(r["yf"]):
+            r["sector"] = override[r["yf"]]   # Yahoo fallback for unclassified names
         r.setdefault("sector", None)
     if any(r.get("sector") for r in rows):
         doc.setdefault("counts", {})["sector_known"] = True

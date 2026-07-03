@@ -1,0 +1,45 @@
+<div class="chart-backdrop" onclick="if(event.target===this)document.getElementById('chart-modal').innerHTML=''">
+  <div class="chart-card" style="width:min(520px,96vw)">
+    <div class="flex items-start justify-between mb-3">
+      <div class="text-sm font-semibold">Create backtest universe</div>
+      <button class="text-slate-400 hover:text-slate-700 text-lg leading-none px-1"
+              onclick="document.getElementById('chart-modal').innerHTML=''">&times;</button>
+    </div>
+    <p class="text-xs text-slate-500 mb-3">
+      Selects instruments that have price + volume, are tradable on eToro, meet the
+      liquidity/history/recency floors, and (optionally) have a sector.
+    </p>
+    <form hx-get="/universe/create" hx-target="#chart-modal" hx-swap="innerHTML"
+          class="grid grid-cols-2 gap-3 text-sm">
+      <label class="col-span-2 flex flex-col gap-1">
+        <span class="text-slate-500">name</span>
+        <input name="name" value="backtest" class="border border-slate-300 rounded-md px-2 py-1.5">
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-slate-500">min €/day turnover</span>
+        <input type="number" name="min_adv" value="1000000" min="0" step="100000"
+               class="border border-slate-300 rounded-md px-2 py-1.5">
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-slate-500">min bars (history)</span>
+        <input type="number" name="min_bars" value="252" min="0" step="1"
+               class="border border-slate-300 rounded-md px-2 py-1.5">
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-slate-500">max staleness (days)</span>
+        <input type="number" name="recent_days" value="7" min="0" step="1"
+               class="border border-slate-300 rounded-md px-2 py-1.5">
+      </label>
+      <label class="flex flex-col gap-1">
+        <span class="text-slate-500">max spread % (blank = any)</span>
+        <input type="number" name="max_spread" value="" min="0" step="0.1"
+               class="border border-slate-300 rounded-md px-2 py-1.5">
+      </label>
+      <label class="col-span-2 flex items-center gap-2 text-slate-600">
+        <input type="checkbox" name="require_sector" value="true" checked>
+        require a sector
+      </label>
+      <button type="submit" class="col-span-2 rules-btn text-center py-2">Create &amp; verify</button>
+    </form>
+  </div>
+</div>

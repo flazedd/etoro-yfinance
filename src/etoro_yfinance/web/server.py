@@ -18,6 +18,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from etoro_yfinance import universe as universe_mod
 from etoro_yfinance.yfinance_map import is_crypto_quote_dupe, is_future
 
 from . import data as datamod
@@ -51,28 +52,25 @@ def create_app() -> FastAPI:
     @app.get("/universe", response_class=HTMLResponse)
     def universe(request: Request, q: str = "", asset_type: str = "",
                  status: str = "", show_internal: bool = False,
-                 min_adv: str = "", sector: str = "") -> HTMLResponse:
+                 min_adv: str = "", sector: str = "", view: str = "") -> HTMLResponse:
         snap = datamod.load_etoro_universe()
+        all_rows = snap.get("rows", [])
         age = datamod.snapshot_age_seconds("etoro_universe_mapping.json", time.time())
-        rows = _filter_universe(snap.get("rows", []), q=q, asset_type=asset_type,
-                                status=status, show_internal=show_internal,
-                                min_adv=_to_float(min_adv), sector=sector)
+        saved = universe_mod.list_saved()
+        madv = _to_float(min_adv)
+        ids = universe_mod.member_ids(view) if view in saved else None
+        rows = _filter_universe(all_rows, q=q, asset_type=asset_type, status=status,
+                                show_internal=show_internal, min_adv=madv, sector=sector,
+                                universe_ids=ids)
+        facets = _facet_counts(all_rows, q=q, asset_type=asset_type, status=status,
+                               sector=sector, min_adv=madv, show_internal=show_internal,
+                               view=view, saved=saved)
         counts = snap.get("counts", {})
-        # Per-option row counts for the Type/Status/Sector filters (base universe =
-        # futures + crypto-dupes already excluded; internal excluded from type/sector
-        # counts to match the default view). Options ordered high→low by count.
-        base = _filter_universe(snap.get("rows", []), q="", asset_type="", status="",
-                                show_internal=True, min_adv=0.0, sector="")
-        type_counts = Counter(r.get("type") for r in base if r.get("status") != "internal")
-        status_counts = Counter(r.get("status") for r in base)
-        sector_counts = Counter(r.get("sector") for r in base
-                                if r.get("sector") and r.get("status") != "internal")
         return page(request, "universe.html", {
             "active": "universe", "snap": snap, "age": age, "rows": rows[:_UNIVERSE_CAP],
             "q": q, "asset_type": asset_type, "status": status, "shown": len(rows),
             "show_internal": show_internal, "min_adv": min_adv, "sector": sector,
-            "sectors": sector_counts.most_common(),
-            "types": type_counts.most_common(), "statuses": status_counts.most_common(),
+            "saved_universes": saved, "view": view, **facets,
             "validated": bool(counts.get("validated")),
             "eligible": bool(counts.get("eligibility_checked")),
             "liquid": bool(counts.get("liquidity_checked")),
@@ -82,18 +80,27 @@ def create_app() -> FastAPI:
     @app.get("/universe/rows", response_class=HTMLResponse)
     def universe_rows(request: Request, q: str = "", asset_type: str = "",
                       status: str = "", show_internal: bool = False,
-                      min_adv: str = "", sector: str = "") -> HTMLResponse:
+                      min_adv: str = "", sector: str = "", view: str = "") -> HTMLResponse:
         snap = datamod.load_etoro_universe()
-        rows = _filter_universe(snap.get("rows", []), q=q, asset_type=asset_type,
-                                status=status, show_internal=show_internal,
-                                min_adv=_to_float(min_adv), sector=sector)
+        all_rows = snap.get("rows", [])
+        saved = universe_mod.list_saved()
+        madv = _to_float(min_adv)
+        ids = universe_mod.member_ids(view) if view in saved else None
+        rows = _filter_universe(all_rows, q=q, asset_type=asset_type, status=status,
+                                show_internal=show_internal, min_adv=madv, sector=sector,
+                                universe_ids=ids)
+        facets = _facet_counts(all_rows, q=q, asset_type=asset_type, status=status,
+                               sector=sector, min_adv=madv, show_internal=show_internal,
+                               view=view, saved=saved)
         counts = snap.get("counts", {})
-        return templates.TemplateResponse(request, "_universe_rows.html",
-                                          {"rows": rows[:_UNIVERSE_CAP], "shown": len(rows),
-                                           "validated": bool(counts.get("validated")),
-                                           "eligible": bool(counts.get("eligibility_checked")),
-                                           "liquid": bool(counts.get("liquidity_checked")),
-                                           "has_sector": bool(counts.get("sector_known"))})
+        return templates.TemplateResponse(request, "_universe_rows.html", {
+            "rows": rows[:_UNIVERSE_CAP], "shown": len(rows), "oob": True,
+            "asset_type": asset_type, "status": status, "sector": sector, "view": view,
+            "saved_universes": saved, **facets,
+            "validated": bool(counts.get("validated")),
+            "eligible": bool(counts.get("eligibility_checked")),
+            "liquid": bool(counts.get("liquidity_checked")),
+            "has_sector": bool(counts.get("sector_known"))})
 
     @app.get("/universe/rules", response_class=HTMLResponse)
     def universe_rules(request: Request, t: str = "", name: str = "", sym: str = "") -> HTMLResponse:
@@ -101,6 +108,27 @@ def create_app() -> FastAPI:
         rules = datamod.load_instrument_rules(t) if t else None
         return templates.TemplateResponse(request, "_rules.html",
                                           {"rules": rules, "iid": t, "name": name, "sym": sym})
+
+    @app.get("/universe/new", response_class=HTMLResponse)
+    def universe_new(request: Request) -> HTMLResponse:
+        """The create-universe criteria form (modal)."""
+        return templates.TemplateResponse(request, "_universe_new.html", {})
+
+    @app.get("/universe/create", response_class=HTMLResponse)
+    def universe_create(request: Request, name: str = "backtest", min_adv: str = "1000000",
+                        min_bars: str = "252", recent_days: str = "7",
+                        max_spread: str = "", require_sector: str = "") -> HTMLResponse:
+        """Build + persist a universe under the criteria, return a confirmation
+        (count, per-condition verification, per-sector breakdown)."""
+        doc = universe_mod.save(
+            name,
+            min_adv=_to_float(min_adv),
+            min_bars=int(_to_float(min_bars)),
+            recent_days=int(_to_float(recent_days)) or None,
+            max_spread=(_to_float(max_spread) if max_spread.strip() else None),
+            require_sector=(require_sector == "true"),
+        )
+        return templates.TemplateResponse(request, "_universe_created.html", {"doc": doc})
 
     @app.get("/universe/chart", response_class=HTMLResponse)
     def universe_chart(request: Request, t: str = "", name: str = "",
@@ -180,12 +208,16 @@ def _to_float(s: str) -> float:
 def _filter_universe(
     rows: list[dict[str, Any]], *, q: str, asset_type: str, status: str,
     show_internal: bool = False, min_adv: float = 0.0, sector: str = "",
+    universe_ids: set | None = None,
 ) -> list[dict[str, Any]]:
     ql = q.lower().strip()
     crypto_syms = {(r.get("symbol") or "").upper() for r in rows
                    if r.get("status") == "crypto"}
     out = []
     for r in rows:
+        # Restrict to a saved universe's members (by execution instrument_id).
+        if universe_ids is not None and r.get("instrument_id") not in universe_ids:
+            continue
         # Dated futures and non-USD-quoted crypto duplicates (BTCEUR vs BTC) are
         # never part of the spot universe — excluded here too so a pre-filter
         # snapshot can't leak them into the view.
@@ -214,6 +246,31 @@ def _filter_universe(
             continue
         out.append(r)
     return out
+
+
+def _facet_counts(rows, *, q, asset_type, status, sector, min_adv, show_internal,
+                  view, saved):
+    """Faceted option counts: each dropdown counts with every OTHER active filter
+    applied (excluding its own selection), so the numbers show what picking each
+    option would yield given the rest of the filters."""
+    view_ids = universe_mod.member_ids(view) if view in saved else None
+
+    def f(*, atype=asset_type, st=status, sc=sector, uids=view_ids):
+        return _filter_universe(rows, q=q, asset_type=atype, status=st, sector=sc,
+                                min_adv=min_adv, show_internal=show_internal,
+                                universe_ids=uids)
+
+    types = Counter(r.get("type") for r in f(atype="")
+                    if r.get("status") != "internal").most_common()
+    statuses = Counter(r.get("status") for r in f(st="")).most_common()
+    sectors = Counter(r.get("sector") for r in f(sc="")
+                      if r.get("sector") and r.get("status") != "internal").most_common()
+    no_view = f(uids=None)                       # view facet ignores the view restriction
+    mem = {u: universe_mod.member_ids(u) for u in saved}
+    view_counts = [(u, sum(1 for r in no_view if r.get("instrument_id") in mem[u]))
+                   for u in saved]
+    return {"types": types, "statuses": statuses, "sectors": sectors,
+            "all_count": len(no_view), "view_counts": view_counts}
 
 
 app = create_app()
