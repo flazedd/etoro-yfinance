@@ -47,31 +47,31 @@
          class="border border-slate-300 rounded-md px-3 py-1.5 text-sm w-80">
   <select name="asset_type" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
     <option value="" {{ 'selected' if not asset_type }}>all types</option>
-    {% for t in ['Stocks','ETF','Crypto','Forex','Commodity','Indices'] %}
-      <option value="{{ t }}" {{ 'selected' if asset_type==t }}>{{ t }}</option>
+    {% for t, n in types %}
+      <option value="{{ t }}" {{ 'selected' if asset_type==t }}>{{ t }} ({{ '{:,}'.format(n) }})</option>
     {% endfor %}
   </select>
   <select name="status" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm">
     <option value="" {{ 'selected' if not status }}>any status</option>
-    {% for s in ['us','intl','crypto','forex','unmapped','internal'] %}
-      <option value="{{ s }}" {{ 'selected' if status==s }}>{{ s }}</option>
+    {% for s, n in statuses %}
+      <option value="{{ s }}" {{ 'selected' if status==s }}>{{ s }} ({{ '{:,}'.format(n) }})</option>
     {% endfor %}
   </select>
+  {% if sectors %}
+  <select name="sector" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm max-w-56">
+    <option value="" {{ 'selected' if not sector }}>all sectors</option>
+    {% for s, n in sectors %}
+      <option value="{{ s }}" {{ 'selected' if sector==s }}>{{ s }} ({{ '{:,}'.format(n) }})</option>
+    {% endfor %}
+  </select>
+  {% endif %}
+  <input type="number" name="min_adv" value="{{ min_adv or '' }}" placeholder="min €/day liquidity"
+         min="0" step="100000"
+         class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
   <label class="flex items-center gap-1.5 text-sm text-slate-600 select-none">
     <input type="checkbox" name="show_internal" value="true" {{ 'checked' if show_internal }}>
     show internal
   </label>
-  <input type="number" name="min_adv" value="{{ min_adv or '' }}" placeholder="min €/day liquidity"
-         min="0" step="100000"
-         class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
-  {% if sectors %}
-  <select name="sector" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm max-w-52">
-    <option value="" {{ 'selected' if not sector }}>all sectors</option>
-    {% for s in sectors %}
-      <option value="{{ s }}" {{ 'selected' if sector==s }}>{{ s }}</option>
-    {% endfor %}
-  </select>
-  {% endif %}
 </form>
 
 <div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh] tbl-box">

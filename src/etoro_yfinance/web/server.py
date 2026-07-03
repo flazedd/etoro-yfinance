@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -57,12 +58,21 @@ def create_app() -> FastAPI:
                                 status=status, show_internal=show_internal,
                                 min_adv=_to_float(min_adv), sector=sector)
         counts = snap.get("counts", {})
-        sectors = sorted({r.get("sector") for r in snap.get("rows", []) if r.get("sector")})
+        # Per-option row counts for the Type/Status/Sector filters (base universe =
+        # futures + crypto-dupes already excluded; internal excluded from type/sector
+        # counts to match the default view). Options ordered high→low by count.
+        base = _filter_universe(snap.get("rows", []), q="", asset_type="", status="",
+                                show_internal=True, min_adv=0.0, sector="")
+        type_counts = Counter(r.get("type") for r in base if r.get("status") != "internal")
+        status_counts = Counter(r.get("status") for r in base)
+        sector_counts = Counter(r.get("sector") for r in base
+                                if r.get("sector") and r.get("status") != "internal")
         return page(request, "universe.html", {
             "active": "universe", "snap": snap, "age": age, "rows": rows[:_UNIVERSE_CAP],
             "q": q, "asset_type": asset_type, "status": status, "shown": len(rows),
             "show_internal": show_internal, "min_adv": min_adv, "sector": sector,
-            "sectors": sectors,
+            "sectors": sector_counts.most_common(),
+            "types": type_counts.most_common(), "statuses": status_counts.most_common(),
             "validated": bool(counts.get("validated")),
             "eligible": bool(counts.get("eligibility_checked")),
             "liquid": bool(counts.get("liquidity_checked")),

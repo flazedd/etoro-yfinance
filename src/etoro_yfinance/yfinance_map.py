@@ -93,7 +93,7 @@ CRYPTO_SCALE_SUFFIXES = ("xB", "xM", "xK")
 # eToro coin base -> Yahoo base, where Yahoo disambiguates a reused ticker with a
 # numeric suffix (the plain ticker is a different, stale coin). Applied after the
 # scale strip, e.g. PEPExM -> PEPE -> PEPE24478 -> PEPE24478-USD.
-CRYPTO_ALIASES = {"PEPE": "PEPE24478"}
+CRYPTO_ALIASES = {"PEPE": "PEPE24478", "TAO": "TAO22974"}
 
 
 def _norm(s: str | None) -> str:
