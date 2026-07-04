@@ -25,6 +25,19 @@ table.sortable thead th { position: sticky; top: 0; z-index: 1; background: #f8f
    so a wide table scrolls inside it instead of overflowing the page. */
 .tbl-box { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
 .htmx-request #rows-wrap { opacity: .5; transition: opacity .1s; }
+/* Loading indicators (hx-indicator): hidden until their request is in flight. */
+.htmx-indicator { opacity: 0; transition: opacity .15s; }
+.htmx-request.htmx-indicator, .htmx-request .htmx-indicator { opacity: 1; }
+/* Backtest progress bar. */
+.bt-track { height: 8px; width: 100%; background: #e2e8f0; border-radius: 9999px; overflow: hidden; }
+.bt-fill { height: 100%; background: #2563eb; transition: width .3s ease; }
+/* Equity-chart hover tooltip (positioned at the cursor by base.html JS). */
+#eq-tip {
+  position: fixed; display: none; z-index: 60; pointer-events: none;
+  background: #0f172a; color: #f1f5f9; font-size: 11px; line-height: 1.5;
+  padding: 5px 8px; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.3);
+}
+.eq-chart { cursor: crosshair; }
 /* One badge style everywhere — header source tags AND cell pills (status,
    tradable, missing) share identical size/shape; only the color class differs. */
 .badge {

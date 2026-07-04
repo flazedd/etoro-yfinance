@@ -15,7 +15,7 @@
       <div class="mx-auto max-w-none px-6 flex items-center gap-6 h-14">
         <a href="/" class="font-semibold tracking-tight hover:text-white">eToro<span class="text-emerald-400"> ↔ </span>yfinance</a>
         <nav class="flex gap-1 text-sm">
-          {% set tabs = [('home','Home'),('universe','eToro ↔ yfinance'),('diagnostics','Diagnostics')] %}
+          {% set tabs = [('home','Home'),('universe','eToro ↔ yfinance'),('backtest','Backtest'),('diagnostics','Diagnostics')] %}
           {% for key,label in tabs %}
           {% set href = '/' if key=='home' else '/' ~ key %}
           <a href="{{ href }}" class="px-3 py-1.5 rounded-md {{ 'bg-slate-700 text-white' if active==key else 'text-slate-300 hover:bg-slate-800' }}">{{ label }}</a>
@@ -28,6 +28,7 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+  <div id="eq-tip"></div>
   <script>
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
@@ -35,6 +36,30 @@
         if (m) m.innerHTML = '';
       }
     });
+    // Hover readout for equity charts (svg.eq-chart): crosshair + date/value tip.
+    (function () {
+      var W = 880, tip = document.getElementById('eq-tip');
+      document.addEventListener('mousemove', function (e) {
+        var svg = e.target.closest ? e.target.closest('svg.eq-chart') : null;
+        if (!svg) { tip.style.display = 'none'; return; }
+        var dates = JSON.parse(svg.dataset.dates), series = JSON.parse(svg.dataset.series);
+        var x0 = +svg.dataset.x0, x1 = +svg.dataset.x1, n = dates.length;
+        var r = svg.getBoundingClientRect();
+        var vbx = (e.clientX - r.left) / r.width * W;
+        var frac = Math.max(0, Math.min(1, (vbx - x0) / (x1 - x0)));
+        var i = Math.round(frac * (n - 1));
+        var cx = x0 + (x1 - x0) * (i / (n - 1));
+        var cross = svg.querySelector('.eq-cross');
+        if (cross) { cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.style.display = 'block'; }
+        var rows = Object.keys(series).map(function (k) {
+          return k + ': ×' + series[k][i].toFixed(2);
+        }).join('<br>');
+        tip.innerHTML = '<b>' + dates[i] + '</b><br>' + rows;
+        tip.style.display = 'block';
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top = (e.clientY + 14) + 'px';
+      });
+    })();
   </script>
 </body>
 </html>

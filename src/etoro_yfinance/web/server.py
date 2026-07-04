@@ -8,8 +8,11 @@ CLI (scripts/etoro_trade.py). Pages: Home, eToro↔yfinance universe, Diagnostic
 from __future__ import annotations
 
 import os
+import threading
 import time
+import uuid
 from collections import Counter
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -161,6 +164,77 @@ def create_app() -> FastAPI:
             "svg_eur": eur[0], "last_eur": eur[2], "last_date_eur": eur[3],
         })
 
+    # ── backtest (monthly momentum on a chosen universe) ─────────────────────
+    @app.get("/backtest", response_class=HTMLResponse)
+    def backtest_page(request: Request) -> HTMLResponse:
+        from etoro_yfinance import momentum
+        latest = max((r.get("price_to") or "" for r in
+                      datamod.load_etoro_universe().get("rows", [])), default="")
+        return page(request, "backtest.html", {
+            "active": "backtest", "saved_universes": universe_mod.list_saved(),
+            "strategy": momentum.strategy_signals(),
+            "end_default": latest or str(date.today()), "start_default": "2018-01-01"})
+
+    @app.get("/backtest/run", response_class=HTMLResponse)
+    def backtest_run(request: Request, view: str = "", start: str = "2018-01-01",
+                     end: str = "", top_n_sectors: str = "4",
+                     top_n_per_sector: str = "6", min_sector_size: str = "0") -> HTMLResponse:
+        """Kick off the backtest in a background thread; return a polling progress
+        bar. Results are fetched by /backtest/progress once done."""
+        from etoro_yfinance import backtest as bt
+
+        rows = (universe_mod.load(view).get("instruments", [])
+                if view in universe_mod.list_saved() else universe_mod.select())
+        job_id = uuid.uuid4().hex[:12]
+        with _BT_LOCK:
+            _BT_JOBS[job_id] = {"pct": 0.0, "label": "starting…", "result": None,
+                                "error": None, "view": view or "(default)"}
+
+        def _progress(frac: float, label: str) -> None:
+            with _BT_LOCK:
+                if job_id in _BT_JOBS:
+                    _BT_JOBS[job_id].update(pct=frac, label=label)
+
+        def _worker() -> None:
+            try:
+                res = bt.run(rows, start=start, end=end or str(date.today()),
+                             top_n_sectors=int(_to_float(top_n_sectors)) or 4,
+                             top_n_per_sector=int(_to_float(top_n_per_sector)) or 6,
+                             min_sector_size=int(_to_float(min_sector_size)),
+                             progress=_progress)
+                with _BT_LOCK:
+                    _BT_JOBS[job_id].update(pct=1.0, result=res)
+            except Exception as e:  # surface failures to the poller
+                with _BT_LOCK:
+                    _BT_JOBS[job_id].update(pct=1.0, error=str(e))
+
+        threading.Thread(target=_worker, daemon=True).start()
+        return templates.TemplateResponse(request, "_backtest_running.html",
+                                          {"job_id": job_id, "pct": 0, "label": "starting…"})
+
+    @app.get("/backtest/progress", response_class=HTMLResponse)
+    def backtest_progress(request: Request, job: str = "") -> HTMLResponse:
+        from . import charts
+
+        with _BT_LOCK:
+            j = dict(_BT_JOBS.get(job) or {})
+        if not j:
+            return templates.TemplateResponse(request, "_backtest_result.html",
+                                              {"res": {"error": "job expired — re-run"},
+                                               "svg": None, "view": ""})
+        if j.get("result") is None and not j.get("error"):
+            return templates.TemplateResponse(request, "_backtest_running.html",
+                                              {"job_id": job, "pct": j["pct"], "label": j["label"]})
+        # Done (or failed): render results and drop the job.
+        with _BT_LOCK:
+            _BT_JOBS.pop(job, None)
+        res = j.get("result") or {"error": j.get("error")}
+        svg = (charts.equity_svg(res["dates"], {"Strategy": res["equity"],
+                                                "Benchmark": res["benchmark"]})
+               if "error" not in res else None)
+        return templates.TemplateResponse(request, "_backtest_result.html",
+                                          {"res": res, "svg": svg, "view": j.get("view", "")})
+
     # ── diagnostics (system health) ──────────────────────────────────────────
     @app.get("/diagnostics", response_class=HTMLResponse)
     def diagnostics(request: Request) -> HTMLResponse:
@@ -195,6 +269,11 @@ def _diag() -> dict[str, Any]:
     return diag.collect(now, snapshots={
         "etoro universe": datamod.snapshot_age_seconds("etoro_universe_mapping.json", now),
     })
+
+
+# In-memory backtest jobs (single-process): id -> {pct, label, result, error, view}.
+_BT_JOBS: dict[str, dict] = {}
+_BT_LOCK = threading.Lock()
 
 
 def _to_float(s: str) -> float:
