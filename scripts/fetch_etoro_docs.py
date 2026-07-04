@@ -11,6 +11,7 @@ pages carry the prose + examples).
 Re-run any time to refresh. The portal sits behind Cloudflare, which blocks the
 default urllib UA, so we send a browser User-Agent and go one request at a time.
 """
+
 from __future__ import annotations
 
 import re
@@ -26,8 +27,10 @@ SPECS = [
     f"{BASE}/api-reference/deprecated-openapi.json",
 ]
 OUT = Path("docs/etoro")
-UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/125.0 Safari/537.36")
+UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/125.0 Safari/537.36"
+)
 DELAY = 0.4  # polite gap between requests (Cloudflare-friendly, sequential)
 
 
@@ -38,7 +41,7 @@ def fetch(url: str) -> bytes:
 
 
 def local_path(url: str) -> Path:
-    return OUT / url[len(BASE) + 1:]  # mirror the path after the host
+    return OUT / url[len(BASE) + 1 :]  # mirror the path after the host
 
 
 def save(url: str, data: bytes) -> None:

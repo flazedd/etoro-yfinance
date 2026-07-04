@@ -23,15 +23,15 @@ def _run(reload: bool) -> int:
     return server.main()
 
 
-def main() -> int:   # momentum-up
+def main() -> int:  # momentum-up
     return _run(reload=False)
 
 
-def dev() -> int:    # momentum-dev
+def dev() -> int:  # momentum-dev
     return _run(reload=True)
 
 
-def prod() -> int:   # momentum-prod
+def prod() -> int:  # momentum-prod
     return _run(reload=False)
 
 

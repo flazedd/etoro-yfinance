@@ -91,8 +91,11 @@ def cpu_temp() -> dict[str, Any]:
         except (OSError, ValueError):
             continue
         celsius = milli / 1000.0
-        return {"status": _pct_status(celsius, TEMP_WARN, TEMP_CRIT),
-                "available": True, "celsius": celsius}
+        return {
+            "status": _pct_status(celsius, TEMP_WARN, TEMP_CRIT),
+            "available": True,
+            "celsius": celsius,
+        }
     return {"status": OK, "available": False}
 
 
@@ -105,8 +108,15 @@ def load() -> dict[str, Any]:
     # >1.0 load-per-core sustained is the warn line; 1.5x is crit.
     per_core = one / cores
     status = CRIT if per_core >= 1.5 else WARN if per_core >= 1.0 else OK
-    return {"status": status, "available": True, "cores": cores,
-            "one": one, "five": five, "fifteen": fifteen, "per_core": per_core}
+    return {
+        "status": status,
+        "available": True,
+        "cores": cores,
+        "one": one,
+        "five": five,
+        "fifteen": fifteen,
+        "per_core": per_core,
+    }
 
 
 def uptime_seconds() -> float | None:
@@ -124,8 +134,9 @@ def overall(parts: list[dict[str, Any]]) -> str:
     return worst
 
 
-def collect(now: float, *, db_path: str | None = None,
-            snapshots: dict[str, float | None] | None = None) -> dict[str, Any]:
+def collect(
+    now: float, *, db_path: str | None = None, snapshots: dict[str, float | None] | None = None
+) -> dict[str, Any]:
     """Gather every metric into one dict the template renders directly.
 
     `now` and any snapshot ages are passed in by the caller (the web layer owns

@@ -88,8 +88,8 @@ def _overlay_liquidity(doc: dict[str, Any]) -> dict[str, Any]:
         return doc
     from etoro_yfinance import liquidity as liq
 
-    turn = _load(data_dir() / "liquidity_cache.json")   # keyed by yfinance ticker
-    spr = _load(data_dir() / "spread_cache.json")        # keyed by instrument_id
+    turn = _load(data_dir() / "liquidity_cache.json")  # keyed by yfinance ticker
+    spr = _load(data_dir() / "spread_cache.json")  # keyed by instrument_id
     for r in rows:
         yf = r.get("yf")
         t = turn.get(yf) if (turn and yf) else None
@@ -103,8 +103,9 @@ def _overlay_liquidity(doc: dict[str, Any]) -> dict[str, Any]:
         for k in ("adv_eur", "adv_pct", "zero_vol_frac", "spread_pct"):
             r.setdefault(k, None)
 
-    adv_by_yf = {r["yf"]: r["adv_eur"] for r in rows
-                 if r.get("yf") and r.get("adv_eur") is not None}
+    adv_by_yf = {
+        r["yf"]: r["adv_eur"] for r in rows if r.get("yf") and r.get("adv_eur") is not None
+    }
     ranks = liq.rank_adv(adv_by_yf)
     for r in rows:
         if r.get("yf") in ranks:
@@ -127,7 +128,7 @@ def _overlay_sector(doc: dict[str, Any]) -> dict[str, Any]:
         if cat and r.get("type") == "ETF" and r.get("yf") and cat.get(r["yf"]):
             r["sector"] = cat[r["yf"]]
         if override and not r.get("sector") and r.get("yf") and override.get(r["yf"]):
-            r["sector"] = override[r["yf"]]   # Yahoo fallback for unclassified names
+            r["sector"] = override[r["yf"]]  # Yahoo fallback for unclassified names
         r.setdefault("sector", None)
     if any(r.get("sector") for r in rows):
         doc.setdefault("counts", {})["sector_known"] = True
@@ -153,10 +154,12 @@ def load_instrument_rules(instrument_id: str) -> dict[str, Any] | None:
     key = str(instrument_id)
     cache = _load(data_dir() / "eligibility_cache.json")
     if key in cache:
-        return cache[key] or None
+        rec: dict[str, Any] | None = cache[key] or None
+        return rec
     for r in _load(data_dir() / "etoro_universe_mapping.json").get("rows", []):
         if str(r.get("instrument_id")) == key:
-            return r.get("rules")
+            rules: dict[str, Any] | None = r.get("rules")
+            return rules
     return None
 
 

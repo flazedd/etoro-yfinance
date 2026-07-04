@@ -48,7 +48,7 @@ class OrderPreview:
 
     instrument_id: str
     symbol: str
-    est_cost: Decimal | None = None            # summed cost lines, if any
+    est_cost: Decimal | None = None  # summed cost lines, if any
     currency: str = ""
     lines: list[CostLine] = field(default_factory=list)
     raw: dict[str, Any] = field(default_factory=dict)
@@ -99,17 +99,27 @@ class Broker(Protocol):
     def resolve_symbol(self, symbol: str) -> Instrument: ...
 
     def preview_buy(
-        self, *, instrument: Instrument,
-        amount: Decimal | None = None, units: Decimal | None = None,
+        self,
+        *,
+        instrument: Instrument,
+        amount: Decimal | None = None,
+        units: Decimal | None = None,
     ) -> OrderPreview: ...
 
     def buy(
-        self, *, instrument: Instrument,
-        amount: Decimal | None = None, units: Decimal | None = None,
+        self,
+        *,
+        instrument: Instrument,
+        amount: Decimal | None = None,
+        units: Decimal | None = None,
     ) -> OrderResult: ...
 
     def close_position(
-        self, *, position_id: str, instrument_id: str, units: Decimal | None = None,
+        self,
+        *,
+        position_id: str,
+        instrument_id: str,
+        units: Decimal | None = None,
     ) -> OrderResult: ...
 
     def balance(self) -> Balance: ...

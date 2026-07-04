@@ -10,6 +10,7 @@ import json
 import types
 from collections.abc import Callable
 from decimal import Decimal
+from typing import Any
 
 import httpx
 import pytest
@@ -26,9 +27,12 @@ from etoro_yfinance.etoro_client import EtoroClient, etoro_from_settings
 _INST = Instrument(broker="etoro", instrument_id="1001", symbol="AAPL", currency="USD")
 
 
-def _mk(handler: Callable[[httpx.Request], httpx.Response], env: str = "demo", **kw: object) -> EtoroClient:
-    return EtoroClient(api_key="AK", user_key="UK", env=env,
-                       transport=httpx.MockTransport(handler), **kw)  # type: ignore[arg-type]
+def _mk(
+    handler: Callable[[httpx.Request], httpx.Response], env: str = "demo", **kw: Any
+) -> EtoroClient:
+    return EtoroClient(
+        api_key="AK", user_key="UK", env=env, transport=httpx.MockTransport(handler), **kw
+    )
 
 
 def test_requires_keys_and_valid_env() -> None:
@@ -61,11 +65,20 @@ def test_resolve_requires_exact_symbol_match() -> None:
     def handler(req: httpx.Request) -> httpx.Response:
         assert req.url.path == "/api/v1/market-data/search"
         assert req.url.params["internalSymbolFull"] == "AAPL"
-        return httpx.Response(200, json={"items": [
-            {"internalSymbolFull": "AAPLX", "instrumentId": 9},  # partial — must be ignored
-            {"internalSymbolFull": "AAPL", "instrumentId": 1001,
-             "instrumentDisplayName": "Apple", "instrumentCurrency": "USD"},
-        ]})
+        return httpx.Response(
+            200,
+            json={
+                "items": [
+                    {"internalSymbolFull": "AAPLX", "instrumentId": 9},  # partial — must be ignored
+                    {
+                        "internalSymbolFull": "AAPL",
+                        "instrumentId": 1001,
+                        "instrumentDisplayName": "Apple",
+                        "instrumentCurrency": "USD",
+                    },
+                ]
+            },
+        )
 
     with _mk(handler) as c:
         inst = c.resolve_symbol("AAPL")
@@ -75,23 +88,36 @@ def test_resolve_requires_exact_symbol_match() -> None:
 
 
 def test_resolve_partial_only_and_empty_raise() -> None:
-    with _mk(lambda r: httpx.Response(200, json={"items": [
-            {"internalSymbolFull": "AAPLX", "instrumentId": 9}]})) as c, pytest.raises(BrokerError):
+    with (
+        _mk(
+            lambda r: httpx.Response(
+                200, json={"items": [{"internalSymbolFull": "AAPLX", "instrumentId": 9}]}
+            )
+        ) as c,
+        pytest.raises(BrokerError),
+    ):
         c.resolve_symbol("AAPL")
     with _mk(lambda r: httpx.Response(200, json={"items": []})) as c, pytest.raises(BrokerError):
         c.resolve_symbol("ZZZZ")
 
 
 def test_preview_buy_demo_path_body_and_totals() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["path"] = req.url.path
         captured["body"] = json.loads(req.content)
-        return httpx.Response(200, json={"instrumentId": 1001, "symbol": "AAPL", "costs": [
-            {"costType": "markup", "amount": "0.15", "currency": "USD"},
-            {"costType": "transactionFee", "amount": "0.05", "currency": "USD"},
-        ]})
+        return httpx.Response(
+            200,
+            json={
+                "instrumentId": 1001,
+                "symbol": "AAPL",
+                "costs": [
+                    {"costType": "markup", "amount": "0.15", "currency": "USD"},
+                    {"costType": "transactionFee", "amount": "0.05", "currency": "USD"},
+                ],
+            },
+        )
 
     with _mk(handler) as c:
         prev = c.preview_buy(instrument=_INST, amount=Decimal("100"))
@@ -109,7 +135,7 @@ def test_preview_buy_demo_path_body_and_totals() -> None:
 
 
 def test_buy_demo_path_units_body_and_order_id() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["path"] = req.url.path
@@ -126,7 +152,7 @@ def test_buy_demo_path_units_body_and_order_id() -> None:
 
 
 def test_buy_real_env_drops_demo_segment() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["path"] = req.url.path
@@ -146,24 +172,29 @@ def test_buy_requires_exactly_one_of_amount_units() -> None:
 
 
 def test_close_position_demo_path_body_and_result() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["path"] = req.url.path
         captured["body"] = json.loads(req.content)
-        return httpx.Response(200, json={
-            "orderForClose": {"orderID": 13904638, "positionID": 2150941015}, "token": "t"})
+        return httpx.Response(
+            200,
+            json={"orderForClose": {"orderID": 13904638, "positionID": 2150941015}, "token": "t"},
+        )
 
     with _mk(handler) as c:
         res = c.close_position(position_id="2150941015", instrument_id="1111", units=Decimal("2"))
-    assert captured["path"] == "/api/v1/trading/execution/demo/market-close-orders/positions/2150941015"
+    assert (
+        captured["path"]
+        == "/api/v1/trading/execution/demo/market-close-orders/positions/2150941015"
+    )
     assert captured["body"] == {"InstrumentId": 1111, "UnitsToDeduct": 2.0}
     assert res.order_id == "13904638"
     assert res.status == "closing"
 
 
 def test_close_whole_position_omits_units() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["body"] = json.loads(req.content)
@@ -177,8 +208,10 @@ def test_close_whole_position_omits_units() -> None:
 def test_balance_reads_env_aware_pnl_credit() -> None:
     def handler(req: httpx.Request) -> httpx.Response:
         assert req.url.path == "/api/v1/trading/info/demo/pnl"  # demo-aware, not /balances
-        return httpx.Response(200, json={
-            "clientPortfolio": {"credit": 10000.5, "unrealizedPnL": 251, "bonusCredit": 500}})
+        return httpx.Response(
+            200,
+            json={"clientPortfolio": {"credit": 10000.5, "unrealizedPnL": 251, "bonusCredit": 500}},
+        )
 
     with _mk(handler) as c:
         b = c.balance()
@@ -188,7 +221,7 @@ def test_balance_reads_env_aware_pnl_credit() -> None:
 
 
 def test_balance_real_env_drops_demo_segment() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["path"] = req.url.path
@@ -205,7 +238,9 @@ def _settings(env: str, **over: object) -> types.SimpleNamespace:
         "etoro_user_key_demo": SecretStr("DEMOKEY"),
         "etoro_user_key_real": SecretStr("REALKEY"),
         "etoro_user_key": None,
-        "etoro_env": env, "etoro_order_currency": "usd", "etoro_default_leverage": 1,
+        "etoro_env": env,
+        "etoro_order_currency": "usd",
+        "etoro_default_leverage": 1,
         "http_timeout_seconds": 5.0,
     }
     base.update(over)
@@ -234,31 +269,82 @@ def test_list_instruments_fetches_by_type_and_normalises() -> None:
     def handler(req: httpx.Request) -> httpx.Response:
         seen_paths.append(str(req.url))
         if req.url.path == "/api/v1/market-data/instrument-types":
-            return httpx.Response(200, json={"instrumentTypes": [
-                {"instrumentTypeID": 5, "instrumentTypeDescription": "Stocks"}]})
-        return httpx.Response(200, json={"instrumentDisplayDatas": [
-            {"instrumentID": 1001, "symbolFull": "AAPL", "instrumentTypeID": 5,
-             "exchangeID": 4, "instrumentDisplayName": "Apple", "isInternalInstrument": False},
-            {"instrumentID": 610, "symbolFull": "ETORIAN610", "instrumentTypeID": 5,
-             "exchangeID": 4, "instrumentDisplayName": "ETORIAN610", "isInternalInstrument": True},
-        ]})
+            return httpx.Response(
+                200,
+                json={
+                    "instrumentTypes": [
+                        {"instrumentTypeID": 5, "instrumentTypeDescription": "Stocks"}
+                    ]
+                },
+            )
+        return httpx.Response(
+            200,
+            json={
+                "instrumentDisplayDatas": [
+                    {
+                        "instrumentID": 1001,
+                        "symbolFull": "AAPL",
+                        "instrumentTypeID": 5,
+                        "exchangeID": 4,
+                        "instrumentDisplayName": "Apple",
+                        "isInternalInstrument": False,
+                    },
+                    {
+                        "instrumentID": 610,
+                        "symbolFull": "ETORIAN610",
+                        "instrumentTypeID": 5,
+                        "exchangeID": 4,
+                        "instrumentDisplayName": "ETORIAN610",
+                        "isInternalInstrument": True,
+                    },
+                ]
+            },
+        )
 
     with _mk(handler) as c:
         rows = c.list_instruments()
     assert any("instrumentTypeIds=5" in p for p in seen_paths)  # enumerated by type
-    assert rows[0] == {"instrument_id": 1001, "symbol": "AAPL", "type_id": 5,
-                       "exchange_id": 4, "name": "Apple", "is_internal": False,
-                       "stocks_industry_id": None}
+    assert rows[0] == {
+        "instrument_id": 1001,
+        "symbol": "AAPL",
+        "type_id": 5,
+        "exchange_id": 4,
+        "name": "Apple",
+        "is_internal": False,
+        "stocks_industry_id": None,
+    }
     assert rows[1]["is_internal"] is True
 
 
 def test_candles_parses_ohlcv_and_sorts_oldest_first() -> None:
     def handler(req: httpx.Request) -> httpx.Response:
-        assert req.url.path == "/api/v1/market-data/instruments/100000/history/candles/desc/OneDay/2"
-        return httpx.Response(200, json={"interval": "OneDay", "candles": [
-            {"fromDate": "2026-07-03T00:00:00Z", "open": 2, "high": 3, "low": 1, "close": 2.5, "volume": None},
-            {"fromDate": "2026-07-02T00:00:00Z", "open": 1, "high": 2, "low": 0.5, "close": 1.5, "volume": 10},
-        ]})
+        assert (
+            req.url.path == "/api/v1/market-data/instruments/100000/history/candles/desc/OneDay/2"
+        )
+        return httpx.Response(
+            200,
+            json={
+                "interval": "OneDay",
+                "candles": [
+                    {
+                        "fromDate": "2026-07-03T00:00:00Z",
+                        "open": 2,
+                        "high": 3,
+                        "low": 1,
+                        "close": 2.5,
+                        "volume": None,
+                    },
+                    {
+                        "fromDate": "2026-07-02T00:00:00Z",
+                        "open": 1,
+                        "high": 2,
+                        "low": 0.5,
+                        "close": 1.5,
+                        "volume": 10,
+                    },
+                ],
+            },
+        )
 
     with _mk(handler) as c:
         rows = c.candles("100000", interval="OneDay", count=2)
@@ -269,7 +355,7 @@ def test_candles_parses_ohlcv_and_sorts_oldest_first() -> None:
 
 
 def test_candles_rejects_bad_interval_and_caps_count() -> None:
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def handler(req: httpx.Request) -> httpx.Response:
         captured["path"] = req.url.path
@@ -283,8 +369,10 @@ def test_candles_rejects_bad_interval_and_caps_count() -> None:
 
 
 def test_http_errors_map_to_broker_errors() -> None:
-    with _mk(lambda r: httpx.Response(401, json={"error": "bad key"})) as c, \
-            pytest.raises(BrokerAuthError):
+    with (
+        _mk(lambda r: httpx.Response(401, json={"error": "bad key"})) as c,
+        pytest.raises(BrokerAuthError),
+    ):
         c.balance()
     with _mk(lambda r: httpx.Response(500, text="boom")) as c, pytest.raises(BrokerError):
         c.balance()

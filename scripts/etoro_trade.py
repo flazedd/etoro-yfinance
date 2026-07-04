@@ -55,8 +55,10 @@ def main() -> int:
     p_res = sub.add_parser("resolve", help="ticker -> eToro instrument id")
     p_res.add_argument("symbol")
 
-    for name, help_ in (("preview", "cost breakdown for a buy (no order)"),
-                        ("buy", "open a long at market")):
+    for name, help_ in (
+        ("preview", "cost breakdown for a buy (no order)"),
+        ("buy", "open a long at market"),
+    ):
         p = sub.add_parser(name, help=help_)
         p.add_argument("symbol")
         g = p.add_mutually_exclusive_group(required=True)
@@ -68,8 +70,9 @@ def main() -> int:
     p_sell = sub.add_parser("sell", help="close (sell) units of an existing position")
     p_sell.add_argument("--position-id", required=True, help="eToro positionId to close")
     p_sell.add_argument("--instrument-id", required=True, help="the position's instrumentId")
-    p_sell.add_argument("--units", type=Decimal, default=None,
-                        help="units to close (default: entire position)")
+    p_sell.add_argument(
+        "--units", type=Decimal, default=None, help="units to close (default: entire position)"
+    )
     p_sell.add_argument("--yes", action="store_true", help="skip confirmation prompt")
 
     args = parser.parse_args()
@@ -92,8 +95,10 @@ def main() -> int:
 
             if args.cmd == "resolve":
                 inst = client.resolve_symbol(args.symbol)
-                print(f"  {inst.symbol} -> instrumentId={inst.instrument_id} "
-                      f"({inst.name} {inst.currency})")
+                print(
+                    f"  {inst.symbol} -> instrumentId={inst.instrument_id} "
+                    f"({inst.name} {inst.currency})"
+                )
                 return 0
 
             if args.cmd in ("preview", "buy"):
@@ -120,7 +125,8 @@ def main() -> int:
                     print("Aborted.")
                     return 0
                 res = client.close_position(
-                    position_id=args.position_id, instrument_id=args.instrument_id,
+                    position_id=args.position_id,
+                    instrument_id=args.instrument_id,
                     units=args.units,
                 )
                 print(f"Close submitted: orderId={res.order_id} status={res.status}")

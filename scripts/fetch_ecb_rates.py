@@ -10,6 +10,7 @@ of 1.0. Used to convert native price/volume series into euros.
 Caveats baked into the consumer, not here: rates are a single daily fix (~16:00
 CET), weekdays only — forward-fill onto trading days when converting.
 """
+
 from __future__ import annotations
 
 import io
@@ -39,8 +40,10 @@ def main() -> int:
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(OUT)
-    print(f"wrote {OUT}: {len(df):,} days × {len(df.columns)} currencies "
-          f"({df.index.min().date()} → {df.index.max().date()})")
+    print(
+        f"wrote {OUT}: {len(df):,} days × {len(df.columns)} currencies "
+        f"({df.index.min().date()} → {df.index.max().date()})"
+    )
     print("currencies:", ", ".join(sorted(df.columns)))
     return 0
 

@@ -8,6 +8,7 @@ writes data/prices_eur/<ticker>.parquet — prices in EUR, `volume` = EUR turnov
     uv run python scripts/fetch_ecb_rates.py      # once / to refresh FX
     uv run python scripts/build_eur_series.py     # (re)build the EUR store
 """
+
 from __future__ import annotations
 
 import json
@@ -25,7 +26,7 @@ def main() -> int:
 
     rows = json.loads((data_dir() / "etoro_universe_mapping.json").read_text())["rows"]
     status_by_yf: dict[str, str] = {}
-    for r in rows:                       # dedup by yfinance ticker (crypto collapses)
+    for r in rows:  # dedup by yfinance ticker (crypto collapses)
         yf = r.get("yf")
         if yf and yf not in status_by_yf:
             status_by_yf[yf] = r.get("status")
@@ -43,7 +44,7 @@ def main() -> int:
         if prices.write_prices_eur(yf, df, ccy, status, ecb):
             ok += 1
         else:
-            skipped[ccy] += 1        # currency not in ECB table
+            skipped[ccy] += 1  # currency not in ECB table
 
     print(f"wrote {ok} EUR series -> {prices.prices_dir(eur=True)}/")
     if skipped:

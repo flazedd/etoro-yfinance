@@ -60,6 +60,7 @@ mapping — search + filter by type/status, sortable, per-row Yahoo link), and
 ## Tests
 
 ```bash
+uv sync --all-extras     # once, for the full dev environment
 uv run pytest -q
-uv run ruff check . && uv run mypy src/etoro_yfinance
+uv run ruff check . && uv run ruff format --check . && uv run mypy
 ```

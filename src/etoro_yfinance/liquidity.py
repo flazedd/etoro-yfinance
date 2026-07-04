@@ -10,14 +10,18 @@ direct round-trip cost on eToro.
 `rank_adv()` turns raw €-turnover into a 0–100 universe percentile so you can keep
 "top N% most liquid". Pure math, shared by the build scripts and the web overlay.
 """
+
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 WINDOW = 252  # trailing trading days for the turnover stats (~1 year)
 
 
-def turnover_stats(volume_eur) -> dict[str, Any]:
+def turnover_stats(volume_eur: pd.Series) -> dict[str, Any]:
     """From a EUR turnover series (data/prices_eur volume) → adv_eur (median daily
     €-turnover over the last WINDOW days), zero_vol_frac, and obs (days used)."""
     s = volume_eur.dropna()
@@ -50,5 +54,8 @@ def rank_adv(adv_by_key: dict[str, float]) -> dict[str, float]:
         return {}
     import bisect
 
-    return {k: round(100 * bisect.bisect_right(vals, v) / n, 1)
-            for k, v in adv_by_key.items() if v is not None}
+    return {
+        k: round(100 * bisect.bisect_right(vals, v) / n, 1)
+        for k, v in adv_by_key.items()
+        if v is not None
+    }

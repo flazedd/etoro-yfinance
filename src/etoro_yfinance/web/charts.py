@@ -4,11 +4,13 @@ price_volume_svg() draws a split-adjusted price line over a volume panel from a
 ticker's stored OHLCV (data/prices/<ticker>.parquet), bucket-downsampled so even
 decades of daily bars render as a compact, readable inline SVG.
 """
+
 from __future__ import annotations
 
 import html
 import json
 import math
+from typing import Any
 
 _W, _H = 880, 400
 _PAD_L, _PAD_R, _PAD_T, _PAD_B = 60, 14, 12, 26
@@ -30,7 +32,9 @@ def _fmt_vol(v: float) -> str:
     return f"{v:.0f}"
 
 
-def _downsample(dates, price, vol):
+def _downsample(
+    dates: list[Any], price: list[float], vol: list[float]
+) -> tuple[list[Any], list[float], list[float]]:
     """Bucket into ~_BUCKETS points: last price in each bucket, max volume."""
     n = len(price)
     if n <= _BUCKETS:
@@ -45,14 +49,16 @@ def _downsample(dates, price, vol):
     return ds, ps, vs
 
 
-def price_volume_svg(df, log: bool = True) -> str | None:
+def price_volume_svg(df: Any, log: bool = True) -> str | None:
     """Build an inline SVG (price line + volume bars) from a stored OHLCV frame,
     or None if there's no usable price series. Uses adj_close (continuous through
     splits) for the price line; log scale on price by default."""
     field = "adj_close" if "adj_close" in df.columns else "close"
-    rows = [(d, float(p), float(v))
-            for d, p, v in zip(df.index, df[field], df["volume"], strict=False)
-            if p == p]  # drop NaN prices
+    rows = [
+        (d, float(p), float(v))
+        for d, p, v in zip(df.index, df[field], df["volume"], strict=False)
+        if p == p
+    ]  # drop NaN prices
     if len(rows) < 2:
         return None
     dates = [r[0] for r in rows]
@@ -69,11 +75,11 @@ def price_volume_svg(df, log: bool = True) -> str | None:
     use_log = log and pmin > 0
 
     plot_h = _H - _PAD_T - _PAD_B
-    price_h = plot_h * 0.62          # price panel
-    gap = plot_h * 0.06             # gap between panels
-    vol_h = plot_h * 0.30           # taller volume panel
+    price_h = plot_h * 0.62  # price panel
+    gap = plot_h * 0.06  # gap between panels
+    vol_h = plot_h * 0.30  # taller volume panel
     vol_top = _PAD_T + price_h + gap
-    vol_base = vol_top + vol_h      # the flat x-axis the bars stand on
+    vol_base = vol_top + vol_h  # the flat x-axis the bars stand on
     inner_w = _W - _PAD_L - _PAD_R
 
     def x(i: int) -> float:
@@ -86,6 +92,7 @@ def price_volume_svg(df, log: bool = True) -> str | None:
         def py(p: float) -> float:
             return _PAD_T + price_h * (1 - (math.log10(max(p, 1e-9)) - lmin) / span)
     else:
+
         def py(p: float) -> float:
             return _PAD_T + price_h * (1 - (p - pmin) / (pmax - pmin))
 
@@ -99,8 +106,10 @@ def price_volume_svg(df, log: bool = True) -> str | None:
         h = vol_h * (vol[i] / vmax)
         if vol[i] > 0:
             h = max(h, 0.8)
-        parts.append(f'<rect x="{x(i) - bar_w / 2:.1f}" y="{vol_base - h:.1f}" '
-                     f'width="{bar_w:.1f}" height="{h:.1f}" fill="#94a3b8"/>')
+        parts.append(
+            f'<rect x="{x(i) - bar_w / 2:.1f}" y="{vol_base - h:.1f}" '
+            f'width="{bar_w:.1f}" height="{h:.1f}" fill="#94a3b8"/>'
+        )
     bars = "".join(parts)
 
     d0, d1 = str(dates[0]), str(dates[-1])
@@ -143,11 +152,11 @@ def equity_svg(dates: list[str], series: dict[str, list[float]], log: bool = Tru
     ph = _H - _PAD_T - _PAD_B
     inner_w = _W - _PAD_L - _PAD_R
 
-    def x(i):
+    def x(i: int) -> float:
         return _PAD_L + inner_w * (i / (n - 1))
 
-    def y(v):
-        t = (math.log10(v) if log else v)
+    def y(v: float) -> float:
+        t = math.log10(v) if log else v
         return _PAD_T + ph * (1 - (t - lo) / (hi - lo))
 
     e = html.escape
@@ -157,12 +166,14 @@ def equity_svg(dates: list[str], series: dict[str, list[float]], log: bool = Tru
         pts = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, v in enumerate(ys) if v and v > 0)
         lines.append(f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.6"/>')
         ly = _PAD_T + 12 + k * 15
-        legend.append(f'<rect x="{_PAD_L + 6}" y="{ly - 8}" width="10" height="10" fill="{color}"/>'
-                      f'<text x="{_PAD_L + 20}" y="{ly + 1}" class="pv-axis">{e(name)} '
-                      f'(×{ys[-1]:.2f})</text>')
+        legend.append(
+            f'<rect x="{_PAD_L + 6}" y="{ly - 8}" width="10" height="10" fill="{color}"/>'
+            f'<text x="{_PAD_L + 20}" y="{ly + 1}" class="pv-axis">{e(name)} '
+            f"(×{ys[-1]:.2f})</text>"
+        )
     # y grid labels (top/bottom of the value range)
-    top_v = (10 ** hi) if log else hi
-    bot_v = (10 ** lo) if log else lo
+    top_v = (10**hi) if log else hi
+    bot_v = (10**lo) if log else lo
     # Data for the JS hover (base.html): dates + rounded series, single-quoted
     # attrs so the JSON double-quotes are valid (values have no single quotes).
     d_dates = json.dumps(dates)
@@ -174,8 +185,8 @@ def equity_svg(dates: list[str], series: dict[str, list[float]], log: bool = Tru
   <line x1="{_PAD_L}" y1="{_PAD_T + ph:.1f}" x2="{_W - _PAD_R}" y2="{_PAD_T + ph:.1f}" stroke="#e2e8f0"/>
   <text x="{_PAD_L - 6}" y="{_PAD_T + 4}" text-anchor="end" class="pv-axis">×{top_v:.2f}</text>
   <text x="{_PAD_L - 6}" y="{_PAD_T + ph:.1f}" text-anchor="end" class="pv-axis">×{bot_v:.2f}</text>
-  {''.join(lines)}
-  {''.join(legend)}
+  {"".join(lines)}
+  {"".join(legend)}
   <line class="eq-cross" x1="{_PAD_L}" x2="{_PAD_L}" y1="{_PAD_T}" y2="{_PAD_T + ph:.1f}"
         stroke="#64748b" stroke-dasharray="3 3" style="display:none"/>
   <text x="{_PAD_L}" y="{_H - 8}" text-anchor="start" class="pv-axis">{e(dates[0])}</text>

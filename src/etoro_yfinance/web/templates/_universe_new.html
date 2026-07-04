@@ -9,7 +9,7 @@
       Selects instruments that have price + volume, are tradable on eToro, meet the
       liquidity/history/recency floors, and (optionally) have a sector.
     </p>
-    <form hx-get="/universe/create" hx-target="#chart-modal" hx-swap="innerHTML"
+    <form hx-post="/universe/create" hx-target="#chart-modal" hx-swap="innerHTML"
           class="grid grid-cols-2 gap-3 text-sm">
       <label class="col-span-2 flex flex-col gap-1">
         <span class="text-slate-500">name</span>

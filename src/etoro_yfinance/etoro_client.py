@@ -41,8 +41,17 @@ from etoro_yfinance.broker import (
 )
 
 # eToro candle intervals accepted by the history endpoint.
-CANDLE_INTERVALS = ("OneMinute", "FiveMinutes", "TenMinutes", "FifteenMinutes",
-                    "ThirtyMinutes", "OneHour", "FourHours", "OneDay", "OneWeek")
+CANDLE_INTERVALS = (
+    "OneMinute",
+    "FiveMinutes",
+    "TenMinutes",
+    "FifteenMinutes",
+    "ThirtyMinutes",
+    "OneHour",
+    "FourHours",
+    "OneDay",
+    "OneWeek",
+)
 _MAX_CANDLES = 1000  # hard cap per request (no date-range param exists)
 
 BASE_URL = "https://public-api.etoro.com"
@@ -117,9 +126,14 @@ class EtoroClient:
         self._order_currency = order_currency
         self._default_leverage = default_leverage
         self._client = httpx.Client(
-            base_url=BASE_URL, timeout=timeout, transport=transport,
-            headers={"x-api-key": api_key, "x-user-key": user_key,
-                     "Content-Type": "application/json"},
+            base_url=BASE_URL,
+            timeout=timeout,
+            transport=transport,
+            headers={
+                "x-api-key": api_key,
+                "x-user-key": user_key,
+                "Content-Type": "application/json",
+            },
         )
 
     # ── lifecycle ────────────────────────────────────────────────────────────
@@ -143,9 +157,14 @@ class EtoroClient:
         return "demo/" if self.is_demo else ""
 
     # ── low-level request ────────────────────────────────────────────────────
-    def _request(self, method: str, path: str, *,
-                 params: dict[str, Any] | None = None,
-                 json: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         headers = {"x-request-id": str(uuid.uuid4())}  # unique per request, for tracing
         try:
             r = self._client.request(method, path, params=params, json=json, headers=headers)
@@ -153,17 +172,16 @@ class EtoroClient:
             raise BrokerError(f"eToro request failed ({method} {path}): {e}") from e
         if r.status_code in (401, 403):
             raise BrokerAuthError(
-                f"eToro auth rejected ({r.status_code}) on {method} {path}: {_err_body(r)}")
+                f"eToro auth rejected ({r.status_code}) on {method} {path}: {_err_body(r)}"
+            )
         if r.status_code >= 400:
-            raise BrokerError(
-                f"eToro API error {r.status_code} on {method} {path}: {_err_body(r)}")
+            raise BrokerError(f"eToro API error {r.status_code} on {method} {path}: {_err_body(r)}")
         if not r.content:
             return {}
         try:
             data = r.json()
         except ValueError as e:
-            raise BrokerError(
-                f"eToro returned non-JSON on {method} {path}: {r.text[:200]}") from e
+            raise BrokerError(f"eToro returned non-JSON on {method} {path}: {r.text[:200]}") from e
         return data if isinstance(data, dict) else {"items": data}
 
     # ── Broker protocol ──────────────────────────────────────────────────────
@@ -171,8 +189,9 @@ class EtoroClient:
         """Resolve a ticker to an eToro instrument. The search may return partial
         matches, so we require an EXACT `internalSymbolFull` hit (per eToro's
         docs) rather than trusting the first row."""
-        data = self._request("GET", "/api/v1/market-data/search",
-                              params={"internalSymbolFull": symbol})
+        data = self._request(
+            "GET", "/api/v1/market-data/search", params={"internalSymbolFull": symbol}
+        )
         items = data.get("items") or []
         want = symbol.strip().upper()
         for it in items:
@@ -180,48 +199,71 @@ class EtoroClient:
                 return self._instrument(it, symbol)
         if items:
             seen = [i.get("internalSymbolFull") for i in items][:5]
-            raise BrokerError(
-                f"eToro: no exact instrument for {symbol!r} (search returned {seen})")
+            raise BrokerError(f"eToro: no exact instrument for {symbol!r} (search returned {seen})")
         raise BrokerError(f"eToro: no instrument found for {symbol!r}")
 
-    def preview_buy(self, *, instrument: Instrument,
-                    amount: Decimal | None = None, units: Decimal | None = None,
-                    leverage: int | None = None) -> OrderPreview:
+    def preview_buy(
+        self,
+        *,
+        instrument: Instrument,
+        amount: Decimal | None = None,
+        units: Decimal | None = None,
+        leverage: int | None = None,
+    ) -> OrderPreview:
         """What-if cost breakdown for opening a long — no order is placed."""
         body = self._open_body(instrument, amount, units, leverage)
         body["settlementType"] = _SETTLEMENT_TYPE  # required for a what-if open
         data = self._request("POST", f"/api/v2/trading/info/{self._seg}costs", json=body)
         return self._preview(data, instrument)
 
-    def buy(self, *, instrument: Instrument,
-            amount: Decimal | None = None, units: Decimal | None = None,
-            leverage: int | None = None) -> OrderResult:
+    def buy(
+        self,
+        *,
+        instrument: Instrument,
+        amount: Decimal | None = None,
+        units: Decimal | None = None,
+        leverage: int | None = None,
+    ) -> OrderResult:
         """Open a long at market, by notional `amount` or by `units` (exactly
         one). Returns the eToro orderId. Placement is real money in REAL env."""
         body = self._open_body(instrument, amount, units, leverage)
         data = self._request("POST", f"/api/v2/trading/execution/{self._seg}orders", json=body)
         oid = data.get("orderId")
-        return OrderResult(broker=self.name, order_id=str(oid) if oid is not None else "",
-                           status="submitted", raw=data)
+        return OrderResult(
+            broker=self.name,
+            order_id=str(oid) if oid is not None else "",
+            status="submitted",
+            raw=data,
+        )
 
-    def close_position(self, *, position_id: str, instrument_id: str,
-                       units: Decimal | None = None) -> OrderResult:
+    def close_position(
+        self, *, position_id: str, instrument_id: str, units: Decimal | None = None
+    ) -> OrderResult:
         """Sell = close an existing long. Closes `units` of the position, or the
         whole position when `units` is None. Needs both the eToro positionId and
         its instrumentId (the caller tracks these from the open)."""
         body: dict[str, Any] = {"InstrumentId": int(instrument_id)}
         if units is not None:
             body["UnitsToDeduct"] = float(units)
-        path = (f"/api/v1/trading/execution/{self._seg}"
-                f"market-close-orders/positions/{position_id}")
+        path = f"/api/v1/trading/execution/{self._seg}market-close-orders/positions/{position_id}"
         data = self._request("POST", path, json=body)
         ofc = data.get("orderForClose") or {}
         oid = ofc.get("orderID") or ofc.get("orderId")
-        return OrderResult(broker=self.name, order_id=str(oid) if oid is not None else "",
-                           status="closing", raw=data)
+        return OrderResult(
+            broker=self.name,
+            order_id=str(oid) if oid is not None else "",
+            status="closing",
+            raw=data,
+        )
 
-    def candles(self, instrument_id: str, *, interval: str = "OneDay",
-                count: int = _MAX_CANDLES, direction: str = "desc") -> list[Candle]:
+    def candles(
+        self,
+        instrument_id: str,
+        *,
+        interval: str = "OneDay",
+        count: int = _MAX_CANDLES,
+        direction: str = "desc",
+    ) -> list[Candle]:
         """OHLCV history for one instrument. `interval` is an eToro granularity
         (e.g. 'OneDay'); `count` is capped at 1000 (the endpoint has no date-range
         param, so you get the most recent `count` bars). Returned oldest-first
@@ -229,14 +271,21 @@ class EtoroClient:
         if interval not in CANDLE_INTERVALS:
             raise BrokerError(f"interval must be one of {CANDLE_INTERVALS}, got {interval!r}")
         n = max(1, min(int(count), _MAX_CANDLES))
-        path = (f"/api/v1/market-data/instruments/{instrument_id}"
-                f"/history/candles/{direction}/{interval}/{n}")
+        path = (
+            f"/api/v1/market-data/instruments/{instrument_id}"
+            f"/history/candles/{direction}/{interval}/{n}"
+        )
         data = self._request("GET", path)
         rows = _find_candle_list(data) or []
         candles = [
-            Candle(date=str(r.get("fromDate") or ""), open=_to_decimal(r.get("open")),
-                   high=_to_decimal(r.get("high")), low=_to_decimal(r.get("low")),
-                   close=_to_decimal(r.get("close")), volume=_to_decimal(r.get("volume")))
+            Candle(
+                date=str(r.get("fromDate") or ""),
+                open=_to_decimal(r.get("open")),
+                high=_to_decimal(r.get("high")),
+                low=_to_decimal(r.get("low")),
+                close=_to_decimal(r.get("close")),
+                volume=_to_decimal(r.get("volume")),
+            )
             for r in rows
         ]
         candles.sort(key=lambda c: c.date)  # normalise to oldest-first
@@ -245,14 +294,18 @@ class EtoroClient:
     def instrument_types(self) -> list[dict[str, Any]]:
         """eToro's asset-type catalog: [{id, name}] (Stocks, ETF, Crypto, ...)."""
         data = self._request("GET", "/api/v1/market-data/instrument-types")
-        return [{"id": t.get("instrumentTypeID"), "name": t.get("instrumentTypeDescription")}
-                for t in data.get("instrumentTypes", [])]
+        return [
+            {"id": t.get("instrumentTypeID"), "name": t.get("instrumentTypeDescription")}
+            for t in data.get("instrumentTypes", [])
+        ]
 
     def exchanges(self) -> list[dict[str, Any]]:
         """eToro's exchange catalog: [{id, name}] (Nasdaq, NYSE, LSE, TYO, ...)."""
         data = self._request("GET", "/api/v1/market-data/exchanges")
-        return [{"id": e.get("exchangeID"), "name": e.get("exchangeDescription")}
-                for e in data.get("exchangeInfo", [])]
+        return [
+            {"id": e.get("exchangeID"), "name": e.get("exchangeDescription")}
+            for e in data.get("exchangeInfo", [])
+        ]
 
     def list_instruments(self, *, type_ids: list[int] | None = None) -> list[dict[str, Any]]:
         """The whole tradable universe (or just the given types), one call per
@@ -264,16 +317,21 @@ class EtoroClient:
             type_ids = [t["id"] for t in self.instrument_types() if t["id"] is not None]
         out: list[dict[str, Any]] = []
         for tid in type_ids:
-            data = self._request("GET", "/api/v1/market-data/instruments",
-                                  params={"instrumentTypeIds": tid})
+            data = self._request(
+                "GET", "/api/v1/market-data/instruments", params={"instrumentTypeIds": tid}
+            )
             for r in data.get("instrumentDisplayDatas", []):
-                out.append({
-                    "instrument_id": r.get("instrumentID"), "symbol": r.get("symbolFull"),
-                    "type_id": r.get("instrumentTypeID"), "exchange_id": r.get("exchangeID"),
-                    "name": r.get("instrumentDisplayName"),
-                    "is_internal": bool(r.get("isInternalInstrument")),
-                    "stocks_industry_id": r.get("stocksIndustryID"),
-                })
+                out.append(
+                    {
+                        "instrument_id": r.get("instrumentID"),
+                        "symbol": r.get("symbolFull"),
+                        "type_id": r.get("instrumentTypeID"),
+                        "exchange_id": r.get("exchangeID"),
+                        "name": r.get("instrumentDisplayName"),
+                        "is_internal": bool(r.get("isInternalInstrument")),
+                        "stocks_industry_id": r.get("stocksIndustryID"),
+                    }
+                )
         return out
 
     def stocks_industries(self) -> dict[int, str]:
@@ -281,11 +339,18 @@ class EtoroClient:
         Technology, Financial, Healthcare, …). Resolves the stocksIndustryID that
         rides along on each stock in list_instruments()."""
         data = self._request("GET", "/api/v1/market-data/stocks-industries")
-        return {i.get("industryID"): i.get("industryName")
-                for i in data.get("stocksIndustries", []) if i.get("industryID") is not None}
+        return {
+            i.get("industryID"): i.get("industryName")
+            for i in data.get("stocksIndustries", [])
+            if i.get("industryID") is not None
+        }
 
-    def eligibility(self, instrument_ids: list[int], *, currency: str = "USD",
-                    ) -> dict[int, dict[str, Any]]:
+    def eligibility(
+        self,
+        instrument_ids: list[int],
+        *,
+        currency: str = "USD",
+    ) -> dict[int, dict[str, Any]]:
         """Per-instrument trading rules for the authenticated (env-aware) account
         — position limits, permitted order types, SL/TP bounds and available
         leverage. Places NO orders. Batches of <=100 (API cap). Returns
@@ -294,8 +359,10 @@ class EtoroClient:
         ids = [int(i) for i in instrument_ids]
         for i in range(0, len(ids), 100):
             data = self._request(
-                "POST", f"/api/v2/trading/info/{self._seg}eligibility",
-                json={"instrumentIds": ids[i:i + 100], "currency": currency})
+                "POST",
+                f"/api/v2/trading/info/{self._seg}eligibility",
+                json={"instrumentIds": ids[i : i + 100], "currency": currency},
+            )
             for e in data.get("eligibilities", []):
                 iid = e.get("instrumentId")
                 if iid is not None:
@@ -310,9 +377,8 @@ class EtoroClient:
         out: dict[int, dict[str, Any]] = {}
         ids = [int(i) for i in instrument_ids]
         for i in range(0, len(ids), 100):
-            q = ",".join(str(x) for x in ids[i:i + 100])
-            data = self._request(
-                "GET", f"/api/v1/market-data/instruments/rates?instrumentIds={q}")
+            q = ",".join(str(x) for x in ids[i : i + 100])
+            data = self._request("GET", f"/api/v1/market-data/instruments/rates?instrumentIds={q}")
             for r in data.get("rates", []):
                 iid = r.get("instrumentID")
                 if iid is not None:
@@ -340,20 +406,28 @@ class EtoroClient:
         if iid is None:
             raise BrokerError(f"eToro search item for {symbol!r} has no instrumentId")
         return Instrument(
-            broker=self.name, instrument_id=str(iid),
+            broker=self.name,
+            instrument_id=str(iid),
             symbol=str(it.get("internalSymbolFull") or symbol),
             name=str(it.get("instrumentDisplayName") or ""),
             currency=str(it.get("instrumentCurrency") or ""),
         )
 
-    def _open_body(self, instrument: Instrument, amount: Decimal | None,
-                   units: Decimal | None, leverage: int | None) -> dict[str, Any]:
+    def _open_body(
+        self,
+        instrument: Instrument,
+        amount: Decimal | None,
+        units: Decimal | None,
+        leverage: int | None,
+    ) -> dict[str, Any]:
         if (amount is None) == (units is None):
             raise BrokerError("specify exactly one of amount or units")
         body: dict[str, Any] = {
-            "action": "open", "transaction": "buy",
+            "action": "open",
+            "transaction": "buy",
             "instrumentId": int(instrument.instrument_id),
-            "orderType": "mkt", "leverage": int(leverage or self._default_leverage),
+            "orderType": "mkt",
+            "leverage": int(leverage or self._default_leverage),
         }
         if amount is not None:
             body["amount"] = float(amount)
@@ -367,20 +441,25 @@ class EtoroClient:
         lines: list[CostLine] = []
         total = Decimal("0")
         ccy = ""
-        for c in (data.get("costs") or []):
+        for c in data.get("costs") or []:
             amt = _to_decimal(c.get("amount"))
             cur = str(c.get("currency") or "")
             if amt is not None:
                 total += amt
             if cur:
                 ccy = cur
-            lines.append(CostLine(kind=str(c.get("costType") or ""),
-                                  amount=amt or Decimal("0"), currency=cur))
+            lines.append(
+                CostLine(
+                    kind=str(c.get("costType") or ""), amount=amt or Decimal("0"), currency=cur
+                )
+            )
         return OrderPreview(
             instrument_id=str(data.get("instrumentId") or instrument.instrument_id),
             symbol=str(data.get("symbol") or instrument.symbol),
             est_cost=total if lines else None,
-            currency=ccy or instrument.currency, lines=lines, raw=data,
+            currency=ccy or instrument.currency,
+            lines=lines,
+            raw=data,
         )
 
 
@@ -388,21 +467,28 @@ def _select_user_key(settings: Any) -> str:
     """Pick the user key matching ETORO_ENV: the real key for 'real', the demo
     key for 'demo', falling back to the generic `etoro_user_key` if the
     env-specific one is unset."""
-    specific = (settings.etoro_user_key_real if settings.etoro_env == ETORO_REAL
-                else settings.etoro_user_key_demo)
+    specific = (
+        settings.etoro_user_key_real
+        if settings.etoro_env == ETORO_REAL
+        else settings.etoro_user_key_demo
+    )
     key = specific or settings.etoro_user_key
     return key.get_secret_value() if key else ""
 
 
-def etoro_from_settings(settings: Any, *,
-                        transport: httpx.BaseTransport | None = None) -> EtoroClient:
+def etoro_from_settings(
+    settings: Any, *, transport: httpx.BaseTransport | None = None
+) -> EtoroClient:
     """Build an `EtoroClient` from the app `Settings` (config.py). Selects the
     demo vs real user key by ETORO_ENV. Raises `BrokerAuthError` if the selected
     env's key (or the public key) isn't configured."""
     api_key = settings.etoro_api_key.get_secret_value() if settings.etoro_api_key else ""
     return EtoroClient(
-        api_key=api_key, user_key=_select_user_key(settings), env=settings.etoro_env,
+        api_key=api_key,
+        user_key=_select_user_key(settings),
+        env=settings.etoro_env,
         order_currency=settings.etoro_order_currency,
         default_leverage=settings.etoro_default_leverage,
-        timeout=settings.http_timeout_seconds, transport=transport,
+        timeout=settings.http_timeout_seconds,
+        transport=transport,
     )

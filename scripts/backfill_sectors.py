@@ -11,6 +11,7 @@ a small, resumable, canary-guarded sweep.
 
     uv run python scripts/backfill_sectors.py
 """
+
 from __future__ import annotations
 
 import json
@@ -21,14 +22,14 @@ from etoro_yfinance.web.data import data_dir
 
 _CACHE = "sector_override_cache.json"
 _PACE = 0.6
-_CANARY = "AAPL"       # always has a sector; distinguishes throttle from genuine-none
+_CANARY = "AAPL"  # always has a sector; distinguishes throttle from genuine-none
 _CANARY_AFTER = 8
 
 
 def _sector(yf_client, t):
     try:
         info = yf_client.Ticker(t).info
-        return info.get("sector") or info.get("category")   # stocks → sector; ETF → category
+        return info.get("sector") or info.get("category")  # stocks → sector; ETF → category
     except Exception:
         return None
 
@@ -36,7 +37,7 @@ def _sector(yf_client, t):
 def main() -> int:
     import yfinance as yf
 
-    gap = universe.sector_gap()                 # default criteria
+    gap = universe.sector_gap()  # default criteria
     tickers = sorted({r["yf"] for r in gap if r.get("yf")})
 
     cache_path = data_dir() / _CACHE
@@ -47,8 +48,10 @@ def main() -> int:
         except Exception:
             cache = {}
     todo = [t for t in tickers if t not in cache]
-    print(f"backfill-sectors: gap={len(tickers)}, {len(tickers) - len(todo)} cached, "
-          f"probing {len(todo)}")
+    print(
+        f"backfill-sectors: gap={len(tickers)}, {len(tickers) - len(todo)} cached, "
+        f"probing {len(todo)}"
+    )
 
     def save() -> None:
         cache_path.write_text(json.dumps(cache))
@@ -65,7 +68,7 @@ def main() -> int:
         else:
             pending.append(t)
             if len(pending) >= _CANARY_AFTER:
-                if _sector(yf, _CANARY):        # Yahoo up → empties are genuine
+                if _sector(yf, _CANARY):  # Yahoo up → empties are genuine
                     for p in pending:
                         cache[p] = None
                     pending.clear()

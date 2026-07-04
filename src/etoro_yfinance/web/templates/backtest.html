@@ -5,43 +5,69 @@
 <div class="mb-4">
   <h1 class="text-xl font-semibold">Momentum backtest</h1>
   <p class="text-sm text-slate-500">
-    Monthly-rebalanced (1st of each month) momentum on a chosen universe — the default
-    bbterminal strategy: score price + volume signals, take the top sectors × top names
-    per sector, equal-weight, hold one month. EUR total return; benchmark = equal-weight
-    of the whole universe.
+    Rebalanced at each period start (monthly or quarterly) on a chosen universe. <b>Momentum</b> (the
+    bbterminal default) scores price + volume signals and takes the top sectors × top
+    names per sector; <b>Sortino lookback</b> ranks every asset by the Sortino ratio of
+    the past month's daily returns and holds the top N. Baskets are equal-weight, held
+    one month. At each rebalance only assets with ≥2 years of prior price + volume
+    history are considered — younger listings join as they mature. EUR total return;
+    benchmark = equal-weight of the eligible universe.
   </p>
 </div>
 
 <form class="flex flex-wrap gap-3 items-end mb-4"
       hx-get="/backtest/run" hx-target="#bt-result" hx-indicator="#bt-spin">
   <label class="flex flex-col gap-1 text-sm">
-    <span class="text-slate-500">universe</span>
-    <select name="view" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
-      <option value="">(default criteria)</option>
-      {% for u in saved_universes %}<option value="{{ u }}">{{ u }}</option>{% endfor %}
+    <span class="text-slate-500">strategy</span>
+    <select name="strategy" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
+      {% for key, label in strategies.items() %}
+      <option value="{{ key }}">{{ label }}</option>
+      {% endfor %}
     </select>
   </label>
-  <label class="flex flex-col gap-1 text-sm"><span class="text-slate-500">start</span>
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">rebalance</span>
+    <select name="rebalance" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
+      {% for r in rebalances %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">universe</span>
+    <select name="view" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
+      <option value="" data-start="{{ default_start or '' }}">(default criteria)</option>
+      {% for u in saved_universes %}
+      <option value="{{ u.name }}" data-start="{{ u.start or '' }}"{% if u.name == default_view %} selected{% endif %}>{{ u.name }}{% if u.count is not none %} ({{ u.count }}){% endif %}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="flex flex-col gap-1 text-sm"
+         title="Defaults to the date the first asset in the chosen universe has 2 years of price + volume history — the rest join the backtest as they reach 2 years">
+    <span class="text-slate-500">start</span>
     <input type="date" name="start" value="{{ start_default }}"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm"></label>
   <label class="flex flex-col gap-1 text-sm"><span class="text-slate-500">end</span>
     <input type="date" name="end" value="{{ end_default }}"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm"></label>
-  <label class="flex flex-col gap-1 text-sm"><span class="text-slate-500">top sectors</span>
+  <label class="mom-only flex flex-col gap-1 text-sm"><span class="text-slate-500">top sectors</span>
     <input type="number" name="top_n_sectors" value="4" min="1" step="1"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-24"></label>
-  <label class="flex flex-col gap-1 text-sm"><span class="text-slate-500">names / sector</span>
+  <label class="mom-only flex flex-col gap-1 text-sm"><span class="text-slate-500">names / sector</span>
     <input type="number" name="top_n_per_sector" value="6" min="1" step="1"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-28"></label>
-  <label class="flex flex-col gap-1 text-sm"><span class="text-slate-500">min sector size</span>
+  <label class="mom-only flex flex-col gap-1 text-sm"><span class="text-slate-500">min sector size</span>
     <input type="number" name="min_sector_size" value="0" min="0" step="1"
            title="Exclude sectors with fewer than this many names available that month (0 = off)"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-28"></label>
+  <label class="sortino-only flex flex-col gap-1 text-sm" style="display:none">
+    <span class="text-slate-500">top n</span>
+    <input type="number" name="top_n" value="30" min="1" step="1"
+           title="Hold the N assets with the best 1-month Sortino ratio"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-24"></label>
   <button type="submit" class="rules-btn" style="padding:8px 14px">Run backtest</button>
   <span id="bt-spin" class="htmx-indicator text-sm text-slate-500">running… (can take a bit for big universes)</span>
 </form>
 
-<div class="mb-4 bg-white rounded-lg border border-slate-200 p-3">
+<div class="mom-only mb-4 bg-white rounded-lg border border-slate-200 p-3">
   <div class="text-xs font-semibold text-slate-600 mb-2">Signals &amp; default weights
     <span class="font-normal text-slate-400">— per-category scores (0-100) combined by the category weight</span></div>
   <div class="flex flex-wrap gap-6">
@@ -67,4 +93,23 @@
     <a class="text-blue-600 hover:underline" href="/universe">eToro ↔ yfinance</a> tab first,
     or run with the default criteria.</div>{% endif %}
 </div>
+
+<script>
+  // Each universe option carries its earliest useful start (the first member
+  // has 2y of price+volume history by then) — sync the date input on change.
+  document.querySelector('select[name=view]').addEventListener('change', (e) => {
+    const start = e.target.selectedOptions[0].dataset.start;
+    if (start) document.querySelector('input[name=start]').value = start;
+  });
+  // Show only the selected strategy's knobs (hidden inputs still submit, and
+  // the backend ignores the other strategy's parameters anyway).
+  const strat = document.querySelector('select[name=strategy]');
+  const syncStrategy = () => {
+    const mom = strat.value === 'momentum';
+    document.querySelectorAll('.mom-only').forEach((el) => { el.style.display = mom ? '' : 'none'; });
+    document.querySelectorAll('.sortino-only').forEach((el) => { el.style.display = mom ? 'none' : ''; });
+  };
+  strat.addEventListener('change', syncStrategy);
+  syncStrategy();
+</script>
 {% endblock %}

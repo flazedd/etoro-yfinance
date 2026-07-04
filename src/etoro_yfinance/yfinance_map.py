@@ -25,8 +25,7 @@ import re
 # there is a false-positive trap — Future plc, Faraday Future, Future FinTech…).
 FUTURES_EXCHANGES = {"CME", "CBOT", "NYMEX", "COMEX", "CFE", "ICE Futures"}
 # Dated-contract symbol suffix: BASE.MONYY (ETH.NOV29, XRP.JAN26).
-_EXPIRY_RE = re.compile(
-    r"\.(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\d{2}$", re.IGNORECASE)
+_EXPIRY_RE = re.compile(r"\.(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\d{2}$", re.IGNORECASE)
 
 
 def is_future(symbol: str | None, exchange_name: str | None) -> bool:
@@ -39,9 +38,29 @@ def is_future(symbol: str | None, exchange_name: str | None) -> bool:
 # Quote-currency codes eToro appends for non-USD-quoted crypto (fiat + crypto).
 # USD is the canonical quote we keep, so it's deliberately absent.
 CRYPTO_QUOTE_CODES = sorted(
-    {"EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD", "CNH", "CNY",
-     "BTC", "ETH", "XLM", "XRP", "LTC", "BCH", "DASH", "USDT", "BNB"},
-    key=len, reverse=True)
+    {
+        "EUR",
+        "GBP",
+        "JPY",
+        "AUD",
+        "CAD",
+        "CHF",
+        "NZD",
+        "CNH",
+        "CNY",
+        "BTC",
+        "ETH",
+        "XLM",
+        "XRP",
+        "LTC",
+        "BCH",
+        "DASH",
+        "USDT",
+        "BNB",
+    },
+    key=len,
+    reverse=True,
+)
 
 
 def is_crypto_quote_dupe(symbol: str | None, crypto_symbols: set[str]) -> bool:
@@ -50,7 +69,7 @@ def is_crypto_quote_dupe(symbol: str | None, crypto_symbols: set[str]) -> bool:
     drop currency/cross duplicates — we keep only the USD-quoted coin."""
     up = (symbol or "").upper()
     for q in CRYPTO_QUOTE_CODES:
-        if up.endswith(q) and len(up) > len(q) and up[:-len(q)] in crypto_symbols:
+        if up.endswith(q) and len(up) > len(q) and up[: -len(q)] in crypto_symbols:
             return True
     return False
 
@@ -66,16 +85,42 @@ TYPE_CRYPTO = 10
 # The exchange suffixes eToro actually uses in symbolFull — all valid Yahoo
 # market suffixes. Anything else after a dot is an eToro artifact, not a market.
 YAHOO_SUFFIXES = {
-    "L", "DE", "PA", "AS", "BR", "LS", "MI", "MC", "SW", "ZU", "T", "HK", "TO",
-    "OL", "ST", "CO", "HE", "SR", "AX", "VI", "WA", "PR", "BD", "IR", "SI", "NZ",
-    "JO", "MX", "IS", "AT",
+    "L",
+    "DE",
+    "PA",
+    "AS",
+    "BR",
+    "LS",
+    "MI",
+    "MC",
+    "SW",
+    "ZU",
+    "T",
+    "HK",
+    "TO",
+    "OL",
+    "ST",
+    "CO",
+    "HE",
+    "SR",
+    "AX",
+    "VI",
+    "WA",
+    "PR",
+    "BD",
+    "IR",
+    "SI",
+    "NZ",
+    "JO",
+    "MX",
+    "IS",
+    "AT",
 }
 # Where eToro's suffix differs from Yahoo's.
 SUFFIX_REMAP = {"ZU": "SW"}
 
 # US exchanges — used to recognise a US class share (BRK.B → BRK-B).
-US_EXCHANGES = {"Nasdaq", "NYSE", "OTC Markets Stock Exchange",
-                "Chicago Board Options Exchange"}
+US_EXCHANGES = {"Nasdaq", "NYSE", "OTC Markets Stock Exchange", "Chicago Board Options Exchange"}
 
 STATUS_US = "us"
 STATUS_INTL = "intl"
@@ -100,8 +145,9 @@ def _norm(s: str | None) -> str:
     return " ".join((s or "").split())
 
 
-def to_yfinance(*, symbol: str | None, type_id: int | None,
-                exchange_name: str | None = None) -> tuple[str | None, str]:
+def to_yfinance(
+    *, symbol: str | None, type_id: int | None, exchange_name: str | None = None
+) -> tuple[str | None, str]:
     """Return (yahoo_ticker, status). `yahoo_ticker` is None when unmapped."""
     up = (symbol or "").strip().upper()
     if not up:
@@ -109,9 +155,9 @@ def to_yfinance(*, symbol: str | None, type_id: int | None,
 
     if type_id == TYPE_CRYPTO:
         raw = (symbol or "").strip()
-        for s in CRYPTO_SCALE_SUFFIXES:            # SHIBxM -> SHIB (drop scale unit)
+        for s in CRYPTO_SCALE_SUFFIXES:  # SHIBxM -> SHIB (drop scale unit)
             if raw.endswith(s) and len(raw) > len(s):
-                up = raw[:-len(s)].upper()
+                up = raw[: -len(s)].upper()
                 break
         base = up.rsplit(".", 1)[0]
         base = CRYPTO_ALIASES.get(base, base)

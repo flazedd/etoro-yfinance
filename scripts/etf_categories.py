@@ -8,6 +8,7 @@ eToro's stock-sector field is meaningless for funds (a gold ETF lands in
 
     uv run python scripts/etf_categories.py       # run / resume
 """
+
 from __future__ import annotations
 
 import json
@@ -16,9 +17,9 @@ import time
 from etoro_yfinance.web.data import data_dir
 
 _CACHE = "etf_category_cache.json"
-_PACE = 0.6                # seconds between requests
-_CANARY = "SPY"            # known-categorized ETF to tell throttle from no-category
-_CANARY_AFTER = 8          # empties-in-a-row => canary-check (throttle vs genuine None)
+_PACE = 0.6  # seconds between requests
+_CANARY = "SPY"  # known-categorized ETF to tell throttle from no-category
+_CANARY_AFTER = 8  # empties-in-a-row => canary-check (throttle vs genuine None)
 
 
 def _category(yf, t):
@@ -57,19 +58,21 @@ def main() -> int:
         cat = _category(yf, t)
         if cat:
             for p in pending:
-                cache[p] = None       # genuine no-category (Yahoo is responding)
+                cache[p] = None  # genuine no-category (Yahoo is responding)
             pending.clear()
             cache[t] = cat
         else:
             pending.append(t)
             if len(pending) >= _CANARY_AFTER:
-                if _category(yf, _CANARY):        # Yahoo up → empties are genuine
+                if _category(yf, _CANARY):  # Yahoo up → empties are genuine
                     for p in pending:
                         cache[p] = None
                     pending.clear()
-                else:                              # canary empty → throttled
-                    print(f"  canary empty near {t} — throttled; stopping "
-                          f"({len(pending)} unconfirmed not cached). Re-run to resume.")
+                else:  # canary empty → throttled
+                    print(
+                        f"  canary empty near {t} — throttled; stopping "
+                        f"({len(pending)} unconfirmed not cached). Re-run to resume."
+                    )
                     throttled = True
                     break
         if n % 50 == 0:
@@ -78,13 +81,12 @@ def main() -> int:
             print(f"  {n}/{len(todo)} probed · {got} categorized", flush=True)
         time.sleep(_PACE)
 
-    if not throttled:                    # loop finished cleanly → trailing empties genuine
+    if not throttled:  # loop finished cleanly → trailing empties genuine
         for p in pending:
             cache[p] = None
     save()
     got = sum(1 for v in cache.values() if v)
-    print(f"done: {got} categorized / {len(cache)} resolved "
-          f"({len(etfs) - len(cache)} left)")
+    print(f"done: {got} categorized / {len(cache)} resolved ({len(etfs) - len(cache)} left)")
     return 0
 
 

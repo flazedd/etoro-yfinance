@@ -44,14 +44,19 @@ from etoro_yfinance.yfinance_map import (  # noqa: E402
 SPOT_TYPES = {"Stocks", "ETF", "Crypto"}
 
 
-def build(validate: bool, revalidate: bool = False,
-          eligibility: bool = False, reeligibility: bool = False,
-          spread: bool = False, respread: bool = False) -> dict:
+def build(
+    validate: bool,
+    revalidate: bool = False,
+    eligibility: bool = False,
+    reeligibility: bool = False,
+    spread: bool = False,
+    respread: bool = False,
+) -> dict:
     settings = Settings()  # type: ignore[call-arg]
     with etoro_from_settings(settings) as c:
         ex_by_id = {e["id"]: e["name"] for e in c.exchanges()}
         ty_by_id = {t["id"]: t["name"] for t in c.instrument_types()}
-        ind_by_id = c.stocks_industries()   # eToro stock sector taxonomy
+        ind_by_id = c.stocks_industries()  # eToro stock sector taxonomy
         spot_type_ids = [tid for tid, name in ty_by_id.items() if name in SPOT_TYPES]
         universe = c.list_instruments(type_ids=spot_type_ids)
 
@@ -64,8 +69,11 @@ def build(validate: bool, revalidate: bool = False,
     sector_override = json.loads(_ovr_path.read_text()) if _ovr_path.exists() else {}
 
     # All crypto symbols (for the quote-duplicate base check below).
-    crypto_syms = {(r["symbol"] or "").upper() for r in universe
-                   if r["type_id"] == TYPE_CRYPTO and not r.get("is_internal")}
+    crypto_syms = {
+        (r["symbol"] or "").upper()
+        for r in universe
+        if r["type_id"] == TYPE_CRYPTO and not r.get("is_internal")
+    }
 
     rows = []
     for r in universe:
@@ -89,14 +97,21 @@ def build(validate: bool, revalidate: bool = False,
             sector = etf_cat.get(yf_t)
         else:
             sector = None
-        if not sector and yf_t:                       # Yahoo fallback for unclassified
+        if not sector and yf_t:  # Yahoo fallback for unclassified
             sector = sector_override.get(yf_t)
-        rows.append({
-            "instrument_id": r["instrument_id"], "symbol": r["symbol"],
-            "name": r["name"], "type": ty_by_id.get(r["type_id"]),
-            "exchange": exch, "yf": yf_t, "status": status, "sector": sector,
-            "isin": None,  # eToro exposes no ISIN
-        })
+        rows.append(
+            {
+                "instrument_id": r["instrument_id"],
+                "symbol": r["symbol"],
+                "name": r["name"],
+                "type": ty_by_id.get(r["type_id"]),
+                "exchange": exch,
+                "yf": yf_t,
+                "status": status,
+                "sector": sector,
+                "isin": None,  # eToro exposes no ISIN
+            }
+        )
 
     if validate:
         _validate_yfinance(rows, revalidate=revalidate)
@@ -119,13 +134,15 @@ def build(validate: bool, revalidate: bool = False,
         counts["yf_ok"] = sum(1 for x in mapped if x.get("yf_ok"))
         # Confirmed on Yahoo but missing one series (e.g. price but no volume).
         counts["yf_partial"] = sorted(
-            x["yf"] for x in mapped
-            if not x.get("yf_ok") and (x.get("yf_price_ok") or x.get("yf_vol_ok")))
+            x["yf"]
+            for x in mapped
+            if not x.get("yf_ok") and (x.get("yf_price_ok") or x.get("yf_vol_ok"))
+        )
         # Neither series seen: dead/delisted ticker OR not yet probed (throttled).
         # Re-run --validate to retry these (cached results are skipped).
         counts["yf_unresolved"] = sorted(
-            x["yf"] for x in mapped
-            if not x.get("yf_price_ok") and not x.get("yf_vol_ok"))
+            x["yf"] for x in mapped if not x.get("yf_price_ok") and not x.get("yf_vol_ok")
+        )
     if eligibility:
         counts["eligibility_checked"] = True
         counts["tradable"] = sum(1 for x in rows if x.get("tradable"))
@@ -135,8 +152,11 @@ def build(validate: bool, revalidate: bool = False,
         counts["spread_known"] = sum(1 for x in rows if x.get("spread_pct") is not None)
     return {
         "generated_at": datetime.now(UTC).isoformat(),
-        "source": "etoro", "analysis_source": "yfinance",
-        "counts": counts, "exchanges": ex_by_id, "rows": rows,
+        "source": "etoro",
+        "analysis_source": "yfinance",
+        "counts": counts,
+        "exchanges": ex_by_id,
+        "rows": rows,
     }
 
 
@@ -154,14 +174,14 @@ def build(validate: bool, revalidate: bool = False,
 # disambiguates: on a run of empties, probe a known-good ticker; if it works the
 # empties are dead tickers (cache them, continue); if it's ALSO empty we're
 # throttled (back off + slow down). Progress is cached to disk; runs are resumable.
-_YF_RPS = 10.0                             # target rate; real throughput is
-_YF_MIN_DELAY = 0.1                        # network-bound to ~4-5/s at this floor
-_YF_MAX_DELAY = 5.0                        # ceiling after back-offs (s)
-_YF_COOLDOWN = 90                          # base back-off on throttle (s); doubles
+_YF_RPS = 10.0  # target rate; real throughput is
+_YF_MIN_DELAY = 0.1  # network-bound to ~4-5/s at this floor
+_YF_MAX_DELAY = 5.0  # ceiling after back-offs (s)
+_YF_COOLDOWN = 90  # base back-off on throttle (s); doubles
 _YF_MAX_COOLDOWN = 900
-_YF_MAX_THROTTLES = 12                     # abort (resume later) after this many
-_YF_CANARY = "AAPL"                        # known-liquid ticker for the canary
-_YF_CACHE = "yf_validation_cache.json"     # under data_dir(); persists results
+_YF_MAX_THROTTLES = 12  # abort (resume later) after this many
+_YF_CANARY = "AAPL"  # known-liquid ticker for the canary
+_YF_CACHE = "yf_validation_cache.json"  # under data_dir(); persists results
 
 
 def _yf_probe(yf, ticker: str):
@@ -178,8 +198,15 @@ def _yf_probe(yf, ticker: str):
     from etoro_yfinance import prices
 
     try:
-        f = yf.download(ticker, period="max", interval="1d", progress=False,
-                        threads=False, auto_adjust=False, actions=True)
+        f = yf.download(
+            ticker,
+            period="max",
+            interval="1d",
+            progress=False,
+            threads=False,
+            auto_adjust=False,
+            actions=True,
+        )
     except Exception:
         f = None
     if f is None or len(f) == 0:
@@ -191,7 +218,7 @@ def _yf_probe(yf, ticker: str):
         f = f.copy()
         f.columns = f.columns.get_level_values(0)
     f = f.loc[:, ~f.columns.duplicated()]
-    f = prices.drop_unclosed(f)   # exclude today's still-open session bar
+    f = prices.drop_unclosed(f)  # exclude today's still-open session bar
     if len(f) == 0:
         return None
 
@@ -208,11 +235,16 @@ def _yf_probe(yf, ticker: str):
     try:
         price_from, price_to = window("Close")
         vol_from, vol_to = window("Volume", positive=True)
-        bars = prices.write_prices(ticker, f)   # persist OHLCV for backtests
+        bars = prices.write_prices(ticker, f)  # persist OHLCV for backtests
     except Exception:
-        return None   # unparseable frame shape — treat as empty (canary decides)
-    return {"price_from": price_from, "price_to": price_to,
-            "vol_from": vol_from, "vol_to": vol_to, "bars": int(bars)}
+        return None  # unparseable frame shape — treat as empty (canary decides)
+    return {
+        "price_from": price_from,
+        "price_to": price_to,
+        "vol_from": vol_from,
+        "vol_to": vol_to,
+        "bars": int(bars),
+    }
 
 
 def _validate_yfinance(rows: list[dict], *, revalidate: bool = False) -> None:
@@ -237,8 +269,7 @@ def _validate_yfinance(rows: list[dict], *, revalidate: bool = False) -> None:
 
     tickers = sorted({x["yf"] for x in rows if x["yf"]})
     todo = [t for t in tickers if t not in cache]
-    print(f"validate: {len(tickers) - len(todo)}/{len(tickers)} cached, "
-          f"probing {len(todo)}")
+    print(f"validate: {len(tickers) - len(todo)}/{len(tickers)} cached, probing {len(todo)}")
 
     def save() -> None:
         cache_path.write_text(json.dumps(cache))
@@ -259,36 +290,42 @@ def _validate_yfinance(rows: list[dict], *, revalidate: bool = False) -> None:
                 # Still empty. Throttle or genuinely delisted? Ask the canary.
                 if _yf_probe(yf, _YF_CANARY) is not None:
                     # canary alive => dead (no coverage window at all)
-                    res = {"price_from": None, "price_to": None,
-                           "vol_from": None, "vol_to": None, "bars": 0}
+                    res = {
+                        "price_from": None,
+                        "price_to": None,
+                        "vol_from": None,
+                        "vol_to": None,
+                        "bars": 0,
+                    }
                 else:
                     # Canary also empty => throttled. Back off + slow down.
                     throttles += 1
                     save()
                     new_delay = min(_YF_MAX_DELAY, delay * 1.5)
-                    print(f"  THROTTLED (event {throttles}/{_YF_MAX_THROTTLES}) after "
-                          f"{done} done in {time.time() - t0:.0f}s — canary empty. "
-                          f"cooldown {cooldown}s, delay {delay:.1f}->{new_delay:.1f}s",
-                          flush=True)
+                    print(
+                        f"  THROTTLED (event {throttles}/{_YF_MAX_THROTTLES}) after "
+                        f"{done} done in {time.time() - t0:.0f}s — canary empty. "
+                        f"cooldown {cooldown}s, delay {delay:.1f}->{new_delay:.1f}s",
+                        flush=True,
+                    )
                     if throttles >= _YF_MAX_THROTTLES:
-                        print("  too many throttles; stopping. Re-run to resume.",
-                              flush=True)
+                        print("  too many throttles; stopping. Re-run to resume.", flush=True)
                         break
                     time.sleep(cooldown)
                     cooldown = min(_YF_MAX_COOLDOWN, cooldown * 2)
                     delay = new_delay
-                    continue   # ticker stays uncached -> retried on re-run
+                    continue  # ticker stays uncached -> retried on re-run
 
             cache[t] = res
             done += 1
             if done % 100 == 0:
                 save()
                 ok = sum(1 for v in cache.values() if v["price_from"] and v["vol_from"])
-                dead = sum(1 for v in cache.values()
-                           if not v["price_from"] and not v["vol_from"])
+                dead = sum(1 for v in cache.values() if not v["price_from"] and not v["vol_from"])
                 rate = done / max(time.time() - t0, 1)
-                print(f"  {done}/{len(todo)} done · {ok} ok · {dead} dead · "
-                      f"~{rate:.2f}/s", flush=True)
+                print(
+                    f"  {done}/{len(todo)} done · {ok} ok · {dead} dead · ~{rate:.2f}/s", flush=True
+                )
             time.sleep(delay)
     finally:
         save()
@@ -306,12 +343,12 @@ def _validate_yfinance(rows: list[dict], *, revalidate: bool = False) -> None:
 # eToro trading-eligibility knobs. The endpoint takes <=100 instrument ids/call
 # and shares the default 60-req/60s quota (stricter in practice), so we pace
 # conservatively and back off on 429 rather than giving up.
-_ELIG_CACHE = "eligibility_cache.json"     # under data_dir(); persists per-id rules
-_ELIG_BATCH = 100                          # API cap per request
-_ELIG_PACE = 1.5                           # seconds between calls (~40/min)
-_ELIG_COOLDOWN = 30                        # base back-off (s) on 429; doubles
+_ELIG_CACHE = "eligibility_cache.json"  # under data_dir(); persists per-id rules
+_ELIG_BATCH = 100  # API cap per request
+_ELIG_PACE = 1.5  # seconds between calls (~40/min)
+_ELIG_COOLDOWN = 30  # base back-off (s) on 429; doubles
 _ELIG_MAX_COOLDOWN = 300
-_ELIG_MAX_RETRIES = 6                      # per-batch 429 retries before skipping
+_ELIG_MAX_RETRIES = 6  # per-batch 429 retries before skipping
 
 
 def _probe_eligibility(rows: list[dict], *, reprobe: bool = False) -> None:
@@ -345,19 +382,22 @@ def _probe_eligibility(rows: list[dict], *, reprobe: bool = False) -> None:
         retries = 0
         try:
             while k < len(todo):
-                batch = todo[k:k + _ELIG_BATCH]
+                batch = todo[k : k + _ELIG_BATCH]
                 try:
-                    res = c.eligibility(batch)      # {id: rules}; missing => not returned
+                    res = c.eligibility(batch)  # {id: rules}; missing => not returned
                 except Exception as e:
                     msg = str(e)
                     if ("429" in msg or "TooManyRequests" in msg) and retries < _ELIG_MAX_RETRIES:
                         retries += 1
-                        print(f"  429 at {k} — backing off {cooldown}s "
-                              f"(retry {retries}/{_ELIG_MAX_RETRIES})", flush=True)
+                        print(
+                            f"  429 at {k} — backing off {cooldown}s "
+                            f"(retry {retries}/{_ELIG_MAX_RETRIES})",
+                            flush=True,
+                        )
                         save()
                         time.sleep(cooldown)
                         cooldown = min(_ELIG_MAX_COOLDOWN, cooldown * 2)
-                        continue                     # retry the same batch
+                        continue  # retry the same batch
                     print(f"  stopped: {e}. Re-run to resume.", flush=True)
                     break
                 cooldown = _ELIG_COOLDOWN
@@ -368,8 +408,7 @@ def _probe_eligibility(rows: list[dict], *, reprobe: bool = False) -> None:
                 if (k // _ELIG_BATCH) % 5 == 0 or k >= len(todo):
                     save()
                     trad = sum(1 for v in cache.values() if v and v.get("allowOpenPosition"))
-                    print(f"  {min(k, len(todo))}/{len(todo)} probed · {trad} tradable",
-                          flush=True)
+                    print(f"  {min(k, len(todo))}/{len(todo)} probed · {trad} tradable", flush=True)
                 time.sleep(_ELIG_PACE)
         finally:
             save()
@@ -421,15 +460,18 @@ def _probe_spreads(rows: list[dict], *, reprobe: bool = False) -> None:
         retries = 0
         try:
             while k < len(todo):
-                batch = todo[k:k + _SPREAD_BATCH]
+                batch = todo[k : k + _SPREAD_BATCH]
                 try:
                     res = c.market_rates(batch)
                 except Exception as e:
                     msg = str(e)
                     if ("429" in msg or "TooManyRequests" in msg) and retries < _SPREAD_MAX_RETRIES:
                         retries += 1
-                        print(f"  429 at {k} — backing off {cooldown}s "
-                              f"(retry {retries}/{_SPREAD_MAX_RETRIES})", flush=True)
+                        print(
+                            f"  429 at {k} — backing off {cooldown}s "
+                            f"(retry {retries}/{_SPREAD_MAX_RETRIES})",
+                            flush=True,
+                        )
                         save()
                         time.sleep(cooldown)
                         cooldown = min(_SPREAD_MAX_COOLDOWN, cooldown * 2)
@@ -440,14 +482,18 @@ def _probe_spreads(rows: list[dict], *, reprobe: bool = False) -> None:
                 retries = 0
                 for iid in batch:
                     r = res.get(int(iid))
-                    cache[str(iid)] = ({"bid": r.get("bid"), "ask": r.get("ask"),
-                                        "spread_pct": liq.spread_pct(r)} if r else None)
+                    cache[str(iid)] = (
+                        {"bid": r.get("bid"), "ask": r.get("ask"), "spread_pct": liq.spread_pct(r)}
+                        if r
+                        else None
+                    )
                 k += _SPREAD_BATCH
                 if (k // _SPREAD_BATCH) % 5 == 0 or k >= len(todo):
                     save()
                     got = sum(1 for v in cache.values() if v and v.get("spread_pct") is not None)
-                    print(f"  {min(k, len(todo))}/{len(todo)} probed · {got} with spread",
-                          flush=True)
+                    print(
+                        f"  {min(k, len(todo))}/{len(todo)} probed · {got} with spread", flush=True
+                    )
                 time.sleep(_SPREAD_PACE)
         finally:
             save()
@@ -460,24 +506,46 @@ def _probe_spreads(rows: list[dict], *, reprobe: bool = False) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Build the eToro→yfinance universe mapping.")
-    ap.add_argument("--validate", action="store_true",
-                    help="live-check yfinance price+volume (slow, rate-limited, resumable)")
-    ap.add_argument("--revalidate", action="store_true",
-                    help="with --validate: ignore the cache and re-probe every ticker")
-    ap.add_argument("--eligibility", action="store_true",
-                    help="fetch eToro trading rules per instrument (no orders, resumable)")
-    ap.add_argument("--reeligibility", action="store_true",
-                    help="with --eligibility: ignore the cache and re-probe every instrument")
-    ap.add_argument("--spread", action="store_true",
-                    help="fetch eToro live bid/ask spread per instrument (no orders, resumable)")
-    ap.add_argument("--respread", action="store_true",
-                    help="with --spread: ignore the cache and re-probe every instrument")
+    ap.add_argument(
+        "--validate",
+        action="store_true",
+        help="live-check yfinance price+volume (slow, rate-limited, resumable)",
+    )
+    ap.add_argument(
+        "--revalidate",
+        action="store_true",
+        help="with --validate: ignore the cache and re-probe every ticker",
+    )
+    ap.add_argument(
+        "--eligibility",
+        action="store_true",
+        help="fetch eToro trading rules per instrument (no orders, resumable)",
+    )
+    ap.add_argument(
+        "--reeligibility",
+        action="store_true",
+        help="with --eligibility: ignore the cache and re-probe every instrument",
+    )
+    ap.add_argument(
+        "--spread",
+        action="store_true",
+        help="fetch eToro live bid/ask spread per instrument (no orders, resumable)",
+    )
+    ap.add_argument(
+        "--respread",
+        action="store_true",
+        help="with --spread: ignore the cache and re-probe every instrument",
+    )
     args = ap.parse_args()
 
-    doc = build(args.validate or args.revalidate, revalidate=args.revalidate,
-                eligibility=args.eligibility or args.reeligibility,
-                reeligibility=args.reeligibility,
-                spread=args.spread or args.respread, respread=args.respread)
+    doc = build(
+        args.validate or args.revalidate,
+        revalidate=args.revalidate,
+        eligibility=args.eligibility or args.reeligibility,
+        reeligibility=args.reeligibility,
+        spread=args.spread or args.respread,
+        respread=args.respread,
+    )
     out = data_dir() / "etoro_universe_mapping.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, ensure_ascii=False, indent=1))
@@ -491,17 +559,20 @@ def main() -> int:
         partial, unresolved = c["yf_partial"], c["yf_unresolved"]
         print(f"yf price+volume ok: {c['yf_ok']}/{c['mapped']}")
         if partial:
-            print(f"partial ({len(partial)}, on Yahoo but missing a series): "
-                  f"{', '.join(partial[:30])}{' …' if len(partial) > 30 else ''}")
+            print(
+                f"partial ({len(partial)}, on Yahoo but missing a series): "
+                f"{', '.join(partial[:30])}{' …' if len(partial) > 30 else ''}"
+            )
         if unresolved:
-            print(f"unresolved ({len(unresolved)}, delisted or not-yet-probed — "
-                  f"re-run --validate to retry): "
-                  f"{', '.join(unresolved[:30])}{' …' if len(unresolved) > 30 else ''}")
+            print(
+                f"unresolved ({len(unresolved)}, delisted or not-yet-probed — "
+                f"re-run --validate to retry): "
+                f"{', '.join(unresolved[:30])}{' …' if len(unresolved) > 30 else ''}"
+            )
         if not partial and not unresolved:
             print("100% hit rate — every mapped ticker has price + volume.")
     if c.get("eligibility_checked"):
-        print(f"eToro tradable: {c['tradable']}/{c['total']} "
-              f"(rules known for {c['rules_known']})")
+        print(f"eToro tradable: {c['tradable']}/{c['total']} (rules known for {c['rules_known']})")
     if c.get("spread_checked"):
         print(f"spread known: {c['spread_known']}/{c['total']}")
     return 0

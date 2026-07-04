@@ -8,6 +8,7 @@ backtest can size, cost, and slice without another lookup.
     uv run python scripts/build_universe.py --min-adv 5e6 --min-bars 500
     uv run python scripts/build_universe.py --name liquid --max-spread 0.5
 """
+
 from __future__ import annotations
 
 import argparse
@@ -27,16 +28,22 @@ def main() -> int:
     args = ap.parse_args()
 
     rows = load_etoro_universe().get("rows", [])
-    crit = {"min_adv": args.min_adv, "min_bars": args.min_bars,
-            "recent_days": args.recent_days, "max_spread": args.max_spread}
+    crit = {
+        "min_adv": args.min_adv,
+        "min_bars": args.min_bars,
+        "recent_days": args.recent_days,
+        "max_spread": args.max_spread,
+    }
     doc = universe.save(args.name, rows=rows, require_sector=not args.no_require_sector, **crit)
     gap = universe.sector_gap(rows=rows, **crit)
 
     print(f"wrote data/universe_{doc['name']}.json")
     print(f"  {doc['count']} instruments")
     print("  by sector:", doc["by_sector"])
-    print(f"  sector gap (pass all but sector): {len(gap)} "
-          f"— run scripts/backfill_sectors.py to fill, then rebuild")
+    print(
+        f"  sector gap (pass all but sector): {len(gap)} "
+        f"— run scripts/backfill_sectors.py to fill, then rebuild"
+    )
     return 0
 
 

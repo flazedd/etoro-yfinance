@@ -12,22 +12,40 @@ Spread is carried (spread_pct) as a per-instrument cost input for the backtest,
 and optionally hard-filtered via max_spread. Backtest on the EUR series
 (prices.load_matrix(tickers, eur=True)) for cross-market comparability.
 """
+
 from __future__ import annotations
 
 import json
 import re
 from collections import Counter
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 MAPPED = ("us", "intl", "crypto")
 
 # Persisted per instrument in a saved universe (execution id + analysis ticker + metrics).
-FIELDS = ("instrument_id", "symbol", "name", "yf", "type", "exchange", "sector",
-          "adv_eur", "spread_pct", "bars", "price_from", "price_to",
-          "min_exposure", "max_leverage")
+FIELDS = (
+    "instrument_id",
+    "symbol",
+    "name",
+    "yf",
+    "type",
+    "exchange",
+    "sector",
+    "adv_eur",
+    "spread_pct",
+    "bars",
+    "price_from",
+    "price_to",
+    "vol_from",
+    "vol_to",
+    "min_exposure",
+    "max_leverage",
+)
 
 
-def _cutoff(rows, recent_days: int | None) -> str:
+def _cutoff(rows: list[dict[str, Any]], recent_days: int | None) -> str:
     """The oldest acceptable price_to (latest closed session minus recent_days)."""
     latest = max((r.get("price_to") or "" for r in rows), default="")
     if not latest or not recent_days:
@@ -36,14 +54,22 @@ def _cutoff(rows, recent_days: int | None) -> str:
     return str(date(y, m, d) - timedelta(days=recent_days))
 
 
-def _load_rows():
+def _load_rows() -> list[dict[str, Any]]:
     from etoro_yfinance.web.data import load_etoro_universe
-    return load_etoro_universe().get("rows", [])
+
+    rows: list[dict[str, Any]] = load_etoro_universe().get("rows", [])
+    return rows
 
 
-def select(*, min_adv: float = 1_000_000.0, min_bars: int = 252,
-           recent_days: int | None = 7, max_spread: float | None = None,
-           require_sector: bool = True, rows: list | None = None) -> list[dict]:
+def select(
+    *,
+    min_adv: float = 1_000_000.0,
+    min_bars: int = 252,
+    recent_days: int | None = 7,
+    max_spread: float | None = None,
+    require_sector: bool = True,
+    rows: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     """The instruments passing every criterion. `rows` defaults to the live
     enriched snapshot; pass your own to reuse one load."""
     rows = rows if rows is not None else _load_rows()
@@ -52,18 +78,18 @@ def select(*, min_adv: float = 1_000_000.0, min_bars: int = 252,
     for r in rows:
         if r.get("status") not in MAPPED or not r.get("yf"):
             continue
-        if not (r.get("price_from") and r.get("vol_from")):     # price + volume
+        if not (r.get("price_from") and r.get("vol_from")):  # price + volume
             continue
-        if not r.get("tradable"):                                # executable on eToro
+        if not r.get("tradable"):  # executable on eToro
             continue
-        if (r.get("adv_eur") or 0) < min_adv:                    # liquidity floor
+        if (r.get("adv_eur") or 0) < min_adv:  # liquidity floor
             continue
-        if (r.get("bars") or 0) < min_bars:                      # enough history
+        if (r.get("bars") or 0) < min_bars:  # enough history
             continue
-        if cutoff and (r.get("price_to") or "") < cutoff:        # not stale
+        if cutoff and (r.get("price_to") or "") < cutoff:  # not stale
             continue
-        if max_spread is not None and (r.get("spread_pct") is None
-                                       or r.get("spread_pct") > max_spread):
+        spread = r.get("spread_pct")
+        if max_spread is not None and (spread is None or spread > max_spread):
             continue
         if require_sector and not r.get("sector"):
             continue
@@ -71,7 +97,36 @@ def select(*, min_adv: float = 1_000_000.0, min_bars: int = 252,
     return out
 
 
-def sector_gap(*, rows: list | None = None, **criteria) -> list[dict]:
+# First ECB reference rates — the EUR return series can't start before this,
+# however far back an asset's native history goes.
+_EUR_EPOCH = "1999-01-04"
+
+
+def earliest_start(rows: list[dict[str, Any]], *, years: int = 2) -> str | None:
+    """The earliest backtest start (ISO date) where the FIRST universe member
+    already has `years` of price AND volume history. The backtest considers an
+    asset only once it has `years` of history before a rebalance (see
+    backtest.MIN_HISTORY_DAYS), so this is simply when the oldest member
+    qualifies — younger listings join later as they mature. Coverage is floored
+    at the ECB EUR-rate epoch (returns are EUR-based). None if nothing has
+    coverage dates."""
+    starts = [
+        max(r["price_from"], r.get("vol_from") or r["price_from"], _EUR_EPOCH)
+        for r in rows
+        if r.get("price_from")
+    ]
+    if not starts:
+        return None
+    y, m, d = (int(x) for x in min(starts).split("-"))
+    try:
+        return str(date(y + years, m, d))
+    except ValueError:  # Feb 29 + N years → the next day
+        return str(date(y + years, 3, 1))
+
+
+def sector_gap(
+    *, rows: list[dict[str, Any]] | None = None, **criteria: Any
+) -> list[dict[str, Any]]:
     """Instruments passing every criterion EXCEPT having a sector — the
     candidates to backfill a sector for (scripts/backfill_sectors.py)."""
     rows = rows if rows is not None else _load_rows()
@@ -85,42 +140,52 @@ def _safe_name(name: str) -> str:
     return re.sub(r"[^A-Za-z0-9_-]", "", (name or "").strip()) or "backtest"
 
 
-def _path(name: str):
+def _path(name: str) -> Path:
     from etoro_yfinance.web.data import data_dir
+
     return data_dir() / f"universe_{_safe_name(name)}.json"
 
 
 def list_saved() -> list[str]:
     from etoro_yfinance.web.data import data_dir
+
     d = data_dir()
-    return sorted(p.stem[len("universe_"):] for p in d.glob("universe_*.json"))
+    return sorted(p.stem[len("universe_") :] for p in d.glob("universe_*.json"))
 
 
-def load(name: str) -> dict:
+def load(name: str) -> dict[str, Any]:
     p = _path(name)
-    return json.loads(p.read_text()) if p.exists() else {}
+    doc: dict[str, Any] = json.loads(p.read_text()) if p.exists() else {}
+    return doc
 
 
-def member_ids(name: str) -> set:
+def member_ids(name: str) -> set[Any]:
     return {r.get("instrument_id") for r in load(name).get("instruments", [])}
 
 
-def verify(selected: list[dict], *, min_adv: float, min_bars: int, **_) -> dict:
+def verify(
+    selected: list[dict[str, Any]], *, min_adv: float = 1_000_000.0, min_bars: int = 252, **_: Any
+) -> dict[str, int]:
     """Per-condition pass counts over a selected set (each should equal total)."""
     return {
         "price + volume": sum(1 for r in selected if r.get("price_from") and r.get("vol_from")),
         "tradable on eToro": sum(1 for r in selected if r.get("tradable")),
         f"turnover ≥ €{min_adv:,.0f}/day": sum(
-            1 for r in selected if (r.get("adv_eur") or 0) >= min_adv),
-        f"history ≥ {min_bars} bars": sum(
-            1 for r in selected if (r.get("bars") or 0) >= min_bars),
+            1 for r in selected if (r.get("adv_eur") or 0) >= min_adv
+        ),
+        f"history ≥ {min_bars} bars": sum(1 for r in selected if (r.get("bars") or 0) >= min_bars),
         "has sector": sum(1 for r in selected if r.get("sector")),
         "total": len(selected),
     }
 
 
-def save(name: str, *, rows: list | None = None, require_sector: bool = True,
-         **criteria) -> dict:
+def save(
+    name: str,
+    *,
+    rows: list[dict[str, Any]] | None = None,
+    require_sector: bool = True,
+    **criteria: Any,
+) -> dict[str, Any]:
     """Select under the criteria, persist to data/universe_<name>.json, and return
     the doc (with per-sector counts and per-condition verification)."""
     rows = rows if rows is not None else _load_rows()

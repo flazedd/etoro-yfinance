@@ -7,6 +7,7 @@ network; just reads the derived EUR series (build_eur_series.py must have run).
 
     uv run python scripts/build_liquidity.py
 """
+
 from __future__ import annotations
 
 import json

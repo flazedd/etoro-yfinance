@@ -8,6 +8,7 @@ fetch-side fix; new runs already exclude the unclosed bar.
     uv run python scripts/trim_unclosed.py
     uv run python scripts/build_liquidity.py   # refresh turnover from trimmed data
 """
+
 from __future__ import annotations
 
 import json
@@ -39,8 +40,7 @@ def _windows(df):
     price = df["close"] if "close" in df.columns else df["adj_close"]
     pf, pt = w(price.notna().to_numpy())
     vf, vt = w(df["volume"].fillna(0).to_numpy() > 0)
-    return {"price_from": pf, "price_to": pt, "vol_from": vf, "vol_to": vt,
-            "bars": len(df)}
+    return {"price_from": pf, "price_to": pt, "vol_from": vf, "vol_to": vt, "bars": len(df)}
 
 
 def main() -> int:
@@ -53,7 +53,7 @@ def main() -> int:
         cache = json.loads(cache_path.read_text())
         updated = 0
         for t, v in cache.items():
-            if v is None:            # dead/delisted ticker — no parquet, leave as-is
+            if v is None:  # dead/delisted ticker — no parquet, leave as-is
                 continue
             df = prices.load_prices(t)
             if df is None or df.empty:

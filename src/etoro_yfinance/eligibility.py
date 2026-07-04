@@ -6,6 +6,7 @@ derives the compact columns (tradable / min $ / max leverage / shortable) shown
 inline in the universe table. Pure dict math, no deps — shared by the probe
 (scripts/etoro_universe.py) and the web overlay (web/data.py).
 """
+
 from __future__ import annotations
 
 from typing import Any

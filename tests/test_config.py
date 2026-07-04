@@ -12,8 +12,13 @@ from etoro_yfinance.config import Settings
 def _isolate(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     # Point pydantic-settings at a non-existent file so the host's real .env never leaks.
     Settings.model_config["env_file"] = str(tmp_path / ".env.missing")
-    for k in ("ETORO_API_KEY", "ETORO_USER_KEY_DEMO", "ETORO_USER_KEY_REAL",
-              "ETORO_USER_KEY", "ETORO_ENV"):
+    for k in (
+        "ETORO_API_KEY",
+        "ETORO_USER_KEY_DEMO",
+        "ETORO_USER_KEY_REAL",
+        "ETORO_USER_KEY",
+        "ETORO_ENV",
+    ):
         monkeypatch.delenv(k, raising=False)
 
 
@@ -35,7 +40,9 @@ def test_settings_reads_etoro_env(monkeypatch: pytest.MonkeyPatch, tmp_path: Pat
     monkeypatch.setenv("ETORO_ENV", "real")
     s = Settings()
     assert s.etoro_env == "real"
+    assert s.etoro_api_key is not None
     assert s.etoro_api_key.get_secret_value() == "PUB"
+    assert s.etoro_user_key_real is not None
     assert s.etoro_user_key_real.get_secret_value() == "REALKEY"
 
 
