@@ -55,6 +55,7 @@
           priceFormatter: function (v) { return v >= 100 ? v.toFixed(0) : v.toFixed(1); },
         },
       });
+      if (window.LWCReset) LWCReset(chart);
       var seriesList = data.series.map(function (s, k) {
         var st = STYLE[k % STYLE.length];
         var series = st.area

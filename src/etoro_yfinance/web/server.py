@@ -290,6 +290,8 @@ def create_app() -> FastAPI:
             start, end = "2005-01-01", "2019-01-01"
         elif window == "validate":
             start, end = "2019-01-01", str(date.today())
+        elif window == "full":
+            start, end = "2005-01-01", str(date.today())
 
         rows = (
             universe_mod.load(view).get("instruments", [])
@@ -449,6 +451,8 @@ def create_app() -> FastAPI:
 
         if window == "validate":
             start, end = "2019-01-01", str(date.today())
+        elif window == "full":
+            start, end = "2005-01-01", str(date.today())
         else:
             window = "develop"
             start, end = "2005-01-01", "2019-01-01"
@@ -507,6 +511,7 @@ def create_app() -> FastAPI:
                         ctx, start, end, progress=lambda f, s: _update(pct=0.85 + 0.15 * f, label=s)
                     )
                 pairs = red.stack().sort_values(key=abs, ascending=False)
+                regimes = sig.regime_series(ctx, start, end)
                 result = {
                     "run_id": job_id,
                     "window": window,
@@ -515,6 +520,7 @@ def create_app() -> FastAPI:
                     "fdr_q": q,
                     "universe": view or "(default)",
                     "names": len(ctx.names),
+                    "regimes": regimes,
                     "board": board.where(board.notna(), None).to_dict("records"),
                     "admitted": admitted,
                     "combo_all": combo_all,
@@ -581,7 +587,7 @@ def create_app() -> FastAPI:
         from etoro_yfinance import signals as sig
 
         q = _to_float(fdr_q) or 0.10
-        window = window if window == "validate" else "develop"
+        window = window if window in ("validate", "full") else "develop"
         wanted_universe = view or "(default)"
         current_signals = sorted(s.name for s in sig.SIGNALS)
         best: dict[str, Any] | None = None

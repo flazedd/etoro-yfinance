@@ -137,6 +137,64 @@ def build_context(
     )
 
 
+# ── market regime (equal-weight universe index) ──────────────────────────────
+def _eq_index(ctx: Ctx) -> tuple[np.ndarray, np.ndarray]:
+    """Equal-weight universe index level and its trailing 63-day realized vol,
+    both aligned to ctx.idx. Daily returns are clipped to ±50% before averaging
+    so a single blow-up bar can't hijack the index."""
+    with np.errstate(all="ignore"):
+        clipped = np.clip(ctx.R, -0.5, 0.5)
+        cnt = np.isfinite(clipped).sum(axis=1)
+        eq_ret = np.where(cnt > 0, np.nansum(clipped, axis=1) / np.maximum(cnt, 1), 0.0)
+    eq_curve = np.cumprod(1.0 + eq_ret)
+    roll_vol = pd.Series(eq_ret).rolling(63).std().to_numpy()
+    return eq_curve, roll_vol
+
+
+def _regime_at(eq_curve: np.ndarray, roll_vol: np.ndarray, p: int) -> tuple[bool, bool]:
+    """(bull, turbulent) at day `p`, using only data strictly before `p`.
+    bull = index at/above its trailing 200-day mean; turbulent = current 63-day
+    vol above the median of its own prior history (needs >60 prior samples)."""
+    prior = eq_curve[max(0, p - 200) : p]
+    bull = bool(eq_curve[p] >= np.mean(prior)) if len(prior) else True
+    hist = roll_vol[63:p]
+    hist = hist[np.isfinite(hist)]
+    turb = bool(
+        len(hist) > 60 and np.isfinite(roll_vol[p]) and roll_vol[p] > np.median(hist)
+    )
+    return bull, turb
+
+
+def regime_series(
+    ctx: Ctx, start: str | None = None, end: str | None = None
+) -> dict[str, list[Any]]:
+    """Daily bull/bear × calm/turbulent classification of the equal-weight
+    universe index — the same definitions `evaluate()` buckets its per-regime
+    ICs by, computed for every day so the regime timeline can be charted. The
+    classification at each day uses only pre-day history (no look-ahead); the
+    returned arrays are sliced to [start, end] for display while the index and
+    its 200-day mean still carry their full warm-up behind the scenes."""
+    eq_curve, roll_vol = _eq_index(ctx)
+    n = len(eq_curve)
+    ma200 = np.empty(n)
+    bull = np.empty(n, dtype=bool)
+    turb = np.empty(n, dtype=bool)
+    for p in range(n):
+        prior = eq_curve[max(0, p - 200) : p]
+        ma200[p] = float(np.mean(prior)) if len(prior) else eq_curve[p]
+        bull[p], turb[p] = _regime_at(eq_curve, roll_vol, p)
+    lo = 0 if start is None else int(ctx.idx.searchsorted(pd.Timestamp(start), "left"))
+    hi = n if end is None else int(ctx.idx.searchsorted(pd.Timestamp(end), "right"))
+    sl = slice(lo, hi)
+    return {
+        "dates": [str(d.date()) for d in ctx.idx[sl]],
+        "index": [round(float(v), 4) for v in eq_curve[sl]],
+        "ma200": [round(float(v), 4) for v in ma200[sl]],
+        "bull": [bool(v) for v in bull[sl]],
+        "turb": [bool(v) for v in turb[sl]],
+    }
+
+
 # ── signals (hypotheses declared in `sign` + description) ────────────────────
 @_register(
     "mom_12_1",
@@ -615,24 +673,14 @@ def evaluate(
     `with_detail=True` also returns per-signal monthly series for charts."""
     pos = _cutoff_positions(ctx, start, end)
 
-    # Regime classification per cutoff — fixed definitions, no look-ahead:
-    # bull = EW universe index at/above its own 200-day mean; turbulent =
-    # trailing 63-day index vol above the median of its own prior history.
-    with np.errstate(all="ignore"):
-        clipped = np.clip(ctx.R, -0.5, 0.5)
-        cnt = np.isfinite(clipped).sum(axis=1)
-        eq_ret = np.where(cnt > 0, np.nansum(clipped, axis=1) / np.maximum(cnt, 1), 0.0)
-    eq_curve = np.cumprod(1.0 + eq_ret)
-    roll_vol = pd.Series(eq_ret).rolling(63).std().to_numpy()
+    # Regime classification per cutoff — fixed definitions, no look-ahead
+    # (bull = EW index at/above its own 200-day mean; turbulent = trailing
+    # 63-day index vol above the median of its prior history). Shared with the
+    # regime-timeline chart via _eq_index / _regime_at so the two never drift.
+    eq_curve, roll_vol = _eq_index(ctx)
 
     def _regime(p: int) -> tuple[bool, bool]:
-        bull = bool(eq_curve[p] >= np.mean(eq_curve[max(0, p - 200) : p]))
-        hist = roll_vol[63:p]
-        hist = hist[np.isfinite(hist)]
-        turb = bool(
-            len(hist) > 60 and np.isfinite(roll_vol[p]) and roll_vol[p] > np.median(hist)
-        )
-        return bull, turb
+        return _regime_at(eq_curve, roll_vol, p)
 
     def _fwd(p: int, days: int) -> np.ndarray | None:
         tgt = ctx.idx[p] + pd.Timedelta(days=days)

@@ -67,6 +67,27 @@
         tip.style.top = y + 'px';
       });
     })();
+    // Double-click resets a Lightweight Chart to its fitted view (LWC ships
+    // wheel-zoom + drag-pan but no reset). Its namespace object is frozen, so
+    // createChart can't be wrapped globally — instead every chart calls
+    // LWCReset(chart) right after creation. A DOM dblclick listener is swallowed
+    // by the canvas, so we subscribe to the chart's own double-click event.
+    window.LWCReset = function (chart) {
+      function reset() {
+        try { chart.timeScale().fitContent(); } catch (e) {}              // reset time (x) zoom/pan
+        ['right', 'left'].forEach(function (id) {
+          try { chart.priceScale(id).applyOptions({ autoScale: true }); } catch (e) {}  // reset price (y) zoom
+        });
+      }
+      try { chart.subscribeDblClick(reset); } catch (e) {}                // LWC's own event
+      // Fallback: a capture-phase DOM listener fires before LWC's canvas can
+      // swallow the double-click (running both is harmless — reset is idempotent).
+      try {
+        var el = chart.chartElement && chart.chartElement();
+        if (el) el.addEventListener('dblclick', reset, true);
+      } catch (e) {}
+      return chart;
+    };
   </script>
 </body>
 </html>

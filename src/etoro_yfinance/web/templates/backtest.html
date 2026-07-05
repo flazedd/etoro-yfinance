@@ -47,6 +47,7 @@
     <select name="window" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
       <option value="develop" selected>develop 2005–2018</option>
       <option value="validate">validate 2019+</option>
+      <option value="full">full 2005–now</option>
       <option value="custom">custom dates</option>
     </select>
   </label>
@@ -188,6 +189,7 @@
     const w = windowSel.value;
     if (w === 'develop') { startIn.value = '2005-01-01'; endIn.value = '2019-01-01'; }
     if (w === 'validate') { startIn.value = '2019-01-01'; endIn.value = new Date().toISOString().slice(0, 10); }
+    if (w === 'full') { startIn.value = '2005-01-01'; endIn.value = new Date().toISOString().slice(0, 10); }
     startIn.readOnly = endIn.readOnly = (w !== 'custom');
     startIn.style.opacity = endIn.style.opacity = (w !== 'custom') ? '0.5' : '';
   };

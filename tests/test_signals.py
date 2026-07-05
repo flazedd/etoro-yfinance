@@ -132,6 +132,28 @@ def test_placebo_run_admits_nothing() -> None:
         signals.SIGNALS[:] = saved
 
 
+def test_regime_series_shape_slice_and_no_lookahead() -> None:
+    ctx = _ctx(n_days=800)
+    rs = signals.regime_series(ctx)
+    n = len(ctx.idx)
+    # aligned to every day, all four arrays parallel, booleans well-formed
+    assert len(rs["dates"]) == len(rs["index"]) == len(rs["ma200"]) == n
+    assert len(rs["bull"]) == len(rs["turb"]) == n
+    assert all(isinstance(b, bool) for b in rs["bull"] + rs["turb"])
+    # turbulent needs >60 prior vol samples (63d window), so early days are calm
+    assert not any(rs["turb"][:100])
+    # slicing to a window returns exactly the in-window days, in order
+    lo, hi = str(ctx.idx[200].date()), str(ctx.idx[500].date())
+    sub = signals.regime_series(ctx, lo, hi)
+    assert sub["dates"][0] == lo
+    assert sub["dates"][-1] <= hi
+    assert sub["dates"] == rs["dates"][200:501]
+    # the sliced classification is identical to the full one (no look-ahead: a
+    # day's regime never depends on where the window starts)
+    assert sub["bull"] == rs["bull"][200:501]
+    assert sub["turb"] == rs["turb"][200:501]
+
+
 def test_advisory_columns_and_detail_series() -> None:
     ctx = _ctx()
     saved = signals.SIGNALS[:]

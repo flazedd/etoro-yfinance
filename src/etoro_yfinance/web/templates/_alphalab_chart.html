@@ -78,7 +78,7 @@
           timeScale: { borderVisible: false, minBarSpacing: 0 },
           crosshair: { horzLine: { visible: false } },
         };
-        function mk(id) { return LWC.createChart(document.getElementById(id), OPTS); }
+        function mk(id) { var c = LWC.createChart(document.getElementById(id), OPTS); if (window.LWCReset) LWCReset(c); return c; }
         function line(chart, color, pts, w) {
           var s = chart.addSeries(LWC.LineSeries, { color: color, lineWidth: w || 2, priceLineVisible: false });
           s.setData(pts); return s;

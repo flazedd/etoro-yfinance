@@ -8,31 +8,116 @@
     <span class="text-slate-400"> · <b>Score signals</b> recomputes</span>
   </div>
   {% endif %}
-  <div class="text-xs text-slate-500 mb-2">
-    {{ view }} · {{ res.start }} → {{ res.end }} · {{ res.names }} names with data ·
-    four-gate admission at FDR q = {{ res.fdr_q }}
-    {% if res.window == 'validate' %} · <b class="text-amber-600">held-out validation window — spend sparingly</b>{% endif %}
-  </div>
-
-  {% macro combo_chip(label, c, tone) %}
-  {% if c %}
-  <span class="inline-flex items-center gap-2 rounded-md border px-2 py-1 {{ 'border-emerald-200 bg-emerald-50' if tone == 'good' else 'border-slate-200 bg-slate-50' }}">
-    <span class="font-semibold">{{ label }}</span>
-    <span class="tabular">IC {{ '%+.4f'|format(c.mean_ic) }}</span>
-    <span class="tabular">t {{ '%.1f'|format(c.t_stat) }}</span>
-    <span class="tabular">{{ c.pct_pos|int }}% months +</span>
-    <span class="text-slate-400">{{ c.families|length }} families</span>
-  </span>
+  {% if res.window == 'validate' %}
+  <div class="text-xs mb-2"><b class="text-amber-600">held-out validation window — spend sparingly</b></div>
+  {% elif res.window == 'full' %}
+  <div class="text-xs mb-2"><b class="text-amber-600">spans the held-out 2019+ window — for reporting, not tuning</b></div>
   {% endif %}
-  {% endmacro %}
-  <div class="flex flex-wrap gap-2 text-xs mb-3">
-    {{ combo_chip('combo (admitted)', res.combo_admitted, 'good') }}
-    {{ combo_chip('combo (all signals)', res.combo_all, 'plain') }}
-  </div>
 
-  <div class="text-xs text-slate-500 mb-2">
-    admitted ({{ res.admitted|length }}): <b>{{ res.admitted|join(', ') if res.admitted else '—' }}</b>
-  </div>
+  {% if res.regimes %}
+  <details id="regime-details" class="mb-3 rounded border border-slate-200 bg-white">
+    <summary class="cursor-pointer select-none px-3 py-2 text-xs font-semibold text-slate-700">
+      Market regimes
+      <span class="font-normal text-slate-400" data-tip="The equal-weight universe index (solid) and its 200-day mean (dashed), shaded by the same regime definition the IC bull/bear and IC calm/turb columns bucket by.&#10;&#10;bull = index at/above its 200d mean; turbulent = 63d index vol above the median of its prior history. Classified with pre-day data only. This is a property of the whole universe, not any single instrument.&#10;&#10;Scroll to zoom, drag to pan.">— when bull/bear × calm/turbulent occur over {{ res.start }} → {{ res.end }}</span>
+    </summary>
+    <div class="px-3 pb-3 pt-1">
+      <div class="flex flex-wrap gap-3 text-xs text-slate-500 mb-1">
+        <span><span style="display:inline-block;width:11px;height:11px;background:#4ade80;vertical-align:-1px;border-radius:2px"></span> bull · calm</span>
+        <span><span style="display:inline-block;width:11px;height:11px;background:#15803d;vertical-align:-1px;border-radius:2px"></span> bull · turbulent</span>
+        <span><span style="display:inline-block;width:11px;height:11px;background:#f87171;vertical-align:-1px;border-radius:2px"></span> bear · calm</span>
+        <span><span style="display:inline-block;width:11px;height:11px;background:#b91c1c;vertical-align:-1px;border-radius:2px"></span> bear · turbulent</span>
+        <span class="text-slate-300">|</span>
+        <span><span style="display:inline-block;width:14px;border-top:2px solid #0f172a;vertical-align:4px"></span> EW index</span>
+        <span><span style="display:inline-block;width:14px;border-top:2px dashed #64748b;vertical-align:4px"></span> 200d mean</span>
+      </div>
+      <div id="regime-chart" style="height:340px"></div>
+    </div>
+    <script type="application/json" id="regime-data">{{ res.regimes | tojson }}</script>
+    <script>
+      (function () {
+        var det = document.getElementById('regime-details');
+        if (!det || !window.LightweightCharts) return;
+        var built = false;
+        function build() {
+          var d = JSON.parse(document.getElementById('regime-data').textContent);
+          if (!d.dates || d.dates.length < 2) return;
+          var LWC = LightweightCharts;
+          var chart = LWC.createChart(document.getElementById('regime-chart'), {
+            autoSize: true,
+            layout: { background: { type: 'solid', color: '#ffffff' }, textColor: '#64748b', fontSize: 10 },
+            grid: { vertLines: { visible: false }, horzLines: { color: '#f1f5f9' } },
+            rightPriceScale: { borderVisible: false },
+            timeScale: { borderVisible: false, minBarSpacing: 0 },
+            crosshair: { mode: LWC.CrosshairMode.Normal },
+          });
+          // per-day band colour: hue = bull/bear, lightness = calm/turbulent
+          var FILL = {
+            '10': 'rgba(74,222,128,0.45)',  // bull · calm      light green
+            '11': 'rgba(21,128,61,0.50)',   // bull · turbulent dark green
+            '00': 'rgba(248,113,113,0.45)', // bear · calm      light red
+            '01': 'rgba(185,28,28,0.50)',   // bear · turbulent dark red
+          };
+          var colors = d.dates.map(function (_, i) {
+            return FILL[(d.bull[i] ? '1' : '0') + (d.turb[i] ? '1' : '0')];
+          });
+          // series primitive: full-height background rects, redrawn every frame
+          // so the bands track zoom/pan. Consecutive same-regime days merge into
+          // one rect (seamless, no histogram striping).
+          function regimeBands() {
+            var chartRef;
+            var renderer = {
+              draw: function (target) {
+                target.useBitmapCoordinateSpace(function (scope) {
+                  var ctx = scope.context;
+                  var ts = chartRef.timeScale();
+                  var range = ts.getVisibleLogicalRange();
+                  if (!range) return;
+                  var n = colors.length;
+                  var from = Math.max(0, Math.floor(range.from));
+                  var to = Math.min(n - 1, Math.ceil(range.to));
+                  var bs = ts.options().barSpacing;
+                  var hr = scope.horizontalPixelRatio;
+                  var h = scope.bitmapSize.height;
+                  var i = from;
+                  while (i <= to) {
+                    var col = colors[i], j = i;
+                    while (j + 1 <= to && colors[j + 1] === col) j++;
+                    var xi = ts.logicalToCoordinate(i), xj = ts.logicalToCoordinate(j);
+                    if (xi !== null && xj !== null) {
+                      var left = (xi - bs / 2) * hr, right = (xj + bs / 2) * hr;
+                      ctx.fillStyle = col;
+                      ctx.fillRect(left, 0, right - left, h);
+                    }
+                    i = j + 1;
+                  }
+                });
+              },
+            };
+            var view = { renderer: function () { return renderer; }, zOrder: function () { return 'bottom'; } };
+            return {
+              attached: function (p) { chartRef = p.chart; },
+              detached: function () {},
+              updateAllViews: function () {},
+              paneViews: function () { return [view]; },
+            };
+          }
+          var idx = chart.addSeries(LWC.LineSeries, { color: '#0f172a', lineWidth: 2, priceLineVisible: false, lastValueVisible: false });
+          idx.setData(d.dates.map(function (dt, i) { return { time: dt, value: d.index[i] }; }));
+          var ma = chart.addSeries(LWC.LineSeries, { color: '#64748b', lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, priceLineVisible: false, lastValueVisible: false });
+          ma.setData(d.dates.map(function (dt, i) { return { time: dt, value: d.ma200[i] }; }));
+          idx.attachPrimitive(regimeBands());
+          if (window.LWCReset) LWCReset(chart);
+          requestAnimationFrame(function () { chart.timeScale().fitContent(); });
+        }
+        // build lazily on first open — a chart created in a hidden <details> has
+        // zero size and never lays out.
+        det.addEventListener('toggle', function () {
+          if (det.open && !built) { built = true; build(); }
+        });
+      })();
+    </script>
+  </details>
+  {% endif %}
 
   {% macro gate(ok) %}<td class="tabular">{{ '<span style="color:#047857">✓</span>'|safe if ok else '<span style="color:#be123c">✗</span>'|safe }}</td>{% endmacro %}
   <div style="overflow-x:auto">
