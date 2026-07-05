@@ -1,0 +1,112 @@
+{% if res.error %}
+  <div class="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">{{ res.error }}</div>
+{% else %}
+  {% if res.cached_at %}
+  <div class="text-xs mb-2 rounded border border-slate-200 bg-slate-50 px-2 py-1.5">
+    cached run from <b>{{ res.cached_at }}</b>
+    {% if res.data_moved %}<span class="text-amber-600"> · the data snapshot is newer than this run — consider re-running</span>{% endif %}
+    <span class="text-slate-400"> · <b>Score signals</b> recomputes</span>
+  </div>
+  {% endif %}
+  <div class="text-xs text-slate-500 mb-2">
+    {{ view }} · {{ res.start }} → {{ res.end }} · {{ res.names }} names with data ·
+    four-gate admission at FDR q = {{ res.fdr_q }}
+    {% if res.window == 'validate' %} · <b class="text-amber-600">held-out validation window — spend sparingly</b>{% endif %}
+  </div>
+
+  {% macro combo_chip(label, c, tone) %}
+  {% if c %}
+  <span class="inline-flex items-center gap-2 rounded-md border px-2 py-1 {{ 'border-emerald-200 bg-emerald-50' if tone == 'good' else 'border-slate-200 bg-slate-50' }}">
+    <span class="font-semibold">{{ label }}</span>
+    <span class="tabular">IC {{ '%+.4f'|format(c.mean_ic) }}</span>
+    <span class="tabular">t {{ '%.1f'|format(c.t_stat) }}</span>
+    <span class="tabular">{{ c.pct_pos|int }}% months +</span>
+    <span class="text-slate-400">{{ c.families|length }} families</span>
+  </span>
+  {% endif %}
+  {% endmacro %}
+  <div class="flex flex-wrap gap-2 text-xs mb-3">
+    {{ combo_chip('combo (admitted)', res.combo_admitted, 'good') }}
+    {{ combo_chip('combo (all signals)', res.combo_all, 'plain') }}
+  </div>
+
+  <div class="text-xs text-slate-500 mb-2">
+    admitted ({{ res.admitted|length }}): <b>{{ res.admitted|join(', ') if res.admitted else '—' }}</b>
+  </div>
+
+  {% macro gate(ok) %}<td class="tabular">{{ '<span style="color:#047857">✓</span>'|safe if ok else '<span style="color:#be123c">✗</span>'|safe }}</td>{% endmacro %}
+  <div style="overflow-x:auto">
+    <table class="rules-table text-xs">
+      <thead><tr>
+        <th>Signal</th><th>Family</th><th>Dir</th>
+        <th data-tip="Average monthly rank correlation between the signal and next-month returns.&#10;&#10;Good: |IC| ≥ 0.02 is tradable, 0.03–0.05 is strong for a monthly cross-sectional signal. Above ~0.10 is suspicious — markets are mostly noise, so check for leakage. The sign must match the Dir arrow.">mean IC</th>
+        <th data-tip="mean IC / std × √months — the naive significance measure (assumes independent months).&#10;&#10;Good: |t| ≥ 2 is conventionally real; ≥ 3 is the bar the factor-zoo literature demands of new effects. Below 1.6 is likely noise.">t</th>
+        <th data-tip="Block-bootstrap p-value: the percentage of luck-only signals (same autocorrelation) that would look this good. One-sided in the hypothesized direction.&#10;&#10;Good: under ~1% clears the FDR gate comfortably in a 22-signal library; above 5% is weak evidence. The bar tightens automatically as the library grows.">p (boot)</th>
+        <th data-tip="Return of the hypothesized-best decile minus the universe, annualized, minus spread costs on that bucket's monthly turnover. Long-only: this is what you could actually harvest.&#10;&#10;Good: positive is the gate; ≥ +3%/yr is meaningful, ≥ +8%/yr excellent. Negative = the effect exists statistically but can't be bought.">top decile net %/yr</th>
+        <th data-tip="Share of years (≥6 months of data) where the IC had the hypothesized sign.&#10;&#10;Good: ≥ 60% is the R-gate bar; ≥ 75% is an all-weather signal. 50% = coin flip — the full-period mean is then carried by a few years.">yr hit</th>
+        <th data-tip="Which instrument types independently support the effect (per-type IC with t ≥ 1 in the hypothesized direction, ≥12 months with ≥50 names).&#10;&#10;Good: ‘all’ or several types. One type is fine when the mechanism predicts it (single-name reversal shouldn’t exist in ETFs); ‘none’ fails the R gate.">scope</th>
+        <th data-tip="Mean monthly rank-IC within each instrument type: stocks / ETF / crypto (— = too little data).&#10;&#10;Good: the same sign as the overall IC wherever there is data. A sign flip between types means the ‘signal’ is really a disguised bet on one asset class.">IC stk / etf / cry</th>
+        <th data-tip="Monotonicity: rank correlation between signal deciles (1–10) and their average forward returns, signed by hypothesis.&#10;&#10;Good: ≥ +0.6 is the A-gate bar; ≥ +0.9 is a textbook clean effect. Negative = the money moves the OPPOSITE way to the ranking — unharvestable long-only (see the low-vol family).">mono</th>
+        <th data-tip="Mean IC at ~1-week / 1-month / 3-month horizons. Not gated — for inspection.&#10;&#10;Good: same sign at all three, fading smoothly with horizon. An effect existing at exactly one horizon is usually a timing artifact rather than investor behavior.">IC 1w / 1m / 3m</th>
+        <th data-tip="Mean IC in bull vs bear months. Bull = the equal-weight universe index at/above its own 200-day average at the cutoff (pre-cutoff data only). Not gated.&#10;&#10;Good: same sign in both. A bear-month collapse (classic for momentum) is a known crash risk to hedge with the trend overlay — not necessarily a rejection, but a risk to plan for.">IC bull / bear</th>
+        <th data-tip="Mean IC in calm vs turbulent months. Turbulent = trailing 63-day universe volatility above the median of its own prior history (pre-cutoff data only). Not gated.&#10;&#10;Good: same sign in both. Alpha living only in turbulence is real but hard to size — it pays exactly when everything is breaking.">IC calm / turb</th>
+        <th data-tip="Marginal IC: rank-IC of the part of this signal the ADMITTED library cannot already explain (per-month cross-sectional residual).&#10;&#10;Good: ≥ ~50% of the raw IC — the signal brings genuinely new information. Near zero = however good it looks alone, your library already contains it.">marg IC</th>
+        <th data-tip="Advisory warning flags (never block admission) — hover each chip for its definition.&#10;&#10;Good: none. One flag = handle with care; several = probably not deployable even if admitted.">flags</th>
+        <th data-tip="Confidence gate: bootstrap p-value survives Benjamini–Hochberg FDR correction across the whole library.&#10;&#10;Good: ✓ — required for admission; guards against multiple-testing luck.">C</th>
+        <th data-tip="Tradability gate: top-decile spread positive net of costs (long-only).&#10;&#10;Good: ✓ — required for admission; separates statistics from harvestable money.">T</th>
+        <th data-tip="Robustness gate: hypothesized sign in ≥60% of years AND at least one instrument type supports it alone.&#10;&#10;Good: ✓ — required for admission; guards against one-regime and one-market flukes.">R</th>
+        <th data-tip="Artifact gate: decile monotonicity ≥ 0.6 in the hypothesized direction.&#10;&#10;Good: ✓ — required for admission; guards against effects driven by a single weird bucket.">A</th>
+        <th></th>
+      </tr></thead>
+      <tbody>
+        {% for r in res.board %}
+        <tr {% if r.signal in res.admitted %}style="background:#ecfdf5"{% endif %}>
+          <td>{{ r.signal }}<i class="info-dot" data-tip="{{ explain.get(r.signal, '') }}">i</i></td><td>{{ r.family }}</td>
+          <td>{{ '↑' if r.sign > 0 else '↓' }}</td>
+          {% if r.mean_ic is not none %}
+          <td class="tabular">{{ '%+.4f'|format(r.mean_ic) }}</td>
+          <td class="tabular">{{ '%.2f'|format(r.t_stat) }}</td>
+          <td class="tabular">{{ '%.2f'|format(r.p_boot * 100) }}%</td>
+          <td class="tabular {{ 'text-emerald-700' if r.spread_net_ann > 0 else 'text-rose-700' }}">{{ '%+.1f'|format(r.spread_net_ann) }}%</td>
+          <td class="tabular">{% if r.yearly_hit is not none %}{{ '%.0f'|format(r.yearly_hit * 100) }}%{% if r.years %} <span class="text-slate-400">/{{ r.years }}y</span>{% endif %}{% else %}—{% endif %}</td>
+          <td>{{ r.scope }}</td>
+          <td class="tabular">{{ '%+.3f'|format(r.ic_stocks) if r.ic_stocks is not none else '—' }} / {{ '%+.3f'|format(r.ic_etf) if r.ic_etf is not none else '—' }} / {{ '%+.3f'|format(r.ic_crypto) if r.ic_crypto is not none else '—' }}</td>
+          <td class="tabular">{{ '%+.2f'|format(r.mono) if r.mono is not none else '—' }}</td>
+          <td class="tabular">{{ '%+.3f'|format(r.ic_1w) if r.ic_1w is not none else '—' }} / {{ '%+.3f'|format(r.mean_ic) }} / {{ '%+.3f'|format(r.ic_3m) if r.ic_3m is not none else '—' }}</td>
+          <td class="tabular">{{ '%+.3f'|format(r.ic_bull) if r.ic_bull is not none else '—' }} / {{ '%+.3f'|format(r.ic_bear) if r.ic_bear is not none else '—' }}</td>
+          <td class="tabular">{{ '%+.3f'|format(r.ic_calm) if r.ic_calm is not none else '—' }} / {{ '%+.3f'|format(r.ic_turb) if r.ic_turb is not none else '—' }}</td>
+          <td class="tabular">{{ '%+.4f'|format(r.ic_marginal) if r.ic_marginal is not none else '—' }}</td>
+          <td>{% for f in (r.flags or '').split(',') if f %}<span class="badge" style="background:#fef3c7;color:#b45309;margin-right:2px;cursor:help" data-tip="{{ flag_info[f][1] }}">{{ flag_info[f][0] }}</span>{% endfor %}</td>
+          {{ gate(r.g_conf) }}{{ gate(r.g_trade) }}{{ gate(r.g_robust) }}{{ gate(r.g_clean) }}
+          <td><button class="chart-btn" hx-get="/alphalab/chart?run={{ res.run_id }}&signal={{ r.signal|urlencode }}"
+                      hx-target="#chart-modal" hx-swap="innerHTML">Chart</button></td>
+          {% else %}
+          <td colspan="18" class="text-slate-400">too few months ({{ r.months }})</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="text-xs text-slate-400 mt-2">
+    hover any column header or ⓘ for what it means · green rows passed all four gates
+    (C-onfidence, T-radability, R-obustness, A-rtifact-free) — that's what "admitted" requires ·
+    ICs are raw, so inverse (↓) signals show negative values by design.
+  </div>
+
+  {% if res.pairs %}
+  <details class="mt-3 text-xs">
+    <summary class="cursor-pointer font-semibold text-slate-600">
+      Redundant pairs (|rank corr| ≥ 0.6) — near-duplicates share one family slot
+    </summary>
+    <table class="rules-table text-xs mt-2">
+      <thead><tr><th>Signal</th><th>Signal</th><th>rank corr</th></tr></thead>
+      <tbody>
+        {% for p in res.pairs %}
+        <tr><td>{{ p.a }}</td><td>{{ p.b }}</td><td class="tabular">{{ '%+.2f'|format(p.corr) }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+  {% endif %}
+{% endif %}

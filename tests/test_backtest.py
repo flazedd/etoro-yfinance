@@ -247,3 +247,78 @@ def test_max_dd_from_daily_curve() -> None:
     assert backtest._max_dd([1.0, 1.2, 0.6, 0.9]) == pytest.approx(-0.5)
     assert backtest._max_dd([1.0]) == 0.0
     assert backtest._stats([1.0, 1.1, 1.21], 2 / 12)["total_return"] == pytest.approx(0.21)
+
+
+def test_yearly_returns_compound_to_total(store: Path) -> None:
+    res = _run(0.0)
+    ys = res["yearly"]
+    assert ys and all(y["portfolios"] for y in ys)
+    # every portfolio lands in its start-date's year
+    for y in ys:
+        assert all(p["date"][:4] == y["year"] for p in y["portfolios"])
+    assert sum(len(y["portfolios"]) for y in ys) == len(res["portfolios"])
+    # yearly returns compound back to the full-period totals (both curves)
+    for key, curve in (("return_pct", "equity"), ("benchmark_return_pct", "benchmark")):
+        total = 1.0
+        for y in ys:
+            total *= 1 + y[key] / 100
+        assert total - 1 == pytest.approx(res[curve][-1] - 1, abs=0.02)
+
+
+def test_stability_criteria_reported(store: Path) -> None:
+    res = _run(0.0)
+    cs = res["criteria"]
+    assert len(cs) == 5
+    assert all({"label", "value", "ok"} <= set(c) for c in cs)
+    # 5-month run: no full calendar year and no 5y window → undecidable (None),
+    # the CAGR/Sharpe/DD checks are decidable booleans.
+    assert [c["ok"] for c in cs[-2:]] == [None, None]
+    assert all(isinstance(c["ok"], bool) for c in cs[:3])
+
+
+def test_trend_filter_moves_downtrending_pick_to_cash(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setenv("MOMENTUM_DATA_DIR", str(tmp_path))
+    (tmp_path / "prices_eur").mkdir(parents=True)
+    (tmp_path / "prices").mkdir(parents=True)
+    idx = pd.date_range("2018-06-01", "2021-07-01", freq="D")
+    n = np.arange(len(idx))
+    for t, g in (("UP", 0.001), ("DOWN", -0.001)):
+        px = 100.0 * (1.0 + g) ** n * (1.0 + 0.002 * np.sin(n / 3.0))
+        pd.DataFrame(
+            {
+                "date": idx,
+                "adj_close": px.astype("float32"),
+                "close": px.astype("float32"),
+                "volume": (px * 1000).astype("float32"),
+            }
+        ).to_parquet(tmp_path / "prices_eur" / f"{t}.parquet", index=False)
+        pd.DataFrame(
+            {"date": idx, "close": px.astype("float32"), "volume": np.full(len(idx), 1000)}
+        ).to_parquet(tmp_path / "prices" / f"{t}.parquet", index=False)
+    rows = [{"yf": t, "sector": "Tech", "spread_pct": 0.0} for t in ("UP", "DOWN")]
+    kw: dict[str, Any] = {"start": "2021-01-01", "end": "2021-06-01", "strategy": "sortino"}
+    base = backtest.run(rows, **kw)
+    filt = backtest.run(rows, trend_filter=True, **kw)
+    # DOWN is picked (top_n covers everything) but trades below its 200d mean →
+    # its slice sits in cash; skipping the loser must beat holding it.
+    assert all(p["trend_dropped"] == 1 for p in filt["portfolios"])
+    assert all(p["trend_dropped"] == 0 for p in base["portfolios"])
+    assert filt["equity"][-1] > base["equity"][-1]
+
+
+def test_vol_target_scales_exposure_down(store: Path) -> None:
+    base = _run(0.0)
+    low = _run(0.0, vol_target=0.3)  # target ≪ the fixture's ~0.7% vol → must de-risk
+    assert all(p["exposure"] == 1.0 for p in base["portfolios"])
+    assert all(p["exposure"] <= 1.0 for p in low["portfolios"])
+    # after the 63-day warmup the book scales down into cash
+    assert any(p["exposure"] < 1.0 for p in low["portfolios"])
+    # over the de-risked stretch the daily curve must be visibly calmer
+    def _tail_vol(res: dict[str, Any]) -> float:
+        eq = np.array(res["equity"][-40:])
+        r = np.diff(eq) / eq[:-1]
+        return float(r.std())
+
+    assert _tail_vol(low) < _tail_vol(base)

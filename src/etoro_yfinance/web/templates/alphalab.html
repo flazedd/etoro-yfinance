@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Alpha Lab{% endblock %}
+{% block content %}
+<script src="/static/lightweight-charts.standalone.production.js"></script>
+<div class="mb-4">
+  <h1 class="text-xl font-semibold">Alpha Lab</h1>
+  <p class="text-sm text-slate-500">
+    Cross-sectional signal research: every registered signal is scored monthly by the
+    <b>rank-IC</b> — the rank correlation between the signal today and next month's return.
+    A signal is <b>admitted</b> only when it clears all four gates:
+    <b>C</b>onfidence (block-bootstrap p-value surviving false-discovery-rate correction
+    across the whole library), <b>T</b>radability (its best decile beats the universe
+    long-only, net of spread costs), <b>R</b>obustness (right sign in ≥60% of years and
+    supported by at least one asset class on its own), and <b>A</b>rtifact-cleanliness
+    (returns rise monotonically across signal deciles). Admitted signals feed the
+    family-balanced combo. Develop on 2005–2018; touch the 2019+ validation window
+    sparingly — every peek spends it.
+  </p>
+</div>
+
+<form id="al-form" class="flex flex-wrap gap-3 items-end mb-4"
+      hx-get="/alphalab/run" hx-target="#al-result" hx-indicator="#al-spin">
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">universe</span>
+    <select name="view" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50"
+            hx-get="/alphalab/cached" hx-target="#al-result" hx-include="#al-form" hx-trigger="change">
+      <option value="">(default criteria)</option>
+      {% for u in saved_universes %}
+      <option value="{{ u.name }}"{% if u.name == default_view %} selected{% endif %}>{{ u.name }}{% if u.count is not none %} ({{ u.count }}){% endif %}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">window</span>
+    <select name="window" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50"
+            hx-get="/alphalab/cached" hx-target="#al-result" hx-include="#al-form" hx-trigger="change">
+      <option value="develop" selected>develop 2005–2018</option>
+      <option value="validate">validate 2019+ (held-out!)</option>
+    </select>
+  </label>
+  <label class="flex flex-col gap-1 text-sm"
+         title="False-discovery rate for the confidence gate: the expected share of admitted signals that are flukes. Lower = stricter.">
+    <span class="text-slate-500">FDR q</span>
+    <input type="number" name="fdr_q" value="0.10" min="0.01" max="0.5" step="0.01"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-24"
+           hx-get="/alphalab/cached" hx-target="#al-result" hx-include="#al-form" hx-trigger="change">
+  </label>
+  <button type="submit" class="rules-btn" style="padding:8px 14px"
+          title="Recompute from scratch (a few minutes); the result replaces the cached run for these settings">Score signals</button>
+  <span id="al-spin" class="htmx-indicator text-sm text-slate-500">scoring… (loads the full universe, takes a minute)</span>
+</form>
+
+<details class="mb-4 text-xs">
+  <summary class="text-slate-500 cursor-pointer font-semibold">
+    Registered signals ({{ signals|length }} across {{ n_families }} families) — hypotheses declared before evaluation
+  </summary>
+  <div style="overflow-x:auto" class="mt-2">
+    <table class="rules-table text-xs">
+      <thead><tr><th>Signal</th><th>Family</th><th>Direction</th><th>Hypothesis</th></tr></thead>
+      <tbody>
+        {% for s in signals %}
+        <tr><td>{{ s.name }}<i class="info-dot" data-tip="{{ s.explanation }}">i</i></td><td>{{ s.family }}</td>
+            <td>{{ 'high → outperform' if s.sign > 0 else 'low → outperform' }}</td>
+            <td>{{ s.description }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+
+<div id="al-result" class="bg-white rounded-lg border border-slate-200 p-4 text-sm text-slate-500"
+     hx-get="/alphalab/cached" hx-include="#al-form" hx-trigger="load">
+  loading cached results…
+</div>
+<div id="chart-modal"></div>
+{% endblock %}

@@ -1,0 +1,131 @@
+<div class="chart-backdrop" onclick="if(event.target===this)document.getElementById('chart-modal').innerHTML=''">
+  <div class="chart-card" style="width:min(1400px,97vw);max-height:94vh;overflow:auto">
+    <div class="flex items-start justify-between mb-1">
+      <div class="text-sm">
+        <span class="font-semibold">{{ signal }}</span>
+        {% if row %}
+        <span class="text-slate-500"> · {{ row.family }} · {{ 'high → outperform' if row.sign > 0 else 'low → outperform' }}</span>
+        <span class="ml-2 rounded-full px-2 py-0.5 text-xs font-medium {{ 'bg-emerald-100 text-emerald-700' if row.admitted else 'bg-rose-100 text-rose-700' }}">
+          {{ 'admitted' if row.admitted else 'rejected' }}</span>
+        {% for f in (row.flags or '').split(',') if f %}<span class="ml-1 rounded-full px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700" style="cursor:help" data-tip="{{ flag_info[f][1] }}">{{ flag_info[f][0] }}</span>{% endfor %}
+        <span class="text-slate-400 ml-2">{{ meta.universe }} · {{ meta.window }} · {{ meta.start }} → {{ meta.end }}</span>
+        {% endif %}
+      </div>
+      <button class="text-slate-400 hover:text-slate-700 text-lg leading-none px-1"
+              onclick="document.getElementById('chart-modal').innerHTML=''">&times;</button>
+    </div>
+    {% if error %}
+      <div class="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">{{ error }}</div>
+    {% else %}
+    <p class="text-xs text-slate-500 mb-2" style="max-width:1000px">{{ explanation }}</p>
+
+    {% macro chip(label, value, tip) %}
+    <span class="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5"
+          data-tip="{{ tip }}"><span class="text-slate-400">{{ label }}</span>
+      <b class="tabular">{{ value }}</b></span>
+    {% endmacro %}
+    {% macro icv(v) %}{{ '%+.4f'|format(v) if v is not none else '—' }}{% endmacro %}
+    <div class="flex flex-wrap gap-1 text-xs mb-3">
+      {{ chip('IC', icv(row.mean_ic), 'Mean monthly rank correlation with next-month returns.&#10;&#10;Good: |IC| ≥ 0.02 tradable, 0.03–0.05 strong; above ~0.10 = check for leakage.') }}
+      {{ chip('t', '%.2f'|format(row.t_stat), 'Naive significance of the mean IC.&#10;&#10;Good: |t| ≥ 2; ≥ 3 by the strict factor-zoo standard.') }}
+      {{ chip('p boot', '%.2f%%'|format(row.p_boot * 100), 'Block-bootstrap p-value (autocorrelation-aware, one-sided): the percentage of luck-only signals that would score this well.&#10;&#10;Good: under ~1%; above 5% is weak evidence.') }}
+      {{ chip('marginal', icv(row.ic_marginal), 'IC of the part of this signal the admitted library cannot already explain.&#10;&#10;Good: ≥ ~50% of the raw IC. Near zero = the library already contains this idea.') }}
+      {{ chip('lag-2d', icv(row.ic_lag2), 'IC when the signal is computed 2 days stale.&#10;&#10;Good: at least half the fresh IC. A collapse means the edge needs perfect timing — the hallmark of bid-ask bounce and stale-close artifacts.') }}
+      {{ chip('trim-5', icv(row.ic_trim5), 'Mean IC with the 5 best months removed.&#10;&#10;Good: at least half the full IC — a steady grind, not a few lucky episodes.') }}
+      {{ chip('net 1×/2×/3×', ('%+.1f / %+.1f / %+.1f%%'|format(row.spread_net_ann, row.spread_net_2x, row.spread_net_3x)) if row.spread_net_ann is not none else '—', 'Top-decile edge per year net of 1×/2×/3× assumed spread costs.&#10;&#10;Good: still positive at 2× (real-world friction margin); positive at 3× is genuinely cost-robust.') }}
+      {{ chip('liquid half', icv(row.ic_liquid), 'IC within the most liquid half of the universe.&#10;&#10;Good: similar to the overall IC. Much weaker = the alpha sits in names that cannot absorb real money.') }}
+      {{ chip('beta corr', ('%+.2f'|format(row.beta_corr)) if row.beta_corr is not none else '—', 'Correlation of the monthly top-decile edge with the universe return.&#10;&#10;Good: |corr| < 0.3. Higher = the edge is mostly market direction, not selection skill.') }}
+      {{ chip('IC trend', ('%+.4f/yr'|format(row.ic_trend)) if row.ic_trend is not none else '—', 'Linear drift of the signed IC per year.&#10;&#10;Good: ≥ 0 (stable or strengthening). Negative enough to halve the IC across the window earns the DEC flag.') }}
+      {{ chip('timing dup', row.timing_dup or '—', 'Highest correlation of this signal\'s monthly IC series with an admitted signal.&#10;&#10;Good: |corr| < 0.5 — it earns at different times than the library, adding diversification.') }}
+      {{ chip('scope', row.scope, 'Instrument types that support the effect independently.&#10;&#10;Good: all or several; a single type is fine when the mechanism predicts it; none fails the R gate.') }}
+      {{ chip('stk/etf/cry', icv(row.ic_stocks) ~ ' / ' ~ icv(row.ic_etf) ~ ' / ' ~ icv(row.ic_crypto), 'Mean IC per instrument type.&#10;&#10;Good: same sign everywhere there is data — a flip means a disguised asset-class bet.') }}
+      {{ chip('bull/bear', icv(row.ic_bull) ~ ' / ' ~ icv(row.ic_bear), 'Mean IC in bull vs bear months.&#10;&#10;Good: same sign in both; a bear collapse is momentum-style crash risk to hedge.') }}
+      {{ chip('calm/turb', icv(row.ic_calm) ~ ' / ' ~ icv(row.ic_turb), 'Mean IC in calm vs turbulent months.&#10;&#10;Good: same sign in both; turbulence-only alpha pays when everything breaks.') }}
+      {{ chip('gates C/T/R/A', ('✓' if row.g_conf else '✗') ~ ('✓' if row.g_trade else '✗') ~ ('✓' if row.g_robust else '✗') ~ ('✓' if row.g_clean else '✗'), 'Confidence / Tradability / Robustness / Artifact-free.&#10;&#10;Good: ✓✓✓✓ — all four are required for admission.') }}
+    </div>
+
+    <div class="flex gap-4 flex-wrap">
+      <div style="flex:1;min-width:320px">
+        <div class="text-xs font-semibold text-slate-600 mb-1" data-tip="Running total of the monthly signed IC. A steady climb = persistent alpha; flattening = decay; a few big steps = event-driven.">Cumulative signed IC ⓘ</div>
+        <div id="alc-cum" style="height:200px"></div>
+      </div>
+      <div style="flex:1;min-width:320px">
+        <div class="text-xs font-semibold text-slate-600 mb-1" data-tip="12-month rolling mean of the signed IC vs the zero line. Shows when the signal worked and whether it still does.">Rolling 12m IC ⓘ</div>
+        <div id="alc-roll" style="height:200px"></div>
+      </div>
+      <div style="flex:1;min-width:320px">
+        <div class="text-xs font-semibold text-slate-600 mb-1" data-tip="Growth of 100 invested in the hypothesized-best decile relative to the universe — gross (grey) and net of spread costs (blue). The gap is the cost drag.">Top-decile edge, gross vs net ⓘ</div>
+        <div id="alc-money" style="height:200px"></div>
+      </div>
+      <div style="flex:0 0 260px;min-width:240px">
+        <div class="text-xs font-semibold text-slate-600 mb-1" data-tip="Average next-month return per signal decile (1 = lowest signal value, 10 = highest). Real effects rise or fall smoothly; a single spiking bucket is an artifact. The hypothesized-best bucket is highlighted.">Decile returns ⓘ</div>
+        <div id="alc-dec" style="height:200px" class="flex items-end gap-1"></div>
+        <div class="flex gap-1 text-xs text-slate-400 mt-0.5"><span style="flex:1">1</span><span style="text-align:right">10</span></div>
+      </div>
+    </div>
+
+    <script type="application/json" id="alc-data">{{ {'sign': row.sign, 'dates': series.dates, 'ic': series.ic, 'gross': series.gross, 'cost': series.cost, 'dec': series.dec} | tojson }}</script>
+    <script>
+      (function () {
+        var d = JSON.parse(document.getElementById('alc-data').textContent);
+        if (!window.LightweightCharts) return;
+        var LWC = LightweightCharts;
+        var OPTS = {
+          autoSize: true,
+          layout: { background: { type: 'solid', color: '#ffffff' }, textColor: '#64748b', fontSize: 10 },
+          grid: { vertLines: { visible: false }, horzLines: { color: '#f1f5f9' } },
+          rightPriceScale: { borderVisible: false },
+          timeScale: { borderVisible: false, minBarSpacing: 0 },
+          crosshair: { horzLine: { visible: false } },
+        };
+        function mk(id) { return LWC.createChart(document.getElementById(id), OPTS); }
+        function line(chart, color, pts, w) {
+          var s = chart.addSeries(LWC.LineSeries, { color: color, lineWidth: w || 2, priceLineVisible: false });
+          s.setData(pts); return s;
+        }
+        // cumulative signed IC
+        var cum = 0;
+        var cumPts = d.dates.map(function (dt, i) { cum += d.sign * d.ic[i]; return { time: dt, value: cum }; });
+        var c1 = mk('alc-cum'); line(c1, '#2563eb', cumPts).createPriceLine({ price: 0, color: '#cbd5e1', lineWidth: 1, lineStyle: LWC.LineStyle.Solid, axisLabelVisible: false });
+        c1.timeScale().fitContent();
+        // rolling 12m mean signed IC
+        var rollPts = [];
+        for (var i = 11; i < d.ic.length; i++) {
+          var s12 = 0; for (var j = i - 11; j <= i; j++) s12 += d.sign * d.ic[j];
+          rollPts.push({ time: d.dates[i], value: s12 / 12 });
+        }
+        var c2 = mk('alc-roll'); line(c2, '#7c3aed', rollPts).createPriceLine({ price: 0, color: '#94a3b8', lineWidth: 1, lineStyle: LWC.LineStyle.Solid, axisLabelVisible: false });
+        c2.timeScale().fitContent();
+        // top-decile edge: growth of 100, gross vs net
+        var g = 100, n = 100, gPts = [], nPts = [];
+        for (var k = 0; k < d.dates.length; k++) {
+          if (d.gross[k] !== null) {
+            g *= 1 + d.gross[k];
+            n *= 1 + d.gross[k] - d.cost[k];
+          }
+          gPts.push({ time: d.dates[k], value: g });
+          nPts.push({ time: d.dates[k], value: n });
+        }
+        var c3 = mk('alc-money');
+        line(c3, '#94a3b8', gPts);
+        line(c3, '#2563eb', nPts);
+        c3.timeScale().fitContent();
+        // decile bars (plain CSS)
+        var box = document.getElementById('alc-dec');
+        var vals = d.dec.map(function (x) { return x === null ? 0 : x; });
+        var lo = Math.min.apply(null, vals.concat([0])), hi = Math.max.apply(null, vals.concat([0]));
+        var span = (hi - lo) || 1;
+        var bestIdx = d.sign > 0 ? 9 : 0;
+        vals.forEach(function (v, idx) {
+          var bar = document.createElement('div');
+          var h = Math.max(3, Math.round(180 * (v - lo) / span));
+          bar.style.cssText = 'flex:1;height:' + h + 'px;border-radius:3px 3px 0 0;background:' +
+            (idx === bestIdx ? '#2563eb' : (v >= 0 ? '#93c5fd' : '#fda4af'));
+          bar.setAttribute('data-tip', 'decile ' + (idx + 1) + ': ' + (100 * v).toFixed(2) + '%/month avg forward return');
+          box.appendChild(bar);
+        });
+      })();
+    </script>
+    {% endif %}
+  </div>
+</div>

@@ -111,3 +111,32 @@ def test_safe_name_slashes(data_dir: Path) -> None:
     raw = pd.DataFrame({"Adj Close": [1.0, 2.0], "Volume": 1}, index=idx)
     assert prices.write_prices("BAD/TICKER", raw) == 2  # writes BAD_TICKER.parquet
     assert prices.load_prices("BAD/TICKER") is not None
+
+
+def _repair_frame(close: list[float], adj: list[float]) -> pd.DataFrame:
+    idx = pd.date_range("2024-01-02", periods=len(close), freq="D")
+    return pd.DataFrame({"close": close, "adj_close": adj}, index=idx)
+
+
+def test_repair_adj_close_splices_out_adjustment_glitch() -> None:
+    # adj_close jumps ×10 overnight while close moves −10% (the TELIA1.HE
+    # shape): the level shift is divided out so the bar's return matches close.
+    df = _repair_frame(close=[10.0, 10.0, 9.0, 9.0], adj=[1.0, 1.0, 9.0, 9.0])
+    out = prices.repair_adj_close(df)
+    assert out.iloc[0] == 1.0 and out.iloc[1] == 1.0
+    assert out.iloc[2] == pytest.approx(0.9)  # follows close's −10%
+    assert out.iloc[3] == pytest.approx(0.9)  # later bars rescaled too
+
+
+def test_repair_adj_close_keeps_real_spikes_and_splits() -> None:
+    # Real spike: close and adj_close jump together — no repair.
+    spike = _repair_frame(close=[1.0, 5.0, 5.0], adj=[1.0, 5.0, 5.0])
+    assert prices.repair_adj_close(spike).tolist() == [1.0, 5.0, 5.0]
+    # Split: close halves, adj_close smooth — no repair (adj is the truth).
+    split = _repair_frame(close=[10.0, 5.0, 5.0], adj=[9.0, 9.0, 9.0])
+    assert prices.repair_adj_close(split).tolist() == [9.0, 9.0, 9.0]
+
+
+def test_repair_adj_close_without_close_column_is_identity() -> None:
+    df = pd.DataFrame({"adj_close": [1.0, 8.0]}, index=pd.date_range("2024-01-02", periods=2))
+    assert prices.repair_adj_close(df).tolist() == [1.0, 8.0]

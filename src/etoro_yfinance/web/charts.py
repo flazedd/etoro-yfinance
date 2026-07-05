@@ -1,14 +1,16 @@
-"""Server-rendered SVG charts for the web UI — no JS charting lib, works offline.
+"""Server-rendered SVG charts for the web UI.
 
 price_volume_svg() draws a split-adjusted price line over a volume panel from a
 ticker's stored OHLCV (data/prices/<ticker>.parquet), bucket-downsampled so even
 decades of daily bars render as a compact, readable inline SVG.
+
+(The backtest equity chart is client-rendered instead — Lightweight Charts,
+vendored in static/ — see _backtest_result.html.)
 """
 
 from __future__ import annotations
 
 import html
-import json
 import math
 from typing import Any
 
@@ -130,65 +132,4 @@ def price_volume_svg(df: Any, log: bool = True) -> str | None:
   <!-- x dates -->
   <text x="{_PAD_L}" y="{_H - 8}" text-anchor="start" class="pv-axis">{e(d0)}</text>
   <text x="{_W - _PAD_R}" y="{_H - 8}" text-anchor="end" class="pv-axis">{e(d1)}</text>
-</svg>"""
-
-
-# Palette for equity-curve lines (strategy first, benchmark muted).
-_LINE_COLORS = ["#2563eb", "#94a3b8", "#059669", "#d97706"]
-
-
-def equity_svg(dates: list[str], series: dict[str, list[float]], log: bool = True) -> str:
-    """Multi-line equity-curve SVG (log y by default) with a legend. Each series
-    is an equity curve (starts at 1.0); `dates` is the shared x (ISO strings)."""
-    vals = [v for s in series.values() for v in s if v is not None and v > 0]
-    if len(vals) < 2:
-        return '<svg viewBox="0 0 880 360" class="pv-chart"></svg>'
-    lo, hi = min(vals), max(vals)
-    if log:
-        lo, hi = math.log10(lo), math.log10(hi)
-    if hi == lo:
-        hi = lo + 1
-    n = max(len(dates), 2)
-    ph = _H - _PAD_T - _PAD_B
-    inner_w = _W - _PAD_L - _PAD_R
-
-    def x(i: int) -> float:
-        return _PAD_L + inner_w * (i / (n - 1))
-
-    def y(v: float) -> float:
-        t = math.log10(v) if log else v
-        return _PAD_T + ph * (1 - (t - lo) / (hi - lo))
-
-    e = html.escape
-    lines, legend = [], []
-    for k, (name, ys) in enumerate(series.items()):
-        color = _LINE_COLORS[k % len(_LINE_COLORS)]
-        pts = " ".join(f"{x(i):.1f},{y(v):.1f}" for i, v in enumerate(ys) if v and v > 0)
-        lines.append(f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.6"/>')
-        ly = _PAD_T + 12 + k * 15
-        legend.append(
-            f'<rect x="{_PAD_L + 6}" y="{ly - 8}" width="10" height="10" fill="{color}"/>'
-            f'<text x="{_PAD_L + 20}" y="{ly + 1}" class="pv-axis">{e(name)} '
-            f"(×{ys[-1]:.2f})</text>"
-        )
-    # y grid labels (top/bottom of the value range)
-    top_v = (10**hi) if log else hi
-    bot_v = (10**lo) if log else lo
-    # Data for the JS hover (base.html): dates + rounded series, single-quoted
-    # attrs so the JSON double-quotes are valid (values have no single quotes).
-    d_dates = json.dumps(dates)
-    d_series = json.dumps({k: [round(v, 4) for v in ys] for k, ys in series.items()})
-    return f"""<svg viewBox="0 0 {_W} {_H}" class="pv-chart eq-chart" role="img"
-     preserveAspectRatio="xMidYMid meet" data-x0="{_PAD_L}" data-x1="{_W - _PAD_R}"
-     data-dates='{d_dates}' data-series='{d_series}'>
-  <line x1="{_PAD_L}" y1="{_PAD_T}" x2="{_W - _PAD_R}" y2="{_PAD_T}" stroke="#e2e8f0"/>
-  <line x1="{_PAD_L}" y1="{_PAD_T + ph:.1f}" x2="{_W - _PAD_R}" y2="{_PAD_T + ph:.1f}" stroke="#e2e8f0"/>
-  <text x="{_PAD_L - 6}" y="{_PAD_T + 4}" text-anchor="end" class="pv-axis">×{top_v:.2f}</text>
-  <text x="{_PAD_L - 6}" y="{_PAD_T + ph:.1f}" text-anchor="end" class="pv-axis">×{bot_v:.2f}</text>
-  {"".join(lines)}
-  {"".join(legend)}
-  <line class="eq-cross" x1="{_PAD_L}" x2="{_PAD_L}" y1="{_PAD_T}" y2="{_PAD_T + ph:.1f}"
-        stroke="#64748b" stroke-dasharray="3 3" style="display:none"/>
-  <text x="{_PAD_L}" y="{_H - 8}" text-anchor="start" class="pv-axis">{e(dates[0])}</text>
-  <text x="{_W - _PAD_R}" y="{_H - 8}" text-anchor="end" class="pv-axis">{e(dates[-1])}</text>
 </svg>"""

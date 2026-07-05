@@ -2,6 +2,7 @@
 {% block title %}Backtest{% endblock %}
 {% block main_class %}mx-auto max-w-none{% endblock %}
 {% block content %}
+<script src="/static/lightweight-charts.standalone.production.js"></script>
 <div class="mb-4">
   <h1 class="text-xl font-semibold">Momentum backtest</h1>
   <p class="text-sm text-slate-500">
@@ -41,6 +42,15 @@
     </select>
   </label>
   <label class="flex flex-col gap-1 text-sm"
+         title="Develop on 2005–2018 only; flip to validate 2019+ once for the held-out test. Custom unlocks the date inputs.">
+    <span class="text-slate-500">window</span>
+    <select name="window" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
+      <option value="develop" selected>develop 2005–2018</option>
+      <option value="validate">validate 2019+</option>
+      <option value="custom">custom dates</option>
+    </select>
+  </label>
+  <label class="flex flex-col gap-1 text-sm"
          title="Defaults to the date the first asset in the chosen universe has 2 years of price + volume history — the rest join the backtest as they reach 2 years">
     <span class="text-slate-500">start</span>
     <input type="date" name="start" value="{{ start_default }}"
@@ -48,6 +58,18 @@
   <label class="flex flex-col gap-1 text-sm"><span class="text-slate-500">end</span>
     <input type="date" name="end" value="{{ end_default }}"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm"></label>
+  <label class="flex flex-col gap-1 text-sm"
+         title="Skip buying picks trading below their own 200-day average at the rebalance — their slice sits in cash for the period">
+    <span class="text-slate-500">trend filter</span>
+    <span class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50 inline-flex items-center gap-1">
+      <input type="checkbox" name="trend_filter" value="1"> 200d
+    </span>
+  </label>
+  <label class="flex flex-col gap-1 text-sm"
+         title="0 = off. Weights picks by inverse volatility and scales the whole book toward this annualized vol (into cash when turbulent, never levered)">
+    <span class="text-slate-500">vol target %</span>
+    <input type="number" name="vol_target" value="0" min="0" max="100" step="1"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-24"></label>
   <label class="mom-only flex flex-col gap-1 text-sm"><span class="text-slate-500">top sectors</span>
     <input type="number" name="top_n_sectors" value="4" min="1" step="1"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-24"></label>
@@ -58,6 +80,10 @@
     <input type="number" name="min_sector_size" value="0" min="0" step="1"
            title="Exclude sectors with fewer than this many names available that month (0 = off)"
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-28"></label>
+  <label class="mom-only flex flex-col gap-1 text-sm"><span class="text-slate-500">min price score</span>
+    <input type="number" name="min_price_score" value="30" min="0" max="100" step="1"
+           title="Only consider names whose price-signal score (0-100) is at least this — they also don't count toward sector rankings (0 = off)"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-28"></label>
   <label class="sortino-only flex flex-col gap-1 text-sm" style="display:none">
     <span class="text-slate-500">top n</span>
     <input type="number" name="top_n" value="30" min="1" step="1"
@@ -65,6 +91,16 @@
            class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-24"></label>
   <button type="submit" class="rules-btn" style="padding:8px 14px">Run backtest</button>
   <span id="bt-spin" class="htmx-indicator text-sm text-slate-500">running… (can take a bit for big universes)</span>
+  <details class="w-full text-xs">
+    <summary class="text-slate-500 cursor-pointer">sectors:
+      <b id="bt-sec-summary">all</b>
+      — strategy and benchmark only consider ticked sectors (click to edit)</summary>
+    <div class="mt-1 mb-1">
+      <a href="#" id="bt-sec-all" class="text-blue-600 hover:underline">all</a> ·
+      <a href="#" id="bt-sec-none" class="text-blue-600 hover:underline">none</a>
+    </div>
+    <div id="bt-sectors" class="flex flex-wrap gap-x-3 gap-y-1"></div>
+  </details>
 </form>
 
 <div class="mom-only mb-4 bg-white rounded-lg border border-slate-200 p-3">
@@ -95,12 +131,68 @@
 </div>
 
 <script>
+  // Sector checkboxes for the selected universe (all ticked by default; the
+  // hidden sectors_filter input tells the backend the boxes were rendered, so
+  // "no sectors submitted" can be told apart from "everything unticked").
+  const SECTORS = {{ sectors_by_view | tojson }};
+  const secBox = document.getElementById('bt-sectors');
+  const viewSel = document.querySelector('select[name=view]');
+  const renderSectors = () => {
+    secBox.textContent = '';
+    for (const s of SECTORS[viewSel.value] || []) {
+      const lab = document.createElement('label');
+      lab.className = 'inline-flex items-center gap-1 cursor-pointer';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.name = 'sectors'; cb.value = s.name; cb.checked = true;
+      lab.appendChild(cb);
+      lab.appendChild(document.createTextNode(' ' + s.name + ' '));
+      const cnt = document.createElement('span');
+      cnt.className = 'text-slate-400'; cnt.textContent = s.count;
+      lab.appendChild(cnt);
+      secBox.appendChild(lab);
+    }
+    const hid = document.createElement('input');
+    hid.type = 'hidden'; hid.name = 'sectors_filter'; hid.value = '1';
+    secBox.appendChild(hid);
+    syncSummary();
+  };
+  const syncSummary = () => {
+    const boxes = secBox.querySelectorAll('input[type=checkbox]');
+    const on = secBox.querySelectorAll('input[type=checkbox]:checked').length;
+    document.getElementById('bt-sec-summary').textContent =
+      on === boxes.length ? `all ${boxes.length}` : `${on}/${boxes.length}`;
+  };
+  const setAll = (checked) => {
+    secBox.querySelectorAll('input[type=checkbox]').forEach((cb) => { cb.checked = checked; });
+    syncSummary();
+  };
+  secBox.addEventListener('change', syncSummary);
+  document.getElementById('bt-sec-all').addEventListener('click', (e) => { e.preventDefault(); setAll(true); });
+  document.getElementById('bt-sec-none').addEventListener('click', (e) => { e.preventDefault(); setAll(false); });
+  renderSectors();
+
   // Each universe option carries its earliest useful start (the first member
   // has 2y of price+volume history by then) — sync the date input on change.
-  document.querySelector('select[name=view]').addEventListener('change', (e) => {
+  viewSel.addEventListener('change', (e) => {
     const start = e.target.selectedOptions[0].dataset.start;
     if (start) document.querySelector('input[name=start]').value = start;
+    renderSectors();
   });
+
+  // Develop/validate window: fixed date ranges (the backend enforces them —
+  // the inputs are synced and locked here just so the user sees what runs).
+  const windowSel = document.querySelector('select[name=window]');
+  const startIn = document.querySelector('input[name=start]');
+  const endIn = document.querySelector('input[name=end]');
+  const syncWindow = () => {
+    const w = windowSel.value;
+    if (w === 'develop') { startIn.value = '2005-01-01'; endIn.value = '2019-01-01'; }
+    if (w === 'validate') { startIn.value = '2019-01-01'; endIn.value = new Date().toISOString().slice(0, 10); }
+    startIn.readOnly = endIn.readOnly = (w !== 'custom');
+    startIn.style.opacity = endIn.style.opacity = (w !== 'custom') ? '0.5' : '';
+  };
+  windowSel.addEventListener('change', syncWindow);
+  syncWindow();
   // Show only the selected strategy's knobs (hidden inputs still submit, and
   // the backend ignores the other strategy's parameters anyway).
   const strat = document.querySelector('select[name=strategy]');

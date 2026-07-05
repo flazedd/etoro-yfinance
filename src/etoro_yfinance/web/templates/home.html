@@ -46,7 +46,7 @@
     tickers. Trading itself lives in the CLI (<code>scripts/etoro_trade.py</code>).</p>
 </div>
 
-<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
   {% call card('/universe', 'emerald', 'eToro ↔ yfinance', 'Every eToro tradable instrument mapped to its yfinance ticker for price/volume analysis.', 'link') %}
     {% set c = home.universe.counts %}
@@ -58,6 +58,22 @@
         <span>{{ age(home.universe.age, 604800) }}</span>
       </div>
     {% else %}<span class="text-sm text-slate-400">not generated yet — run scripts/etoro_universe.py</span>{% endif %}
+  {% endcall %}
+
+  {% call card('/backtest', 'blue', 'Backtest', 'Rebalanced strategy backtests with spread costs, trend/vol overlays, yearly drill-down and the stability checklist.', 'trend') %}
+    {{ stat(home.backtest.strategies, 'strategies', 'text-blue-600') }}
+    <div class="mt-1 flex items-center gap-2 text-xs text-slate-400">
+      <span>{{ home.backtest.universes }} saved universes</span><span class="text-slate-300">·</span>
+      <span>{{ home.backtest.criteria }} stability criteria</span>
+    </div>
+  {% endcall %}
+
+  {% call card('/alphalab', 'violet', 'Alpha Lab', 'Cross-sectional signal research — monthly rank-IC scoreboard, admission rules and the family-balanced combo.', 'bolt') %}
+    {{ stat(home.alphalab.signals, 'signals', 'text-violet-600') }}
+    <div class="mt-1 flex items-center gap-2 text-xs text-slate-400">
+      <span>{{ home.alphalab.families }} families</span><span class="text-slate-300">·</span>
+      <span>develop 2005–2018 · validate 2019+</span>
+    </div>
   {% endcall %}
 
   {% call card('/diagnostics', 'rose', 'Diagnostics', 'System health — disk, RAM, CPU temperature, load, snapshot freshness.', 'heart') %}

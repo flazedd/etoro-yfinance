@@ -25,6 +25,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
+import pyarrow.parquet as pq
 
 from etoro_yfinance.web.data import data_dir
 
@@ -157,14 +158,52 @@ def available_tickers(eur: bool = False) -> list[str]:
     return sorted(p.stem for p in d.glob("*.parquet"))
 
 
-def load_prices(ticker: str, eur: bool = False) -> pd.DataFrame | None:
+def load_prices(
+    ticker: str, eur: bool = False, columns: Iterable[str] | None = None
+) -> pd.DataFrame | None:
     """One ticker's OHLCV DataFrame (date-indexed), or None if not stored. With
     eur=True, returns the derived euro series (prices in EUR, `volume` = EUR
-    turnover)."""
+    turnover). `columns` restricts the read to those fields (parquet is columnar,
+    so unread columns cost nothing); None loads everything."""
     p = prices_dir(eur=eur) / f"{_safe_name(ticker)}.parquet"
     if not p.exists():
         return None
-    return pd.read_parquet(p).set_index("date").sort_index()
+    cols = None
+    if columns is not None:
+        # Requested fields may be absent from older files — read what exists
+        # and let the caller notice the missing column.
+        avail = set(pq.read_schema(p).names)
+        cols = ["date", *(c for c in columns if c in avail)]
+    return pd.read_parquet(p, columns=cols).set_index("date").sort_index()
+
+
+# On a clean bar the adj_close daily factor equals the close daily factor
+# (dividends and splits shift close, never adj_close returns). When they
+# diverge beyond this ratio the adjustment chain is corrupt for that bar.
+_GLITCH_RATIO = 1.8
+
+
+def repair_adj_close(df: pd.DataFrame) -> pd.Series:
+    """`adj_close` with broken-adjustment level shifts spliced out.
+
+    Yahoo's dividend/split factors are occasionally corrupt (e.g. TELIA1.HE
+    prints persistent ×14 / ×2 overnight jumps in adj_close while close moves
+    normally). A bar whose adj_close return diverges from its close return by
+    ≥×1.8 — while close itself stays inside a ±2× day (so split bars, where
+    close is the one that moves, are exempt) — is repaired by rescaling the
+    series from that bar on, making the bar's return match the raw close.
+    Real spikes (where both series jump together) are untouched."""
+    s = df["adj_close"].astype("float64")
+    if "close" not in df.columns:
+        return s
+    fa = s / s.shift(1)
+    fc = (df["close"].astype("float64") / df["close"].shift(1)).fillna(1.0)
+    r = fa / fc
+    bad = ((r > _GLITCH_RATIO) | (r < 1 / _GLITCH_RATIO)) & (fc < 2.0) & (fc > 0.5)
+    if not bad.any():
+        return s
+    corr = (fc[bad] / fa[bad]).reindex(s.index).fillna(1.0).cumprod()
+    return s * corr
 
 
 def load_matrix(

@@ -34,6 +34,13 @@ _MIN_BARS = 20  # min price history before a rebalance to be eligible (mirrors s
 # volume history before the cutoff. Young listings join as they mature.
 MIN_HISTORY_DAYS = 730  # 2 years
 
+# Extra history loaded beyond MIN_HISTORY_DAYS before `start`. The eligibility
+# rule reads each series' first bar, so truncation must leave a bar at or before
+# start - MIN_HISTORY_DAYS for names old enough to qualify at the first cutoff —
+# the slack covers trading gaps/halts around that boundary. Signal lookbacks
+# (≤252 bars + 3-month offset) fit well inside the 2-year window.
+_LOAD_SLACK_DAYS = 90
+
 # Selectable strategies (key -> UI label). Both share the same rebalance
 # cadence, eligibility rules, cost model and benchmark — they differ only in
 # how each period's basket is picked.
@@ -51,6 +58,22 @@ REBALANCE = {
 
 _SORTINO_WINDOW = 21  # trading days ≈ one month of daily returns
 _SORTINO_MIN_RETS = 15  # need most of a month of returns to be ranked
+
+# Acceptance criteria for a "stable" strategy — every backtest result carries a
+# pass/fail checklist against these (shown in the UI), so runs are judged
+# against fixed goals instead of eyeballed.
+STABILITY_CRITERIA = {
+    "min_cagr": 0.20,  # CAGR ≥ 20%
+    "min_sharpe": 1.2,
+    "max_drawdown": -0.20,  # daily-curve max DD no worse than −20%
+    "min_full_year_pct": -5.0,  # no full calendar year below −5%
+    "min_rolling_5y_cagr": 0.10,  # worst 5-year sub-window ≥ 10%/yr
+}
+
+# Overlay windows: trend filter = price vs its own trailing mean at the cutoff;
+# vol sizing = trailing daily-return vol (per name and for the whole book).
+_TREND_WINDOW = 200  # bars ≈ the classic 200-day moving average
+_VOL_WINDOW = 63  # bars ≈ 3 months
 
 
 def sortino_ratio(rets: np.ndarray) -> float:
@@ -108,8 +131,11 @@ def run(
     top_n_sectors: int = 4,
     top_n_per_sector: int = 6,
     min_sector_size: int = 0,
+    min_price_score: float = 0,
     top_n: int = 30,
     weights: dict[str, float] | None = None,
+    trend_filter: bool = False,
+    vol_target: float = 0.0,
     progress: Callable[[float, str], None] | None = None,
 ) -> dict[str, Any]:
     """Run a periodically rebalanced backtest. `rows` = universe instruments
@@ -117,10 +143,18 @@ def run(
 
     `strategy` picks the selector (see STRATEGIES): "momentum" scores + selects
     top sectors × top names (top_n_sectors/top_n_per_sector/min_sector_size/
-    weights); "sortino" takes the `top_n` names by the Sortino ratio of the past
-    month's daily returns. `rebalance` sets the cadence (see REBALANCE) — the
-    basket is re-picked at each period start and held to the next.
-    `progress(frac, label)` is called 0.0→1.0."""
+    min_price_score/weights); "sortino" takes the `top_n` names by the Sortino
+    ratio of the past month's daily returns. `rebalance` sets the cadence (see
+    REBALANCE) — the basket is re-picked at each period start and held to the
+    next. `progress(frac, label)` is called 0.0→1.0.
+
+    Overlays (apply to any strategy, benchmark stays gross equal-weight):
+    `trend_filter` — a pick trading below its own 200-bar average at the cutoff
+    is not bought; its slice sits in cash for the period. `vol_target`
+    (annualized %, 0 = off) — picks are weighted by inverse trailing vol
+    instead of equal, and the whole book is scaled by target/realized vol of
+    the strategy's own trailing daily returns (capped at 1: cash, never
+    leverage)."""
     if strategy not in STRATEGIES:
         return {"error": f"unknown strategy {strategy!r} (choose from {list(STRATEGIES)})"}
     if rebalance not in REBALANCE:
@@ -131,7 +165,13 @@ def run(
         if progress:
             progress(min(1.0, max(0.0, frac)), label)
 
-    # Dedup by yfinance ticker; load EUR adj-close (signals + returns) + raw volume.
+    # Dedup by yfinance ticker; load EUR adj-close (signals + returns) + raw
+    # volume — only those columns, only the window the backtest can actually
+    # read: [start - eligibility history - slack, end]. Bars outside it never
+    # influence a cutoff, and truncating up front keeps the wide price matrix
+    # (and the signal windows) small when backtesting a short range.
+    load_lo = pd.Timestamp(start) - pd.Timedelta(days=MIN_HISTORY_DAYS + _LOAD_SLACK_DAYS)
+    load_hi = pd.Timestamp(end)
     price_index: dict[str, pd.Series] = {}
     volume_index: dict[str, pd.Series] = {}
     sectors: dict[str, str | None] = {}
@@ -143,22 +183,23 @@ def run(
         yf = r.get("yf")
         if not yf or yf in price_index:
             continue
-        eur = prices.load_prices(yf, eur=True)
+        eur = prices.load_prices(yf, eur=True, columns=["adj_close", "close"])
         if eur is None or "adj_close" not in eur.columns:
             continue
-        s = eur["adj_close"].dropna()
+        s = prices.repair_adj_close(eur).dropna()
         s.index = pd.to_datetime(s.index)
+        s = s.loc[(s.index >= load_lo) & (s.index <= load_hi)]
         if len(s) < 20:
             continue
         price_index[yf] = s
         sectors[yf] = r.get("sector")
         if r.get("spread_pct") is not None:
             spreads[yf] = float(r["spread_pct"])
-        nat = prices.load_prices(yf)
+        nat = prices.load_prices(yf, columns=["volume"])
         if nat is not None and "volume" in nat.columns:
             v = nat["volume"].astype("float64")
             v.index = pd.to_datetime(v.index)
-            volume_index[yf] = v
+            volume_index[yf] = v.loc[(v.index >= load_lo) & (v.index <= load_hi)]
 
     cutoffs = list(pd.date_range(start=start, end=end, freq=freq))
     if len(cutoffs) < 2 or not price_index:
@@ -186,33 +227,68 @@ def run(
     all_days = full_days[(full_days >= lo) & (full_days <= hi)]
     lo_f, hi_f = 1 + _RET_FLOOR, 1 + _RET_CAP
 
-    def _seg(names: list[str], c: pd.Timestamp, win: pd.DatetimeIndex, run: float) -> list[float]:
-        """Daily equity of an equal-weight buy-hold basket entered at c, valued on
-        each day in `win`. Per-name growth factor is clipped to [lo_f, hi_f] so a
-        single data-glitch spike can't dominate the equal-weight mean."""
+    def _seg(
+        w: dict[str, float], c: pd.Timestamp, win: pd.DatetimeIndex, run: float
+    ) -> list[float]:
+        """Daily equity of a weighted buy-hold basket entered at c, valued on
+        each day in `win`. Weights may sum to < 1 — the remainder is cash (flat).
+        Per-name growth factor is clipped to [lo_f, hi_f] so a single
+        data-glitch spike can't dominate the basket."""
+        names = [t for t, wt in w.items() if wt > 0]
         if not names or len(win) == 0:
             return [run] * len(win)
+        cash = max(0.0, 1.0 - sum(w[t] for t in names))
         entry = price_m.loc[c, names]
         fac = price_m.loc[win, names].div(entry).clip(lower=lo_f, upper=hi_f)
-        return list(fac.mean(axis=1) * run)
+        wv = np.array([w[t] for t in names], dtype="float64")
+        return list((fac.to_numpy(dtype="float64") @ wv + cash) * run)
 
     # Rebalance costs: half the spread on each side of a turnover (buy at ask,
-    # sell at bid). Unknown spreads get the median known one, so missing data
-    # doesn't silently mean "free trading".
+    # sell at bid), on the weight actually traded. Unknown spreads get the
+    # median known one, so missing data doesn't silently mean "free trading".
     known_spreads = sorted(spreads.values())
     default_spread = known_spreads[len(known_spreads) // 2] if known_spreads else 0.0
 
     def _half_spread(t: str) -> float:
         return spreads.get(t, default_spread) / 2.0 / 100.0
 
-    def _turnover_cost(new: list[str], old: set[str]) -> float:
-        """Fraction of equity paid in spread at one rebalance (entries at the
-        new equal weight, exits at the old equal weight)."""
-        if not new and not old:
-            return 0.0
-        enter = sum(_half_spread(t) for t in new if t not in old) / len(new) if new else 0.0
-        exit_ = sum(_half_spread(t) for t in old if t not in new) / len(old) if old else 0.0
-        return enter + exit_
+    def _turnover_cost(new: dict[str, float], old: dict[str, float]) -> float:
+        """Fraction of equity paid in spread at one rebalance: each name pays
+        the half-spread on its weight increase (buys) plus decrease (sells)."""
+        cost = 0.0
+        for t in new.keys() | old.keys():
+            cost += _half_spread(t) * abs(new.get(t, 0.0) - old.get(t, 0.0))
+        return cost
+
+    def _above_trend(t: str, c: pd.Timestamp) -> bool:
+        """Last close before c at or above its own trailing 200-bar mean."""
+        s = price_index[t]
+        pos = int(s.index.searchsorted(c, side="left"))
+        vals = s.values[max(0, pos - _TREND_WINDOW) : pos].astype("float64")
+        vals = vals[np.isfinite(vals)]
+        return len(vals) > 0 and vals[-1] >= vals.mean()
+
+    def _pick_weights(names: list[str], c: pd.Timestamp) -> dict[str, float]:
+        """Basket weights: equal, or inverse trailing vol when vol-targeting
+        (names with too little/degenerate data get the median vol)."""
+        if not names:
+            return {}
+        if vol_target <= 0:
+            return {t: 1.0 / len(names) for t in names}
+        vols: dict[str, float | None] = {}
+        for t in names:
+            s = price_index[t]
+            pos = int(s.index.searchsorted(c, side="left"))
+            v = s.values[max(0, pos - (_VOL_WINDOW + 1)) : pos].astype("float64")
+            v = v[np.isfinite(v) & (v > 0)]
+            rets = np.diff(v) / v[:-1] if len(v) > 20 else np.array([])
+            sd = float(rets.std()) if len(rets) else 0.0
+            vols[t] = sd * float(np.sqrt(252)) if sd > 0 else None
+        known = [x for x in vols.values() if x]
+        med = float(np.median(known)) if known else 1.0
+        inv = {t: 1.0 / (vols[t] or med) for t in names}
+        tot = sum(inv.values())
+        return {t: x / tot for t, x in inv.items()}
 
     def _bench_eligible(c: pd.Timestamp) -> list[str]:
         """Universe names considered at cutoff c: the same 2-year price+volume
@@ -266,7 +342,7 @@ def run(
     period_s, period_b = [1.0], [1.0]  # values at each cutoff → stats
     run_s = run_b = 1.0
     cost_mult = 1.0  # cumulative (1 - cost) → total drag
-    prev_picks: set[str] = set()
+    prev_w: dict[str, float] = {}  # last period's traded weights
     holdings_per: list[int] = []
     portfolios: list[dict[str, Any]] = []  # one record per held period
     last_holdings: list[dict[str, Any]] = []
@@ -297,6 +373,7 @@ def run(
                 top_n_sectors=top_n_sectors,
                 top_n_per_sector=top_n_per_sector,
                 min_sector_size=min_sector_size,
+                min_price_score=min_price_score,
             )
             picks = list(sel["company_id"]) if not sel.empty else []
             holdings = [
@@ -312,26 +389,46 @@ def run(
         if holdings:
             last_holdings = holdings
 
+        # Overlays: basket weights (equal or inverse-vol), then the trend gate
+        # (a pick below its 200-bar mean keeps weight 0 → its slice is cash),
+        # then book-level vol targeting via the strategy's own trailing returns.
+        w = _pick_weights(picks, c)
+        trend_dropped = 0
+        if trend_filter and picks:
+            kept = {t for t in picks if _above_trend(t, c)}
+            trend_dropped = len(picks) - len(kept)
+            w = {t: (wt if t in kept else 0.0) for t, wt in w.items()}
+        expo = 1.0
+        if vol_target > 0 and len(strat_daily) > _VOL_WINDOW:
+            eq = np.asarray(strat_daily[-(_VOL_WINDOW + 1) :], dtype="float64")
+            rets_own = np.diff(eq) / eq[:-1]
+            realized = float(rets_own.std() * np.sqrt(252))
+            if realized > 1e-9:
+                expo = min(1.0, (vol_target / 100.0) / realized)
+        if expo < 1.0:
+            w = {t: wt * expo for t, wt in w.items()}
+        w = {t: wt for t, wt in w.items() if wt > 0}
+
         # Pay the spread on this month's turnover before valuing the segment,
         # so every daily mark from c onward reflects it. Benchmark stays gross.
-        cost = _turnover_cost(picks, prev_picks)
+        cost = _turnover_cost(w, prev_w)
         run_before = run_s  # period entry value, pre-cost → net period return
         run_s *= 1.0 - cost
         cost_mult *= 1.0 - cost
-        prev_picks = set(picks)
+        prev_w = w
 
         # Value each basket daily over [c, nxt] inclusive; append all but the last
         # (nxt is the next month's opening point) — the last value carries forward.
         win = all_days[(all_days >= c) & (all_days <= nxt)]
-        s_vals = _seg(picks, c, win, run_s)
-        b_vals = _seg(b_names, c, win, run_b)
+        s_vals = _seg(w, c, win, run_s)
+        b_vals = _seg({t: 1.0 / len(b_names) for t in b_names}, c, win, run_b)
         dates += [str(d.date()) for d in win[:-1]]
         strat_daily += s_vals[:-1]
         bench_daily += b_vals[:-1]
         run_s, run_b = s_vals[-1], b_vals[-1]
         period_s.append(run_s)
         period_b.append(run_b)
-        holdings_per.append(len(picks))
+        holdings_per.append(len(w))
 
         # Per-period record: net return (spread cost included) and the Sortino
         # of the basket's own daily returns over the holding period.
@@ -345,6 +442,8 @@ def run(
                 "n": len(picks),
                 "return_pct": round((run_s / run_before - 1.0) * 100, 2) if run_before else 0.0,
                 "sortino": None if np.isinf(p_sortino) else round(p_sortino, 2),
+                "exposure": round(expo, 2),
+                "trend_dropped": trend_dropped,
                 "holdings": holdings,
             }
         )
@@ -354,6 +453,32 @@ def run(
     strat_daily.append(run_s)
     bench_daily.append(run_b)
 
+    # Calendar-year returns (first/last year partial), each carrying its own
+    # rebalance records so the UI can nest portfolios under the year.
+    year_last: dict[str, int] = {}
+    for i, d in enumerate(dates):
+        year_last[d[:4]] = i  # ISO dates in order → last daily index per year
+    yearly: list[dict[str, Any]] = []
+    prev_s = prev_b = 1.0
+    for y in sorted(year_last):
+        i = year_last[y]
+        # A year is "full" if the curve covers it from early Jan to late Dec —
+        # partial years don't count toward the worst-full-year criterion.
+        full = not (
+            (y == dates[0][:4] and dates[0][5:] > "01-07")
+            or (y == dates[-1][:4] and dates[-1][5:] < "12-24")
+        )
+        yearly.append(
+            {
+                "year": y,
+                "full": full,
+                "return_pct": round((strat_daily[i] / prev_s - 1) * 100, 1),
+                "benchmark_return_pct": round((bench_daily[i] / prev_b - 1) * 100, 1),
+                "portfolios": [p for p in portfolios if p["date"][:4] == y],
+            }
+        )
+        prev_s, prev_b = strat_daily[i], bench_daily[i]
+
     years = (cutoffs[-1] - cutoffs[0]).days / 365.25
     stats = _stats(period_s, years, periods_per_year)
     bench_stats = _stats(period_b, years, periods_per_year)
@@ -362,6 +487,55 @@ def run(
         stats["max_drawdown"] = _max_dd(strat_daily)
     if bench_stats:
         bench_stats["max_drawdown"] = _max_dd(bench_daily)
+
+    # Pass/fail checklist against STABILITY_CRITERIA (None = not decidable,
+    # e.g. no full year / fewer than 5 years of data).
+    crit = STABILITY_CRITERIA
+    criteria: list[dict[str, Any]] = []
+    if stats:
+        criteria.append(
+            {
+                "label": f"CAGR ≥ {crit['min_cagr'] * 100:.0f}%",
+                "value": f"{stats['cagr'] * 100:+.1f}%",
+                "ok": stats["cagr"] >= crit["min_cagr"],
+            }
+        )
+        criteria.append(
+            {
+                "label": f"Sharpe ≥ {crit['min_sharpe']:.1f}",
+                "value": f"{stats['sharpe']:.2f}",
+                "ok": stats["sharpe"] >= crit["min_sharpe"],
+            }
+        )
+        criteria.append(
+            {
+                "label": f"Max DD ≥ {crit['max_drawdown'] * 100:.0f}%",
+                "value": f"{stats['max_drawdown'] * 100:.1f}%",
+                "ok": stats["max_drawdown"] >= crit["max_drawdown"],
+            }
+        )
+        full_years = [y for y in yearly if y["full"]]
+        worst_y = min(full_years, key=lambda y: y["return_pct"]) if full_years else None
+        criteria.append(
+            {
+                "label": f"Worst full year ≥ {crit['min_full_year_pct']:.0f}%",
+                "value": f"{worst_y['return_pct']:+.1f}% ({worst_y['year']})" if worst_y else "n/a",
+                "ok": worst_y["return_pct"] >= crit["min_full_year_pct"] if worst_y else None,
+            }
+        )
+        roll = 5 * periods_per_year  # 5-year window in rebalance periods
+        eq = np.array(period_s)
+        worst5 = (
+            float((eq[roll:] / eq[:-roll]).min() ** (1 / 5) - 1) if len(eq) > roll else None
+        )
+        criteria.append(
+            {
+                "label": f"Worst 5y CAGR ≥ {crit['min_rolling_5y_cagr'] * 100:.0f}%",
+                "value": f"{worst5 * 100:+.1f}%/yr" if worst5 is not None else "n/a",
+                "ok": worst5 >= crit["min_rolling_5y_cagr"] if worst5 is not None else None,
+            }
+        )
+
     return {
         "dates": dates,
         "equity": strat_daily,
@@ -373,6 +547,8 @@ def run(
         "universe_size": len(price_index),
         "last_holdings": last_holdings,
         "portfolios": portfolios,
+        "yearly": yearly,
+        "criteria": criteria,
         "cost_drag": round(1.0 - cost_mult, 4),  # equity fraction lost to spreads
         "spread_known": len(spreads),
         "default_spread_pct": round(default_spread, 3),
@@ -392,7 +568,10 @@ def run(
             "top_n_sectors": top_n_sectors,
             "top_n_per_sector": top_n_per_sector,
             "min_sector_size": min_sector_size,
+            "min_price_score": min_price_score,
             "top_n": top_n,
+            "trend_filter": trend_filter,
+            "vol_target": vol_target,
             "start": start,
             "end": end,
         },

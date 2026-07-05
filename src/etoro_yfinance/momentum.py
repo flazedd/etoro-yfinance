@@ -297,9 +297,16 @@ def select_from_scored(
     top_n_sectors: int = 4,
     top_n_per_sector: int = 6,
     min_sector_size: int = 0,
+    min_price_score: float = 0,
 ) -> pd.DataFrame:
     if scored.empty:
         return pd.DataFrame()
+    if min_price_score > 0 and "score_price" in scored.columns:
+        # Names whose price-signal score is below the floor are not considered
+        # at all (they don't count toward sector averages or sizes either).
+        scored = scored[scored["score_price"].fillna(-1.0) >= min_price_score].copy()
+        if scored.empty:
+            return pd.DataFrame()
     if min_sector_size > 0:  # drop thin sectors before ranking
         sizes = scored.groupby("sector")["company_id"].transform("size")
         scored = scored[sizes.fillna(0) >= min_sector_size].copy()

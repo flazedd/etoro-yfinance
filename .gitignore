@@ -207,3 +207,4 @@ data/spread_cache.json
 data/etf_category_cache.json
 data/sector_override_cache.json
 data/universe_*.json
+data/alphalab/

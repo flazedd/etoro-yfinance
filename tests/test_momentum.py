@@ -187,3 +187,22 @@ def test_strategy_signals_weights_sum_to_100() -> None:
     assert math.isclose(sum(c["weight_pct"] for c in cats), 100.0, abs_tol=1.0)
     keys = [s["key"] for c in cats for s in c["signals"]]
     assert sorted(keys) == sorted(momentum.DEFAULT_WEIGHTS)
+
+
+def test_select_min_price_score_floors_names() -> None:
+    scored = _scored(
+        [
+            ("A1", "Alpha", 90.0),
+            ("A2", "Alpha", 80.0),
+            ("B1", "Beta", 60.0),
+            ("B2", "Beta", 50.0),
+        ]
+    )
+    scored["score_price"] = [75.0, 30.0, 70.0, None]  # NaN = never passes the floor
+    sel = momentum.select_from_scored(
+        scored, top_n_sectors=2, top_n_per_sector=2, min_price_score=50
+    )
+    assert list(sel["company_id"]) == ["A1", "B1"]
+    # floor off → column is ignored entirely
+    sel_off = momentum.select_from_scored(scored, top_n_sectors=2, top_n_per_sector=2)
+    assert list(sel_off["company_id"]) == ["A1", "A2", "B1", "B2"]
