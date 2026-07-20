@@ -1,0 +1,6155 @@
+{
+"_schema": 2,
+"rows": {
+"BOL.ST": {
+"chosen": {
+"name": "Boliden AB Registered Shs",
+"ticker": "BOLIF",
+"isin": "SE0017768716",
+"conf": "name+country"
+},
+"isin": "SE0017768716",
+"verified": false
+},
+"VH2.DE": {
+"chosen": {
+"name": "H2Core",
+"ticker": "",
+"isin": "DE000A0H1GY2",
+"conf": "country?"
+},
+"isin": "DE000A0H1GY2",
+"verified": false
+},
+"LITE": {
+"chosen": {
+"name": "Lumentum Holdings Inc",
+"ticker": "LITE",
+"isin": "US55024U1097",
+"conf": "ticker+country"
+},
+"isin": "US55024U1097",
+"verified": true
+},
+"JLL": {
+"chosen": {
+"name": "Jones Lang Lasalle IncShs",
+"ticker": "JLL",
+"isin": "US48020Q1076",
+"conf": "ticker+country"
+},
+"isin": "US48020Q1076",
+"verified": true
+},
+"UBSG.SW": {
+"chosen": {
+"name": "UBS",
+"ticker": "UBS",
+"isin": "CH0244767585",
+"conf": "name+country"
+},
+"isin": "CH0244767585",
+"verified": true
+},
+"AAPL": {
+"chosen": {
+"name": "Apple Inc.",
+"ticker": "AAPL",
+"isin": "US0378331005",
+"conf": "ticker+country"
+},
+"isin": "US0378331005",
+"verified": true
+},
+"LPX": {
+"chosen": {
+"name": "Louisiana-Pacific Corp.",
+"ticker": "LPX",
+"isin": "US5463471053",
+"conf": "ticker+country"
+},
+"isin": "US5463471053",
+"verified": true
+},
+"RDW.L": {
+"chosen": {
+"name": "Redrow PLC Registred Shs",
+"ticker": "RDWWF",
+"isin": "GB00BG11K365",
+"conf": "name+country"
+},
+"isin": "GB00BG11K365",
+"verified": true
+},
+"MNSO": {
+"chosen": {
+"name": "MINISO Group Holding Limited (A) (spons. ADRs)",
+"ticker": "MNSO",
+"isin": "US66981J1025",
+"conf": "ticker+country"
+},
+"isin": "US66981J1025",
+"verified": true
+},
+"FDBC": {
+"chosen": {
+"name": "Fidelity D & D Bancorp Inc",
+"ticker": "FDBC",
+"isin": "US31609R1005",
+"conf": "ticker+country"
+},
+"isin": "US31609R1005",
+"verified": true
+},
+"GCT": {
+"chosen": {
+"name": "GigaCloud Technology Incorporation Registered Shs",
+"ticker": "GCT",
+"isin": "KYG386441037",
+"conf": "ticker"
+},
+"isin": "KYG386441037",
+"verified": true
+},
+"TSEOQ": {
+"chosen": {
+"name": "Trinseo PLC Registered Shs",
+"ticker": "TSEOQ",
+"isin": "IE0000QBK8U7",
+"conf": "ticker"
+},
+"isin": "IE0000QBK8U7",
+"verified": true
+},
+"PLCE": {
+"chosen": {
+"name": "Children's Place Retail Stores Inc.",
+"ticker": "PLCE",
+"isin": "US1689051076",
+"conf": "ticker+country"
+},
+"isin": "US1689051076",
+"verified": true
+},
+"GROY": {
+"chosen": {
+"name": "Gold Royalty Corp Registered Shs",
+"ticker": "GROY",
+"isin": "CA38071H1064",
+"conf": "ticker"
+},
+"isin": "CA38071H1064",
+"verified": true
+},
+"NVT": {
+"chosen": {
+"name": "nVent Electric PLC Registered Shs",
+"ticker": "NVT",
+"isin": "IE00BDVJJQ56",
+"conf": "ticker"
+},
+"isin": "IE00BDVJJQ56",
+"verified": true
+},
+"SREI.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"RELAIS.HE": {
+"chosen": {
+"name": "Relais Group Oyj Registered Shs",
+"ticker": "",
+"isin": "FI4000391487",
+"conf": "name+country"
+},
+"isin": "FI4000391487",
+"verified": true
+},
+"7270.T": {
+"chosen": {
+"name": "Fuji Heavy Industries Ltd.",
+"ticker": "FUJHF",
+"isin": "JP3814800003",
+"conf": "country?"
+},
+"isin": "JP3814800003",
+"verified": true
+},
+"NC5A.DE": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"VMX.PA": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"TIETOS.ST": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"AQUA.OL": {
+"chosen": {
+"name": "Evoqua Water Technologies Corp Registered Shs",
+"ticker": "AQUA",
+"isin": "US30057T1051",
+"conf": "ticker"
+},
+"isin": "US30057T1051",
+"verified": true
+},
+"RAVE": {
+"chosen": {
+"name": "Rave Restaurant Group Inc",
+"ticker": "RAVE",
+"isin": "US7541981095",
+"conf": "ticker+country"
+},
+"isin": "US7541981095",
+"verified": true
+},
+"PPSI": {
+"chosen": {
+"name": "Pioneer Power Solutions Inc",
+"ticker": "PPSI",
+"isin": "US7238363003",
+"conf": "ticker+country"
+},
+"isin": "US7238363003",
+"verified": true
+},
+"GV": {
+"chosen": {
+"name": "Visionary Education Technology Holdings Group Inc Registered Shs",
+"ticker": "GV",
+"isin": "CA92838F2008",
+"conf": "ticker"
+},
+"isin": "CA92838F2008",
+"verified": true
+},
+"MOGU": {
+"chosen": {
+"name": "MOGU Inc (A) (spons. ADRs)",
+"ticker": "MOGU",
+"isin": "US6080123085",
+"conf": "ticker+country"
+},
+"isin": "US6080123085",
+"verified": true
+},
+"FALN": {
+"chosen": {
+"name": "iShares Fallen Angels USD Bond ETF",
+"ticker": "FALN",
+"isin": "US46435G4745",
+"conf": "ticker+country"
+},
+"isin": "US46435G4745",
+"verified": true
+},
+"RAC": {
+"chosen": {
+"name": "Rithm Acquisition Corporation Registered Shs -A-",
+"ticker": "RAC",
+"isin": "KYG757511004",
+"conf": "ticker"
+},
+"isin": "KYG757511004",
+"verified": true
+},
+"FTSL": {
+"chosen": {
+"name": "First Trust Senior Loan Fund",
+"ticker": "FTSL",
+"isin": "US33738D3098",
+"conf": "ticker+country"
+},
+"isin": "US33738D3098",
+"verified": true
+},
+"VGK": {
+"chosen": {
+"name": "Vanguard FTSE Europe ETF",
+"ticker": "VGK",
+"isin": "US9220428745",
+"conf": "ticker+country"
+},
+"isin": "US9220428745",
+"verified": true
+},
+"MSFT": {
+"chosen": {
+"name": "Microsoft Corp.",
+"ticker": "MSFT",
+"isin": "US5949181045",
+"conf": "ticker+country"
+},
+"isin": "US5949181045",
+"verified": true
+},
+"AA": {
+"chosen": {
+"name": "Alcoa Corp",
+"ticker": "AA",
+"isin": "US0138721065",
+"conf": "ticker+country"
+},
+"isin": "US0138721065",
+"verified": true
+},
+"AMZN": {
+"chosen": {
+"name": "Amazon",
+"ticker": "AMZN",
+"isin": "US0231351067",
+"conf": "ticker+country"
+},
+"isin": "US0231351067",
+"verified": true
+},
+"BA": {
+"chosen": {
+"name": "Boeing Co.",
+"ticker": "BA",
+"isin": "US0970231058",
+"conf": "ticker+country"
+},
+"isin": "US0970231058",
+"verified": true
+},
+"META": {
+"chosen": {
+"name": "Meta Platforms (ex Facebook)",
+"ticker": "META",
+"isin": "US30303M1027",
+"conf": "ticker+country"
+},
+"isin": "US30303M1027",
+"verified": true
+},
+"AXP": {
+"chosen": {
+"name": "American Express Co.",
+"ticker": "AXP",
+"isin": "US0258161092",
+"conf": "ticker+country"
+},
+"isin": "US0258161092",
+"verified": true
+},
+"GOOG": {
+"chosen": {
+"name": "Alphabet C (ex Google)",
+"ticker": "GOOG",
+"isin": "US02079K1079",
+"conf": "ticker+country"
+},
+"isin": "US02079K1079",
+"verified": true
+},
+"AABA": {
+"chosen": {
+"name": "Altaba Inc (ex Yahoo)",
+"ticker": "AABA",
+"isin": "US0213461017",
+"conf": "ticker+country"
+},
+"isin": "US0213461017",
+"verified": true
+},
+"ZNGA": {
+"chosen": {
+"name": "Engage Mobility Inc",
+"ticker": "BBUZ",
+"isin": "US29282Q1004",
+"conf": "country?"
+},
+"isin": "US29282Q1004",
+"verified": false
+},
+"BAC": {
+"chosen": {
+"name": "Bank of America Corp.",
+"ticker": "BAC",
+"isin": "US0605051046",
+"conf": "ticker+country"
+},
+"isin": "US0605051046",
+"verified": true
+},
+"DDOLD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"CSCO": {
+"chosen": {
+"name": "Cisco Inc.",
+"ticker": "CSCO",
+"isin": "US17275R1023",
+"conf": "ticker+country"
+},
+"isin": "US17275R1023",
+"verified": true
+},
+"DIS": {
+"chosen": {
+"name": "Walt Disney",
+"ticker": "DIS",
+"isin": "US2546871060",
+"conf": "ticker+country"
+},
+"isin": "US2546871060",
+"verified": true
+},
+"CAT": {
+"chosen": {
+"name": "Caterpillar Inc.",
+"ticker": "CAT",
+"isin": "US1491231015",
+"conf": "ticker+country"
+},
+"isin": "US1491231015",
+"verified": true
+},
+"HD": {
+"chosen": {
+"name": "Home Depot",
+"ticker": "HD",
+"isin": "US4370761029",
+"conf": "ticker+country"
+},
+"isin": "US4370761029",
+"verified": true
+},
+"IBM": {
+"chosen": {
+"name": "IBM Corp. (International Business Machines)",
+"ticker": "IBM",
+"isin": "US4592001014",
+"conf": "ticker+country"
+},
+"isin": "US4592001014",
+"verified": true
+},
+"INTC": {
+"chosen": {
+"name": "Intel Corp.",
+"ticker": "INTC",
+"isin": "US4581401001",
+"conf": "ticker+country"
+},
+"isin": "US4581401001",
+"verified": true
+},
+"HPQ": {
+"chosen": {
+"name": "HP Inc (ex Hewlett-Packard)",
+"ticker": "HPQ",
+"isin": "US40434L1052",
+"conf": "ticker+country"
+},
+"isin": "US40434L1052",
+"verified": true
+},
+"JNJ": {
+"chosen": {
+"name": "Johnson & Johnson",
+"ticker": "JNJ",
+"isin": "US4781601046",
+"conf": "ticker+country"
+},
+"isin": "US4781601046",
+"verified": true
+},
+"GE": {
+"chosen": {
+"name": "GE Aerospace (ex General Electric)",
+"ticker": "GE",
+"isin": "US3696043013",
+"conf": "ticker+country"
+},
+"isin": "US3696043013",
+"verified": true
+},
+"KO": {
+"chosen": {
+"name": "Coca-Cola Co.",
+"ticker": "KO",
+"isin": "US1912161007",
+"conf": "ticker+country"
+},
+"isin": "US1912161007",
+"verified": true
+},
+"MCD": {
+"chosen": {
+"name": "McDonald's Corp.",
+"ticker": "MCD",
+"isin": "US5801351017",
+"conf": "ticker+country"
+},
+"isin": "US5801351017",
+"verified": true
+},
+"MMM": {
+"chosen": {
+"name": "3M Co.",
+"ticker": "MMM",
+"isin": "US88579Y1010",
+"conf": "ticker+country"
+},
+"isin": "US88579Y1010",
+"verified": true
+},
+"MRK": {
+"chosen": {
+"name": "Merck Co.",
+"ticker": "MRK",
+"isin": "US58933Y1055",
+"conf": "ticker+country"
+},
+"isin": "US58933Y1055",
+"verified": true
+},
+"PFE": {
+"chosen": {
+"name": "Pfizer Inc.",
+"ticker": "PFE",
+"isin": "US7170811035",
+"conf": "ticker+country"
+},
+"isin": "US7170811035",
+"verified": true
+},
+"TRV": {
+"chosen": {
+"name": "Travelers Inc (Travelers Companies)",
+"ticker": "TRV",
+"isin": "US89417E1091",
+"conf": "ticker+country"
+},
+"isin": "US89417E1091",
+"verified": true
+},
+"JPM": {
+"chosen": {
+"name": "JPMorgan Chase & Co.",
+"ticker": "JPM",
+"isin": "US46625H1005",
+"conf": "ticker+country"
+},
+"isin": "US46625H1005",
+"verified": true
+},
+"UNH": {
+"chosen": {
+"name": "UnitedHealth Inc.",
+"ticker": "UNH",
+"isin": "US91324P1021",
+"conf": "ticker+country"
+},
+"isin": "US91324P1021",
+"verified": true
+},
+"PG": {
+"chosen": {
+"name": "Procter & Gamble Co.",
+"ticker": "PG",
+"isin": "US7427181091",
+"conf": "ticker+country"
+},
+"isin": "US7427181091",
+"verified": true
+},
+"RTX": {
+"chosen": {
+"name": "Raytheon Technologies Corp",
+"ticker": "RTX",
+"isin": "US75513E1010",
+"conf": "ticker+country"
+},
+"isin": "US75513E1010",
+"verified": true
+},
+"WMT": {
+"chosen": {
+"name": "Walmart",
+"ticker": "WMT",
+"isin": "US9311421039",
+"conf": "ticker+country"
+},
+"isin": "US9311421039",
+"verified": true
+},
+"VZ": {
+"chosen": {
+"name": "Verizon Inc.",
+"ticker": "VZ",
+"isin": "US92343V1044",
+"conf": "ticker+country"
+},
+"isin": "US92343V1044",
+"verified": true
+},
+"XOM": {
+"chosen": {
+"name": "ExxonMobil Corp. (Exxon Mobil)",
+"ticker": "XOM",
+"isin": "US30231G1022",
+"conf": "ticker+country"
+},
+"isin": "US30231G1022",
+"verified": true
+},
+"HMC": {
+"chosen": {
+"name": "Honda Motor Co. Ltd. (Spons. ADRS)",
+"ticker": "HMC",
+"isin": "US4381283088",
+"conf": "ticker+country"
+},
+"isin": "US4381283088",
+"verified": true
+},
+"MANU": {
+"chosen": {
+"name": "Manchester United",
+"ticker": "MANU",
+"isin": "KYG5784H1065",
+"conf": "ticker"
+},
+"isin": "KYG5784H1065",
+"verified": true
+},
+"C": {
+"chosen": {
+"name": "Citigroup Inc.",
+"ticker": "C",
+"isin": "US1729674242",
+"conf": "ticker+country"
+},
+"isin": "US1729674242",
+"verified": true
+},
+"HSBC": {
+"chosen": {
+"name": "HSBC Holdings plc (Spons. ADRs)",
+"ticker": "HSBC",
+"isin": "US4042804066",
+"conf": "ticker+country"
+},
+"isin": "US4042804066",
+"verified": true
+},
+"MA": {
+"chosen": {
+"name": "MasterCard Inc.",
+"ticker": "MA",
+"isin": "US57636Q1040",
+"conf": "ticker+country"
+},
+"isin": "US57636Q1040",
+"verified": true
+},
+"NKE": {
+"chosen": {
+"name": "Nike Inc.",
+"ticker": "NKE",
+"isin": "US6541061031",
+"conf": "ticker+country"
+},
+"isin": "US6541061031",
+"verified": true
+},
+"PEP": {
+"chosen": {
+"name": "PepsiCo Inc.",
+"ticker": "PEP",
+"isin": "US7134481081",
+"conf": "ticker+country"
+},
+"isin": "US7134481081",
+"verified": true
+},
+"SONY": {
+"chosen": {
+"name": "SONY CORPShs American Deposit.Receipt Repr.1 Sh",
+"ticker": "SONY",
+"isin": "US8356993076",
+"conf": "ticker+country"
+},
+"isin": "US8356993076",
+"verified": true
+},
+"TM": {
+"chosen": {
+"name": "Toyota Motor Corp. (spons. ADRs)",
+"ticker": "TM",
+"isin": "US8923313071",
+"conf": "ticker+country"
+},
+"isin": "US8923313071",
+"verified": true
+},
+"V": {
+"chosen": {
+"name": "Visa Inc.",
+"ticker": "V",
+"isin": "US92826C8394",
+"conf": "ticker+country"
+},
+"isin": "US92826C8394",
+"verified": true
+},
+"VOD": {
+"chosen": {
+"name": "Vodafone Group PLC (spons. ADRs)",
+"ticker": "VOD",
+"isin": "US92857W3088",
+"conf": "ticker+country"
+},
+"isin": "US92857W3088",
+"verified": true
+},
+"TWX": {
+"chosen": {
+"name": "Take Two",
+"ticker": "TTWO",
+"isin": "US8740541094",
+"conf": "country?"
+},
+"isin": "US8740541094",
+"verified": false
+},
+"EBAY": {
+"chosen": {
+"name": "eBay Inc.",
+"ticker": "EBAY",
+"isin": "US2786421030",
+"conf": "ticker+country"
+},
+"isin": "US2786421030",
+"verified": true
+},
+"CL": {
+"chosen": {
+"name": "Colgate-Palmolive Co.",
+"ticker": "CL",
+"isin": "US1941621039",
+"conf": "ticker+country"
+},
+"isin": "US1941621039",
+"verified": true
+},
+"DB": {
+"chosen": {
+"name": "Deutsche Bank AG",
+"ticker": "DB",
+"isin": "DE0005140008",
+"conf": "ticker"
+},
+"isin": "DE0005140008",
+"verified": true
+},
+"QIWI": {
+"chosen": {
+"name": "QIWI plc (spons. ADRs)",
+"ticker": "QIWI",
+"isin": "US74735M1080",
+"conf": "ticker+country"
+},
+"isin": "US74735M1080",
+"verified": true
+},
+"CHL": {
+"chosen": {
+"name": "Chocoladefabriken Lindt & Spruengli AG Unsponsored American Depositary Receipts Repr 1-1000 Shs",
+"ticker": "CHLSY",
+"isin": "US1702721085",
+"conf": "country?"
+},
+"isin": "US1702721085",
+"verified": true
+},
+"MTBLY": {
+"chosen": {
+"name": "Renren Inc (A) (spons. ADRs)",
+"ticker": "MTBLY",
+"isin": "US7598923008",
+"conf": "ticker+country"
+},
+"isin": "US7598923008",
+"verified": true
+},
+"OWL": {
+"chosen": {
+"name": "Blue Owl Capital Inc Registered Shs -A-",
+"ticker": "OWL",
+"isin": "US09581B1035",
+"conf": "ticker+country"
+},
+"isin": "US09581B1035",
+"verified": true
+},
+"LBRDA": {
+"chosen": {
+"name": "Liberty Broadband Corp (A)",
+"ticker": "LBRDA",
+"isin": "US5303071071",
+"conf": "ticker+country"
+},
+"isin": "US5303071071",
+"verified": true
+},
+"NBIS": {
+"chosen": {
+"name": "Nebius",
+"ticker": "NBIS",
+"isin": "NL0009805522",
+"conf": "ticker"
+},
+"isin": "NL0009805522",
+"verified": true
+},
+"FWONK": {
+"chosen": {
+"name": "Liberty Media Corp Registered Shs Series -C- Liberty Formula One",
+"ticker": "FWONK",
+"isin": "US5312297550",
+"conf": "ticker+country"
+},
+"isin": "US5312297550",
+"verified": true
+},
+"SGFY": {
+"chosen": {
+"name": "Signify Health",
+"ticker": "SGFY",
+"isin": "US82671G1004",
+"conf": "ticker+country"
+},
+"isin": "US82671G1004",
+"verified": true
+},
+"KRTX": {
+"chosen": {
+"name": "Karuna Therapeutics Inc Registered Shs",
+"ticker": "KRTX",
+"isin": "US48576A1007",
+"conf": "ticker+country"
+},
+"isin": "US48576A1007",
+"verified": false
+},
+"OPCH": {
+"chosen": {
+"name": "Option Care Health Inc Registered Shs",
+"ticker": "OPCH",
+"isin": "US68404L2016",
+"conf": "ticker+country"
+},
+"isin": "US68404L2016",
+"verified": true
+},
+"LNTH": {
+"chosen": {
+"name": "Lantheus Holdings Inc",
+"ticker": "LNTH",
+"isin": "US5165441032",
+"conf": "ticker+country"
+},
+"isin": "US5165441032",
+"verified": true
+},
+"NOVT": {
+"chosen": {
+"name": "GSI Group Inc",
+"ticker": "NOVT",
+"isin": "CA67000B1040",
+"conf": "ticker"
+},
+"isin": "CA67000B1040",
+"verified": true
+},
+"PRVA": {
+"chosen": {
+"name": "Privia Health Group Inc Registered Shs",
+"ticker": "PRVA",
+"isin": "US74276R1023",
+"conf": "ticker+country"
+},
+"isin": "US74276R1023",
+"verified": true
+},
+"ZD": {
+"chosen": {
+"name": "J2 Global Inc",
+"ticker": "ZD",
+"isin": "US48123V1026",
+"conf": "ticker+country"
+},
+"isin": "US48123V1026",
+"verified": true
+},
+"BECN": {
+"chosen": {
+"name": "Beacon Roofing Supply Inc.",
+"ticker": "BECN",
+"isin": "US0736851090",
+"conf": "ticker+country"
+},
+"isin": "US0736851090",
+"verified": true
+},
+"SMCI": {
+"chosen": {
+"name": "Super Micro Computer Inc",
+"ticker": "SMCI",
+"isin": "US86800U3023",
+"conf": "ticker+country"
+},
+"isin": "US86800U3023",
+"verified": true
+},
+"BTU": {
+"chosen": {
+"name": "Peabody Energy Corp",
+"ticker": "BTU",
+"isin": "US7045511000",
+"conf": "ticker+country"
+},
+"isin": "US7045511000",
+"verified": true
+},
+"PTCT": {
+"chosen": {
+"name": "PTC Therapeutics Inc",
+"ticker": "PTCT",
+"isin": "US69366J2006",
+"conf": "ticker+country"
+},
+"isin": "US69366J2006",
+"verified": true
+},
+"ENVX": {
+"chosen": {
+"name": "Enovix Corporation",
+"ticker": "ENVX",
+"isin": "US2935941078",
+"conf": "ticker+country"
+},
+"isin": "US2935941078",
+"verified": true
+},
+"CALM": {
+"chosen": {
+"name": "Cal-Maine Foods Inc.",
+"ticker": "CALM",
+"isin": "US1280302027",
+"conf": "ticker+country"
+},
+"isin": "US1280302027",
+"verified": true
+},
+"AMR": {
+"chosen": {
+"name": "Contura Energy Inc Registered Shs",
+"ticker": "AMR",
+"isin": "US0207641061",
+"conf": "ticker+country"
+},
+"isin": "US0207641061",
+"verified": true
+},
+"NEOG": {
+"chosen": {
+"name": "Neogen Corp.",
+"ticker": "NEOG",
+"isin": "US6404911066",
+"conf": "ticker+country"
+},
+"isin": "US6404911066",
+"verified": true
+},
+"CNR": {
+"chosen": {
+"name": "Core Natural Resources Inc Registered shs",
+"ticker": "CNR",
+"isin": "US2189371006",
+"conf": "ticker+country"
+},
+"isin": "US2189371006",
+"verified": true
+},
+"SIGA": {
+"chosen": {
+"name": "SIGA Technologies Inc.",
+"ticker": "SIGA",
+"isin": "US8269171067",
+"conf": "ticker+country"
+},
+"isin": "US8269171067",
+"verified": true
+},
+"VERU": {
+"chosen": {
+"name": "Veru Inc Registered shs",
+"ticker": "VERU",
+"isin": "US92536C2026",
+"conf": "ticker+country"
+},
+"isin": "US92536C2026",
+"verified": true
+},
+"TX": {
+"chosen": {
+"name": "Ternium SAShs American Deposit Receipt Repr 10 Shs",
+"ticker": "TX",
+"isin": "US8808901081",
+"conf": "ticker+country"
+},
+"isin": "US8808901081",
+"verified": true
+},
+"PBR": {
+"chosen": {
+"name": "Petroleo Brasileiro SA - Petrobras (spons. ADRs)",
+"ticker": "PBR",
+"isin": "US71654V4086",
+"conf": "ticker+country"
+},
+"isin": "US71654V4086",
+"verified": true
+},
+"VALE": {
+"chosen": {
+"name": "Vale SA  (spons. ADRs)",
+"ticker": "VALE",
+"isin": "US91912E1055",
+"conf": "ticker+country"
+},
+"isin": "US91912E1055",
+"verified": true
+},
+"TELFY": {
+"chosen": {
+"name": "Telefonica S.A. (spons. ADRs)",
+"ticker": "TELFY",
+"isin": "US8793822086",
+"conf": "ticker+country"
+},
+"isin": "US8793822086",
+"verified": true
+},
+"SAN": {
+"chosen": {
+"name": "Banco Santander Central Hispano, SAShs Sponsored American Deposit.Receipt Repr.1 Sh",
+"ticker": "SAN",
+"isin": "US05964H1059",
+"conf": "ticker+country"
+},
+"isin": "US05964H1059",
+"verified": true
+},
+"AMX": {
+"chosen": {
+"name": "America Movil SAB de CV (B) (spons. ADRs)",
+"ticker": "AMX",
+"isin": "US02390A1016",
+"conf": "ticker+country"
+},
+"isin": "US02390A1016",
+"verified": true
+},
+"DTV": {
+"chosen": {
+"name": "Dover Corp.",
+"ticker": "DOV",
+"isin": "US2600031080",
+"conf": "country?"
+},
+"isin": "US2600031080",
+"verified": false
+},
+"TV": {
+"chosen": {
+"name": "Grupo Televisa S.A.B (spons. ADRs)",
+"ticker": "TV",
+"isin": "US40049J2069",
+"conf": "ticker+country"
+},
+"isin": "US40049J2069",
+"verified": true
+},
+"CX": {
+"chosen": {
+"name": "Cemex S.A. (Spons. ADRs)",
+"ticker": "CX",
+"isin": "US1512908898",
+"conf": "ticker+country"
+},
+"isin": "US1512908898",
+"verified": true
+},
+"SNDK_OLD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"TSLA": {
+"chosen": {
+"name": "Tesla",
+"ticker": "TSLA",
+"isin": "US88160R1014",
+"conf": "ticker+country"
+},
+"isin": "US88160R1014",
+"verified": true
+},
+"F": {
+"chosen": {
+"name": "Ford Motor Co.",
+"ticker": "F",
+"isin": "US3453708600",
+"conf": "ticker+country"
+},
+"isin": "US3453708600",
+"verified": true
+},
+"TEO": {
+"chosen": {
+"name": "Telecom Argentina S.A. (Spons. ADRs)",
+"ticker": "TEO",
+"isin": "US8792732096",
+"conf": "ticker+country"
+},
+"isin": "US8792732096",
+"verified": true
+},
+"LVS": {
+"chosen": {
+"name": "Las Vegas Sands Corp.",
+"ticker": "LVS",
+"isin": "US5178341070",
+"conf": "ticker+country"
+},
+"isin": "US5178341070",
+"verified": true
+},
+"LNKD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"NOK": {
+"chosen": {
+"name": "Nokia Oyj (Nokia Corp.) (Spons. ADRS)",
+"ticker": "NOK",
+"isin": "US6549022043",
+"conf": "ticker+country"
+},
+"isin": "US6549022043",
+"verified": true
+},
+"POT": {
+"chosen": {
+"name": "Potash America Inc",
+"ticker": "PTAM",
+"isin": "US7375491054",
+"conf": "name+country"
+},
+"isin": "US7375491054",
+"verified": false
+},
+"FSLR": {
+"chosen": {
+"name": "First Solar Inc",
+"ticker": "FSLR",
+"isin": "US3364331070",
+"conf": "ticker+country"
+},
+"isin": "US3364331070",
+"verified": true
+},
+"BRK-B": {
+"chosen": {
+"name": "Berkshire Hathaway Inc. B",
+"ticker": "BRK.B",
+"isin": "US0846707026",
+"conf": "name+country"
+},
+"isin": "US0846707026",
+"verified": true
+},
+"WU": {
+"chosen": {
+"name": "Western Union Company",
+"ticker": "WU",
+"isin": "US9598021098",
+"conf": "ticker+country"
+},
+"isin": "US9598021098",
+"verified": true
+},
+"RL": {
+"chosen": {
+"name": "Ralph Lauren Corp (A)",
+"ticker": "RL",
+"isin": "US7512121010",
+"conf": "ticker+country"
+},
+"isin": "US7512121010",
+"verified": true
+},
+"TRIP": {
+"chosen": {
+"name": "TripAdvisor Inc.",
+"ticker": "TRIP",
+"isin": "US8969452015",
+"conf": "ticker+country"
+},
+"isin": "US8969452015",
+"verified": true
+},
+"HOG": {
+"chosen": {
+"name": "Harley-Davidson Inc.",
+"ticker": "HOG",
+"isin": "US4128221086",
+"conf": "ticker+country"
+},
+"isin": "US4128221086",
+"verified": true
+},
+"EA": {
+"chosen": {
+"name": "Electronic Arts Inc.",
+"ticker": "EA",
+"isin": "US2855121099",
+"conf": "ticker+country"
+},
+"isin": "US2855121099",
+"verified": true
+},
+"URBN": {
+"chosen": {
+"name": "Urban Outfitters Inc.",
+"ticker": "URBN",
+"isin": "US9170471026",
+"conf": "ticker+country"
+},
+"isin": "US9170471026",
+"verified": true
+},
+"ADBE": {
+"chosen": {
+"name": "Adobe Inc.",
+"ticker": "ADBE",
+"isin": "US00724F1012",
+"conf": "ticker+country"
+},
+"isin": "US00724F1012",
+"verified": true
+},
+"NFLX": {
+"chosen": {
+"name": "Netflix Inc.",
+"ticker": "NFLX",
+"isin": "US64110L1061",
+"conf": "ticker+country"
+},
+"isin": "US64110L1061",
+"verified": true
+},
+"MSI": {
+"chosen": {
+"name": "Motorola Solutions Inc.",
+"ticker": "MSI",
+"isin": "US6200763075",
+"conf": "ticker+country"
+},
+"isin": "US6200763075",
+"verified": true
+},
+"ANF": {
+"chosen": {
+"name": "Abercrombie & Fitch Co.",
+"ticker": "ANF",
+"isin": "US0028962076",
+"conf": "ticker+country"
+},
+"isin": "US0028962076",
+"verified": true
+},
+"DEM": {
+"chosen": {
+"name": "WisdomTree Emerging Markets High Dividend Fund",
+"ticker": "DEM",
+"isin": "US97717W3152",
+"conf": "ticker+country"
+},
+"isin": "US97717W3152",
+"verified": true
+},
+"AGNC": {
+"chosen": {
+"name": "AGNC Investment Corp",
+"ticker": "AGNC",
+"isin": "US00123Q1040",
+"conf": "ticker+country"
+},
+"isin": "US00123Q1040",
+"verified": true
+},
+"ORCL": {
+"chosen": {
+"name": "Oracle Corp.",
+"ticker": "ORCL",
+"isin": "US68389X1054",
+"conf": "ticker+country"
+},
+"isin": "US68389X1054",
+"verified": true
+},
+"GAP": {
+"chosen": {
+"name": "Gap Inc.",
+"ticker": "GAP",
+"isin": "US3647601083",
+"conf": "ticker+country"
+},
+"isin": "US3647601083",
+"verified": true
+},
+"WDC": {
+"chosen": {
+"name": "Western Digital Corp.",
+"ticker": "WDC",
+"isin": "US9581021055",
+"conf": "ticker+country"
+},
+"isin": "US9581021055",
+"verified": true
+},
+"ADSK": {
+"chosen": {
+"name": "Autodesk Inc.",
+"ticker": "ADSK",
+"isin": "US0527691069",
+"conf": "ticker+country"
+},
+"isin": "US0527691069",
+"verified": true
+},
+"LMT": {
+"chosen": {
+"name": "Lockheed Martin Corp.",
+"ticker": "LMT",
+"isin": "US5398301094",
+"conf": "ticker+country"
+},
+"isin": "US5398301094",
+"verified": true
+},
+"MU": {
+"chosen": {
+"name": "Micron Technology Inc.",
+"ticker": "MU",
+"isin": "US5951121038",
+"conf": "ticker+country"
+},
+"isin": "US5951121038",
+"verified": true
+},
+"NVDA": {
+"chosen": {
+"name": "NVIDIA Corp.",
+"ticker": "NVDA",
+"isin": "US67066G1040",
+"conf": "ticker+country"
+},
+"isin": "US67066G1040",
+"verified": true
+},
+"NBL": {
+"chosen": {
+"name": "NBT BancorpShs",
+"ticker": "NBTB",
+"isin": "US6287781024",
+"conf": "country?"
+},
+"isin": "US6287781024",
+"verified": false
+},
+"FDX": {
+"chosen": {
+"name": "FedEx Corp.",
+"ticker": "FDX",
+"isin": "US31428X1063",
+"conf": "ticker+country"
+},
+"isin": "US31428X1063",
+"verified": true
+},
+"CAR": {
+"chosen": {
+"name": "Avis Budget Group Inc.",
+"ticker": "CAR",
+"isin": "US0537741052",
+"conf": "ticker+country"
+},
+"isin": "US0537741052",
+"verified": true
+},
+"BIDU": {
+"chosen": {
+"name": "Baidu.com Inc.",
+"ticker": "BIDU",
+"isin": "US0567521085",
+"conf": "ticker+country"
+},
+"isin": "US0567521085",
+"verified": true
+},
+"SBUX": {
+"chosen": {
+"name": "Starbucks Corp.",
+"ticker": "SBUX",
+"isin": "US8552441094",
+"conf": "ticker+country"
+},
+"isin": "US8552441094",
+"verified": true
+},
+"ATVI": {
+"chosen": {
+"name": "Activision Blizzard Inc.",
+"ticker": "ATVI",
+"isin": "US00507V1098",
+"conf": "ticker+country"
+},
+"isin": "US00507V1098",
+"verified": true
+},
+"AMGN": {
+"chosen": {
+"name": "Amgen Inc.",
+"ticker": "AMGN",
+"isin": "US0311621009",
+"conf": "ticker+country"
+},
+"isin": "US0311621009",
+"verified": true
+},
+"PETM": {
+"chosen": {
+"name": "PetMed Express Inc.",
+"ticker": "PETS",
+"isin": "US7163821066",
+"conf": "country?"
+},
+"isin": "US7163821066",
+"verified": false
+},
+"CHKP": {
+"chosen": {
+"name": "Check Point Software Ltd.",
+"ticker": "CHKP",
+"isin": "IL0010824113",
+"conf": "ticker"
+},
+"isin": "IL0010824113",
+"verified": true
+},
+"KDP": {
+"chosen": {
+"name": "Keurig Dr Pepper Inc",
+"ticker": "KDP",
+"isin": "US49271V1008",
+"conf": "ticker+country"
+},
+"isin": "US49271V1008",
+"verified": true
+},
+"MOS": {
+"chosen": {
+"name": "The Mosaic Co",
+"ticker": "MOS",
+"isin": "US61945C1036",
+"conf": "ticker+country"
+},
+"isin": "US61945C1036",
+"verified": true
+},
+"LMND": {
+"chosen": {
+"name": "Lemonade Inc Registered Shs",
+"ticker": "LMND",
+"isin": "US52567D1072",
+"conf": "ticker+country"
+},
+"isin": "US52567D1072",
+"verified": true
+},
+"CR": {
+"chosen": {
+"name": "Crane Holdings Co Registered Shs When Issued Ex-Distribution",
+"ticker": "CR",
+"isin": "US2244081046",
+"conf": "ticker+country"
+},
+"isin": "US2244081046",
+"verified": true
+},
+"STZ": {
+"chosen": {
+"name": "Constellation Brands Inc (A)",
+"ticker": "STZ",
+"isin": "US21036P1084",
+"conf": "ticker+country"
+},
+"isin": "US21036P1084",
+"verified": true
+},
+"FTRE": {
+"chosen": {
+"name": "Fortrea Holdings Inc Registered Shs When Issued",
+"ticker": "FTRE",
+"isin": "US34965K1079",
+"conf": "ticker+country"
+},
+"isin": "US34965K1079",
+"verified": true
+},
+"KING": {
+"chosen": {
+"name": "King Resources Inc",
+"ticker": "KRFG",
+"isin": "US4956601029",
+"conf": "name+country"
+},
+"isin": "US4956601029",
+"verified": false
+},
+"SPOT": {
+"chosen": {
+"name": "Spotify",
+"ticker": "SPOT",
+"isin": "LU1778762911",
+"conf": "ticker"
+},
+"isin": "LU1778762911",
+"verified": true
+},
+"TWTR": {
+"chosen": {
+"name": "TetraLogic Pharmaceuticals Corp",
+"ticker": "TLOG",
+"isin": "US88165U1097",
+"conf": "country?"
+},
+"isin": "US88165U1097",
+"verified": false
+},
+"DBX": {
+"chosen": {
+"name": "Dropbox",
+"ticker": "DBX",
+"isin": "US26210C1045",
+"conf": "ticker+country"
+},
+"isin": "US26210C1045",
+"verified": true
+},
+"ETSY": {
+"chosen": {
+"name": "Etsy Inc",
+"ticker": "ETSY",
+"isin": "US29786A1060",
+"conf": "ticker+country"
+},
+"isin": "US29786A1060",
+"verified": true
+},
+"BABA": {
+"chosen": {
+"name": "Alibaba",
+"ticker": "BABA",
+"isin": "US01609W1027",
+"conf": "ticker+country"
+},
+"isin": "US01609W1027",
+"verified": true
+},
+"WIX": {
+"chosen": {
+"name": "Wix.com Ltd.DL-Zero Exch. Notes 2025(30)",
+"ticker": "A4EGYX",
+"isin": "US92940WAE93",
+"conf": "name+country"
+},
+"isin": "US92940WAE93",
+"verified": true
+},
+"DLPH": {
+"chosen": {
+"name": "Alphatec Holdings Inc",
+"ticker": "ATEC",
+"isin": "US02081G2012",
+"conf": "country?"
+},
+"isin": "US02081G2012",
+"verified": false
+},
+"ACB": {
+"chosen": {
+"name": "Aurora Cannabis",
+"ticker": "ACB",
+"isin": "CA05156X8504",
+"conf": "ticker"
+},
+"isin": "CA05156X8504",
+"verified": true
+},
+"RYAAY": {
+"chosen": {
+"name": "Ryanair Holdings PLC (spons. ADRs)",
+"ticker": "RYAAY",
+"isin": "US7835132033",
+"conf": "ticker+country"
+},
+"isin": "US7835132033",
+"verified": true
+},
+"SMG": {
+"chosen": {
+"name": "The Scotts Miracle-Gro Company",
+"ticker": "SMG",
+"isin": "US8101861065",
+"conf": "ticker+country"
+},
+"isin": "US8101861065",
+"verified": true
+},
+"INSY": {
+"chosen": {
+"name": "Instacart",
+"ticker": "CART",
+"isin": "US5653941030",
+"conf": "country?"
+},
+"isin": "US5653941030",
+"verified": false
+},
+"PHIN": {
+"chosen": {
+"name": "Phinia Inc Registered Shs When Issued",
+"ticker": "PHIN",
+"isin": "US71880K1016",
+"conf": "ticker+country"
+},
+"isin": "US71880K1016",
+"verified": true
+},
+"WP": {
+"chosen": {
+"name": "WPP 2012 PLC (spons. ADRs)",
+"ticker": "WPP",
+"isin": "US92937A1025",
+"conf": "country?"
+},
+"isin": "US92937A1025",
+"verified": true
+},
+"TVRD": {
+"chosen": {
+"name": "Tvardi Therapeutics Inc. Registered shs",
+"ticker": "TVRD",
+"isin": "US1407553072",
+"conf": "ticker+country"
+},
+"isin": "US1407553072",
+"verified": true
+},
+"ZYNE": {
+"chosen": {
+"name": "Zynerba Pharmaceuticals Inc",
+"ticker": "ZYNE",
+"isin": "US98986X1090",
+"conf": "ticker+country"
+},
+"isin": "US98986X1090",
+"verified": true
+},
+"CRBP": {
+"chosen": {
+"name": "Corbus Pharmaceuticals Holdings Inc Registered Shs",
+"ticker": "CRBP",
+"isin": "US21833P3010",
+"conf": "ticker+country"
+},
+"isin": "US21833P3010",
+"verified": true
+},
+"CRON": {
+"chosen": {
+"name": "Cronos",
+"ticker": "CRON",
+"isin": "CA22717L1013",
+"conf": "ticker"
+},
+"isin": "CA22717L1013",
+"verified": true
+},
+"PEGI": {
+"chosen": {
+"name": "Pegasystems Inc.",
+"ticker": "PEGA",
+"isin": "US7055731035",
+"conf": "country?"
+},
+"isin": "US7055731035",
+"verified": false
+},
+"XIFR": {
+"chosen": {
+"name": "NextEra Energy Partners LP Partnership Units",
+"ticker": "XIFR",
+"isin": "US65341B1061",
+"conf": "ticker+country"
+},
+"isin": "US65341B1061",
+"verified": true
+},
+"CVA": {
+"chosen": {
+"name": "Cavitation Technologies Inc",
+"ticker": "CVAT",
+"isin": "US14964W1045",
+"conf": "country?"
+},
+"isin": "US14964W1045",
+"verified": true
+},
+"EVVAQ": {
+"chosen": {
+"name": "Enviva Inc Registered Shs",
+"ticker": "EVVAQ",
+"isin": "US29415B1035",
+"conf": "ticker+country"
+},
+"isin": "US29415B1035",
+"verified": false
+},
+"1810.HK": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BBBY": {
+"chosen": {
+"name": "Overstock.com Inc.",
+"ticker": "BBBY",
+"isin": "US6903701018",
+"conf": "ticker+country"
+},
+"isin": "US6903701018",
+"verified": true
+},
+"APHA": {
+"chosen": {
+"name": "AptarGroup",
+"ticker": "ATR",
+"isin": "US0383361039",
+"conf": "country?"
+},
+"isin": "US0383361039",
+"verified": false
+},
+"ALB": {
+"chosen": {
+"name": "Albemarle Corp.",
+"ticker": "ALB",
+"isin": "US0126531013",
+"conf": "ticker+country"
+},
+"isin": "US0126531013",
+"verified": true
+},
+"TLRY": {
+"chosen": {
+"name": "Tilray Brands (ex Aphria)",
+"ticker": "TLRY",
+"isin": "US88688T2096",
+"conf": "ticker+country"
+},
+"isin": "US88688T2096",
+"verified": true
+},
+"LYFT": {
+"chosen": {
+"name": "Lyft",
+"ticker": "LYFT",
+"isin": "US55087P1049",
+"conf": "ticker+country"
+},
+"isin": "US55087P1049",
+"verified": true
+},
+"PINS": {
+"chosen": {
+"name": "Pinterest",
+"ticker": "PINS",
+"isin": "US72352L1061",
+"conf": "ticker+country"
+},
+"isin": "US72352L1061",
+"verified": true
+},
+"LEVI": {
+"chosen": {
+"name": "Levi Strauss & Co Registered Shs -A-",
+"ticker": "LEVI",
+"isin": "US52736R1023",
+"conf": "ticker+country"
+},
+"isin": "US52736R1023",
+"verified": true
+},
+"BYND": {
+"chosen": {
+"name": "Beyond Meat",
+"ticker": "BYND",
+"isin": "US08862E1091",
+"conf": "ticker+country"
+},
+"isin": "US08862E1091",
+"verified": true
+},
+"CXM": {
+"chosen": {
+"name": "Sprinklr Inc Registered Shs -A-",
+"ticker": "CXM",
+"isin": "US85208T1079",
+"conf": "ticker+country"
+},
+"isin": "US85208T1079",
+"verified": true
+},
+"SDHC": {
+"chosen": {
+"name": "Smith Douglas Homes Corp Registered Shs-A-",
+"ticker": "SDHC",
+"isin": "US83207R1077",
+"conf": "ticker+country"
+},
+"isin": "US83207R1077",
+"verified": true
+},
+"BIRK": {
+"chosen": {
+"name": "Birkenstock",
+"ticker": "BIRK",
+"isin": "JE00BS44BN30",
+"conf": "ticker"
+},
+"isin": "JE00BS44BN30",
+"verified": true
+},
+"LAR": {
+"chosen": {
+"name": "Lithium Argentina AG",
+"ticker": "LAR",
+"isin": "CH1403212751",
+"conf": "ticker"
+},
+"isin": "CH1403212751",
+"verified": true
+},
+"NATL": {
+"chosen": {
+"name": "NCR ATMCo LLC Registered Shs When Issued",
+"ticker": "NATL",
+"isin": "US63001N1063",
+"conf": "ticker+country"
+},
+"isin": "US63001N1063",
+"verified": true
+},
+"CAVA": {
+"chosen": {
+"name": "CAVA Group Inc Registered Shs",
+"ticker": "CAVA",
+"isin": "US1489291021",
+"conf": "ticker+country"
+},
+"isin": "US1489291021",
+"verified": true
+},
+"UBER": {
+"chosen": {
+"name": "Uber",
+"ticker": "UBER",
+"isin": "US90353T1007",
+"conf": "ticker+country"
+},
+"isin": "US90353T1007",
+"verified": true
+},
+"AHR": {
+"chosen": {
+"name": "American Healthcare REIT Inc Registered Shs",
+"ticker": "AHR",
+"isin": "US3981823038",
+"conf": "ticker+country"
+},
+"isin": "US3981823038",
+"verified": true
+},
+"SIE.DE": {
+"chosen": {
+"name": "Siemens AG",
+"ticker": "SMAWF",
+"isin": "DE0007236101",
+"conf": "name+country"
+},
+"isin": "DE0007236101",
+"verified": true
+},
+"BAS.DE": {
+"chosen": {
+"name": "BASF",
+"ticker": "BFFAF",
+"isin": "DE000BASF111",
+"conf": "name+country"
+},
+"isin": "DE000BASF111",
+"verified": true
+},
+"BAYN.DE": {
+"chosen": {
+"name": "Bayer",
+"ticker": "BAYZF",
+"isin": "DE000BAY0017",
+"conf": "name+country"
+},
+"isin": "DE000BAY0017",
+"verified": true
+},
+"SAP.DE": {
+"chosen": {
+"name": "SAP SE",
+"ticker": "SAPGF",
+"isin": "DE0007164600",
+"conf": "name+country"
+},
+"isin": "DE0007164600",
+"verified": true
+},
+"ALV.DE": {
+"chosen": {
+"name": "Autoliv Inc.",
+"ticker": "ALV",
+"isin": "US0528001094",
+"conf": "ticker"
+},
+"isin": "US0528001094",
+"verified": true
+},
+"MBG.DE": {
+"chosen": {
+"name": "Mercedes-Benz Group (ex Daimler)",
+"ticker": "MBGAF",
+"isin": "DE0007100000",
+"conf": "name+country"
+},
+"isin": "DE0007100000",
+"verified": true
+},
+"EOAN.DE": {
+"chosen": {
+"name": "Landesbank Baden-W\u00fcrttembergBonSchuld EOAN 23(29)",
+"ticker": "LB386K",
+"isin": "DE000LB386K7",
+"conf": "country?"
+},
+"isin": "DE000LB386K7",
+"verified": false
+},
+"AS": {
+"chosen": {
+"name": "Amer Sports Incorporation Registered Shs",
+"ticker": "AS",
+"isin": "KYG0260P1028",
+"conf": "ticker"
+},
+"isin": "KYG0260P1028",
+"verified": true
+},
+"VOW3.DE": {
+"chosen": {
+"name": "BONI Schuldv. 26(31) VOW3",
+"ticker": "DP9A5U",
+"isin": "DE000DP9A5U4",
+"conf": "country?"
+},
+"isin": "DE000DP9A5U4",
+"verified": false
+},
+"LNA.DE": {
+"chosen": {
+"name": "Landesbank Baden-W\u00fcrttembergBonSchuld LHA 25(29)",
+"ticker": "LB4W9Z",
+"isin": "DE000LB4W9Z7",
+"conf": "country?"
+},
+"isin": "DE000LB4W9Z7",
+"verified": false
+},
+"BMW.DE": {
+"chosen": {
+"name": "BMW Vz.",
+"ticker": "BYMOF",
+"isin": "DE0005190037",
+"conf": "country?"
+},
+"isin": "DE0005190037",
+"verified": true
+},
+"MUV2.DE": {
+"chosen": {
+"name": "DekaBank Dt.GirozentraleBonit\u00e4tsanleihe 16(26) MUV2",
+"ticker": "DK0G24",
+"isin": "DE000DK0G241",
+"conf": "country?"
+},
+"isin": "DE000DK0G241",
+"verified": false
+},
+"DTE.DE": {
+"chosen": {
+"name": "Deutsche Telekom AG",
+"ticker": "DTEGF",
+"isin": "DE0005557508",
+"conf": "name+country"
+},
+"isin": "DE0005557508",
+"verified": true
+},
+"RWE.DE": {
+"chosen": {
+"name": "RWE AG St.",
+"ticker": "RWNFF",
+"isin": "DE0007037129",
+"conf": "name+country"
+},
+"isin": "DE0007037129",
+"verified": true
+},
+"FME.DE": {
+"chosen": {
+"name": "Fresenius Medical Care (FMC) St.",
+"ticker": "FMCQF",
+"isin": "DE0005785802",
+"conf": "name+country"
+},
+"isin": "DE0005785802",
+"verified": true
+},
+"ADS.DE": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"DHL.DE": {
+"chosen": {
+"name": "DHL Group (ex Deutsche Post)",
+"ticker": "DPSTF",
+"isin": "DE0005552004",
+"conf": "country?"
+},
+"isin": "DE0005552004",
+"verified": true
+},
+"FRE.DE": {
+"chosen": {
+"name": "CLN FRE 25(33)",
+"ticker": "LB4W9W",
+"isin": "DE000LB4W9W4",
+"conf": "country?"
+},
+"isin": "DE000LB4W9W4",
+"verified": false
+},
+"DB1.DE": {
+"chosen": {
+"name": "Deutsche B\u00f6rse AG",
+"ticker": "DBOEF",
+"isin": "DE0005810055",
+"conf": "name+country"
+},
+"isin": "DE0005810055",
+"verified": true
+},
+"HEN3.DE": {
+"chosen": {
+"name": "Henkel KGaA St.",
+"ticker": "HELKF",
+"isin": "DE0006048408",
+"conf": "name+country"
+},
+"isin": "DE0006048408",
+"verified": true
+},
+"TKA.DE": {
+"chosen": {
+"name": "thyssenkrupp AG",
+"ticker": "TYEKF",
+"isin": "DE0007500001",
+"conf": "name+country"
+},
+"isin": "DE0007500001",
+"verified": true
+},
+"IFX.DE": {
+"chosen": {
+"name": "Infineon AG",
+"ticker": "IFNNF",
+"isin": "DE0006231004",
+"conf": "name+country"
+},
+"isin": "DE0006231004",
+"verified": true
+},
+"CBK.DE": {
+"chosen": {
+"name": "Commerzbank",
+"ticker": "CRZBF",
+"isin": "DE000CBK1001",
+"conf": "name+country"
+},
+"isin": "DE000CBK1001",
+"verified": true
+},
+"BEI.DE": {
+"chosen": {
+"name": "Beiersdorf AG",
+"ticker": "BDRFF",
+"isin": "DE0005200000",
+"conf": "name+country"
+},
+"isin": "DE0005200000",
+"verified": true
+},
+"SDF.DE": {
+"chosen": {
+"name": "K+S AG",
+"ticker": "KPLUF",
+"isin": "DE000KSAG888",
+"conf": "name+country"
+},
+"isin": "DE000KSAG888",
+"verified": true
+},
+"LHA.DE": {
+"chosen": {
+"name": "Lufthansa AG",
+"ticker": "DLAKF",
+"isin": "DE0008232125",
+"conf": "country?"
+},
+"isin": "DE0008232125",
+"verified": true
+},
+"CON.DE": {
+"chosen": {
+"name": "Concentra Group Holdings Parent Inc Registered Shs",
+"ticker": "CON",
+"isin": "US20603L1026",
+"conf": "ticker"
+},
+"isin": "US20603L1026",
+"verified": true
+},
+"HEI.DE": {
+"chosen": {
+"name": "Heidelberg Materials",
+"ticker": "HLBZF",
+"isin": "DE0006047004",
+"conf": "name+country"
+},
+"isin": "DE0006047004",
+"verified": true
+},
+"LXSD.DE": {
+"chosen": {
+"name": "BonSchuld LXS 23(29)",
+"ticker": "LB384P",
+"isin": "DE000LB384P1",
+"conf": "country?"
+},
+"isin": "DE000LB384P1",
+"verified": false
+},
+"BOSSD.DE": {
+"chosen": {
+"name": "HUGO BOSS AG",
+"ticker": "HUGPF",
+"isin": "DE000A1PHFF7",
+"conf": "name+country"
+},
+"isin": "DE000A1PHFF7",
+"verified": true
+},
+"AC.PA": {
+"chosen": {
+"name": "ACCOR S.A.EO-Bonds 2024(24/31)",
+"ticker": "A3LVR8",
+"isin": "FR001400OJO2",
+"conf": "name+country"
+},
+"isin": "FR001400OJO2",
+"verified": true
+},
+"ACA.PA": {
+"chosen": {
+"name": "Arcosa Inc Registered Shs When Issued",
+"ticker": "ACA",
+"isin": "US0396531008",
+"conf": "ticker"
+},
+"isin": "US0396531008",
+"verified": true
+},
+"AI.PA": {
+"chosen": {
+"name": "C3.ai Inc",
+"ticker": "AI",
+"isin": "US12468P1049",
+"conf": "ticker"
+},
+"isin": "US12468P1049",
+"verified": true
+},
+"ALO.PA": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"AIR.PA": {
+"chosen": {
+"name": "AAR Corp.",
+"ticker": "AIR",
+"isin": "US0003611052",
+"conf": "ticker"
+},
+"isin": "US0003611052",
+"verified": true
+},
+"ALU.PA": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BNP.PA": {
+"chosen": {
+"name": "BNP Paribas S.A.",
+"ticker": "BNPQF",
+"isin": "FR0000131104",
+"conf": "name+country"
+},
+"isin": "FR0000131104",
+"verified": true
+},
+"BN.PA": {
+"chosen": {
+"name": "Banta Corp.",
+"ticker": "BN",
+"isin": "US0668211099",
+"conf": "ticker"
+},
+"isin": "US0668211099",
+"verified": false
+},
+"CA.PA": {
+"chosen": {
+"name": "Xtrackers California Municipal Bond ETF",
+"ticker": "CA",
+"isin": "US23306X8526",
+"conf": "ticker"
+},
+"isin": "US23306X8526",
+"verified": false
+},
+"DG.PA": {
+"chosen": {
+"name": "Dollar General Corporation",
+"ticker": "DG",
+"isin": "US2566771059",
+"conf": "ticker"
+},
+"isin": "US2566771059",
+"verified": true
+},
+"CAP.PA": {
+"chosen": {
+"name": "Cap Gemini S.A.",
+"ticker": "CAPMF",
+"isin": "FR0000125338",
+"conf": "country?"
+},
+"isin": "FR0000125338",
+"verified": true
+},
+"CS.PA": {
+"chosen": {
+"name": "CS Communication et SystemesACT.",
+"ticker": "",
+"isin": "FR0007317813",
+"conf": "country?"
+},
+"isin": "FR0007317813",
+"verified": false
+},
+"EL.PA": {
+"chosen": {
+"name": "Est\u00e9e Lauder Companies Inc. (ELC) (Estee Lauder)",
+"ticker": "EL",
+"isin": "US5184391044",
+"conf": "ticker"
+},
+"isin": "US5184391044",
+"verified": true
+},
+"EN.PA": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"TTE.PA": {
+"chosen": {
+"name": "TotalEnergies",
+"ticker": "TTE",
+"isin": "FR0000120271",
+"conf": "ticker+country"
+},
+"isin": "FR0000120271",
+"verified": true
+},
+"FR.PA": {
+"chosen": {
+"name": "First Industrial Realty Trust Inc:",
+"ticker": "FR",
+"isin": "US32054K1034",
+"conf": "ticker"
+},
+"isin": "US32054K1034",
+"verified": true
+},
+"GLE.PA": {
+"chosen": {
+"name": "Global Engine Group Holding Limited Registered Shs",
+"ticker": "GLE",
+"isin": "VGG397111094",
+"conf": "ticker"
+},
+"isin": "VGG397111094",
+"verified": true
+},
+"ENGI.PA": {
+"chosen": {
+"name": "Engie SA Act.Nom.Prime Fidelite",
+"ticker": "",
+"isin": "FR0013215407",
+"conf": "name+country"
+},
+"isin": "FR0013215407",
+"verified": false
+},
+"KER.PA": {
+"chosen": {
+"name": "Kering",
+"ticker": "PPRUF",
+"isin": "FR0000121485",
+"conf": "name+country"
+},
+"isin": "FR0000121485",
+"verified": true
+},
+"MC.PA": {
+"chosen": {
+"name": "Moelis & Company (A)",
+"ticker": "MC",
+"isin": "US60786M1053",
+"conf": "ticker"
+},
+"isin": "US60786M1053",
+"verified": true
+},
+"LR.PA": {
+"chosen": {
+"name": "L'Or\u00e9al S.A. (L'Oreal, L Oreal)",
+"ticker": "LRLCF",
+"isin": "FR0000120321",
+"conf": "country?"
+},
+"isin": "FR0000120321",
+"verified": true
+},
+"ML.PA": {
+"chosen": {
+"name": "MoneyLion Inc Registered Shs -A-",
+"ticker": "ML",
+"isin": "US60938K3041",
+"conf": "ticker"
+},
+"isin": "US60938K3041",
+"verified": false
+},
+"LG.PA": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MTS.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"OR.PA": {
+"chosen": {
+"name": "OR Royalties Incorporation Registered Shs",
+"ticker": "OR",
+"isin": "CA68390D1069",
+"conf": "ticker"
+},
+"isin": "CA68390D1069",
+"verified": true
+},
+"ORA.PA": {
+"chosen": {
+"name": "Orange S.A. (ex France T\u00e9l\u00e9com)",
+"ticker": "FNCTF",
+"isin": "FR0000133308",
+"conf": "name+country"
+},
+"isin": "FR0000133308",
+"verified": true
+},
+"RNO.PA": {
+"chosen": {
+"name": "Enogia SAS",
+"ticker": "",
+"isin": "FR0014004974",
+"conf": "country?"
+},
+"isin": "FR0014004974",
+"verified": false
+},
+"RI.PA": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"SGO.PA": {
+"chosen": {
+"name": "Saint-Gobain S.A. (Compagnie de Saint-Gobain)",
+"ticker": "CODGF",
+"isin": "FR0000125007",
+"conf": "country?"
+},
+"isin": "FR0000125007",
+"verified": true
+},
+"PUB.PA": {
+"chosen": {
+"name": "Publicis S.A.",
+"ticker": "PGPEF",
+"isin": "FR0000130577",
+"conf": "name+country"
+},
+"isin": "FR0000130577",
+"verified": true
+},
+"SAF.PA": {
+"chosen": {
+"name": "SAFRAN S.A.",
+"ticker": "SAFRF",
+"isin": "FR0000073272",
+"conf": "name+country"
+},
+"isin": "FR0000073272",
+"verified": true
+},
+"SOLB.BR": {
+"chosen": {
+"name": "Solvay S.A.",
+"ticker": "SVYSF",
+"isin": "BE0003470755",
+"conf": "name+country"
+},
+"isin": "BE0003470755",
+"verified": true
+},
+"SU.PA": {
+"chosen": {
+"name": "Suncor Energy Inc.",
+"ticker": "SU",
+"isin": "CA8672241079",
+"conf": "ticker"
+},
+"isin": "CA8672241079",
+"verified": true
+},
+"TEC.PA": {
+"chosen": {
+"name": "TechnipFMC PLC",
+"ticker": "A1ZF8M",
+"isin": "FR0011273432",
+"conf": "name+country"
+},
+"isin": "FR0011273432",
+"verified": false
+},
+"UG.PA": {
+"chosen": {
+"name": "United Guardian Inc",
+"ticker": "UG",
+"isin": "US9105711082",
+"conf": "ticker"
+},
+"isin": "US9105711082",
+"verified": true
+},
+"VIE.PA": {
+"chosen": {
+"name": "Veolia Environnement S.A.",
+"ticker": "VEOEF",
+"isin": "FR0000124141",
+"conf": "name+country"
+},
+"isin": "FR0000124141",
+"verified": true
+},
+"UL.PA": {
+"chosen": {
+"name": "Unilever PLC (spons. ADRs)",
+"ticker": "UL",
+"isin": "US9047678035",
+"conf": "ticker"
+},
+"isin": "US9047678035",
+"verified": true
+},
+"SAN.PA": {
+"chosen": {
+"name": "Banco Santander Central Hispano, SAShs Sponsored American Deposit.Receipt Repr.1 Sh",
+"ticker": "SAN",
+"isin": "US05964H1059",
+"conf": "ticker"
+},
+"isin": "US05964H1059",
+"verified": true
+},
+"A2A.MI": {
+"chosen": {
+"name": "A2A S.p.A.",
+"ticker": "AEMMF",
+"isin": "IT0001233417",
+"conf": "name+country"
+},
+"isin": "IT0001233417",
+"verified": true
+},
+"AGL.MI": {
+"chosen": {
+"name": "agilon health inc Registered Shs",
+"ticker": "AGL",
+"isin": "US00857U2069",
+"conf": "ticker"
+},
+"isin": "US00857U2069",
+"verified": true
+},
+"ATL.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BMPS-OLD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"VIV.PA": {
+"chosen": {
+"name": "Vivendi S.A.",
+"ticker": "VVVNF",
+"isin": "FR0000127771",
+"conf": "name+country"
+},
+"isin": "FR0000127771",
+"verified": true
+},
+"CNHI.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BZU.MI": {
+"chosen": {
+"name": "Buzzi Unicem S.p.A.",
+"ticker": "BZZUF",
+"isin": "IT0001347308",
+"conf": "name+country"
+},
+"isin": "IT0001347308",
+"verified": true
+},
+"BPE.MI": {
+"chosen": {
+"name": "BPER Banca S.p.A.",
+"ticker": "A3KX58",
+"isin": "IT0005461626",
+"conf": "name+country"
+},
+"isin": "IT0005461626",
+"verified": true
+},
+"BP.MI": {
+"chosen": {
+"name": "BP plc (Spons. ADRS)",
+"ticker": "BP",
+"isin": "US0556221044",
+"conf": "ticker"
+},
+"isin": "US0556221044",
+"verified": true
+},
+"AZM.MI": {
+"chosen": {
+"name": "Azimut Holding S.p.A.",
+"ticker": "AZIHF",
+"isin": "IT0003261697",
+"conf": "name+country"
+},
+"isin": "IT0003261697",
+"verified": true
+},
+"CPR.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"EGPW.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ENEL.MI": {
+"chosen": {
+"name": "Enel S.p.A.",
+"ticker": "ESOCF",
+"isin": "IT0003128367",
+"conf": "name+country"
+},
+"isin": "IT0003128367",
+"verified": true
+},
+"ENI.MI": {
+"chosen": {
+"name": "Eni S.p.A.",
+"ticker": "EIPAF",
+"isin": "IT0003132476",
+"conf": "name+country"
+},
+"isin": "IT0003132476",
+"verified": true
+},
+"STLAM.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"EXO.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MB.MI": {
+"chosen": {
+"name": "Masterbeef Group Registered Shs",
+"ticker": "MB",
+"isin": "KYG6001H1011",
+"conf": "ticker"
+},
+"isin": "KYG6001H1011",
+"verified": true
+},
+"MONC.MI": {
+"chosen": {
+"name": "Moncler S.p.A.",
+"ticker": "MONRF",
+"isin": "IT0004965148",
+"conf": "name+country"
+},
+"isin": "IT0004965148",
+"verified": true
+},
+"ISP.MI": {
+"chosen": {
+"name": "Intesa Sanpaolo S.p.A.",
+"ticker": "IITSF",
+"isin": "IT0000072618",
+"conf": "name+country"
+},
+"isin": "IT0000072618",
+"verified": true
+},
+"LUX.MI": {
+"chosen": {
+"name": "Tema Luxury ETF",
+"ticker": "LUX",
+"isin": "US87975E3053",
+"conf": "ticker"
+},
+"isin": "US87975E3053",
+"verified": true
+},
+"MFEB.MI": {
+"chosen": {
+"name": "Pacer Swan SOS Moderate (February) ETF",
+"ticker": "MFEB",
+"isin": "US69374H1133",
+"conf": "ticker"
+},
+"isin": "US69374H1133",
+"verified": true
+},
+"PMI.MI": {
+"chosen": {
+"name": "Picard Medical Incorporation Registered Shs",
+"ticker": "PMI",
+"isin": "US71953R1086",
+"conf": "ticker"
+},
+"isin": "US71953R1086",
+"verified": true
+},
+"PRY.MI": {
+"chosen": {
+"name": "Prysmian S.p.A.Az.",
+"ticker": "PRYMF",
+"isin": "IT0004176001",
+"conf": "name+country"
+},
+"isin": "IT0004176001",
+"verified": true
+},
+"SFER.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"SPM_OLD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"STMMI.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"SRG.MI": {
+"chosen": {
+"name": "Seritage Growth Properties (A) When Issued",
+"ticker": "SRG",
+"isin": "US81752R1005",
+"conf": "ticker"
+},
+"isin": "US81752R1005",
+"verified": true
+},
+"LDO.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"G.MI": {
+"chosen": {
+"name": "Genpact LtdShs",
+"ticker": "G",
+"isin": "BMG3922B1072",
+"conf": "ticker"
+},
+"isin": "BMG3922B1072",
+"verified": true
+},
+"STS.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MED.MI": {
+"chosen": {
+"name": "Medifast Inc.",
+"ticker": "MED",
+"isin": "US58470H1014",
+"conf": "ticker"
+},
+"isin": "US58470H1014",
+"verified": true
+},
+"TEN.MI": {
+"chosen": {
+"name": "Tenneco Automotive Inc.",
+"ticker": "TEN",
+"isin": "US8803491054",
+"conf": "ticker"
+},
+"isin": "US8803491054",
+"verified": true
+},
+"TOD.MI": {
+"chosen": {
+"name": "Tod's S.p.A.",
+"ticker": "TODGF",
+"isin": "IT0003007728",
+"conf": "name+country"
+},
+"isin": "IT0003007728",
+"verified": true
+},
+"UBI.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"WDF.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"US.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"YNAP.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"TRN.MI": {
+"chosen": {
+"name": "Trinity Industries Inc.",
+"ticker": "TRN",
+"isin": "US8965221091",
+"conf": "ticker"
+},
+"isin": "US8965221091",
+"verified": true
+},
+"ABE.MC": {
+"chosen": {
+"name": "Abengoa B",
+"ticker": "AGOAF",
+"isin": "ES0105200002",
+"conf": "country?"
+},
+"isin": "ES0105200002",
+"verified": false
+},
+"UCG.MI": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ACS.MC": {
+"chosen": {
+"name": "ACS S.A.",
+"ticker": "ACSAF",
+"isin": "ES0167050915",
+"conf": "name+country"
+},
+"isin": "ES0167050915",
+"verified": true
+},
+"ABG-P.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"TIT.MI": {
+"chosen": {
+"name": "TitanMet S.p.A. Az nominativa",
+"ticker": "",
+"isin": "IT0005481855",
+"conf": "country?"
+},
+"isin": "IT0005481855",
+"verified": false
+},
+"ANA.MC": {
+"chosen": {
+"name": "Acciona S.A.",
+"ticker": "ACXIF",
+"isin": "ES0125220311",
+"conf": "name+country"
+},
+"isin": "ES0125220311",
+"verified": true
+},
+"BKIA.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BBVA.MC": {
+"chosen": {
+"name": "BBVA SA (Banco Bilbao Vizcaya Argentaria)",
+"ticker": "BBVXF",
+"isin": "ES0113211835",
+"conf": "name+country"
+},
+"isin": "ES0113211835",
+"verified": true
+},
+"BME.MC": {
+"chosen": {
+"name": "BlackRock Health Sciences Trust",
+"ticker": "BME",
+"isin": "US09250W1071",
+"conf": "ticker"
+},
+"isin": "US09250W1071",
+"verified": true
+},
+"CABK.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BKT.MC": {
+"chosen": {
+"name": "Bankinter, SA Reg.Shs",
+"ticker": "BKIMF",
+"isin": "ES0113679I37",
+"conf": "name+country"
+},
+"isin": "ES0113679I37",
+"verified": true
+},
+"ENG.MC": {
+"chosen": {
+"name": "Enagas S.A.",
+"ticker": "ENGGF",
+"isin": "ES0130960018",
+"conf": "name+country"
+},
+"isin": "ES0130960018",
+"verified": true
+},
+"AMS.MC": {
+"chosen": {
+"name": "American Shared Hospital ServicesShs",
+"ticker": "AMS",
+"isin": "US0295951059",
+"conf": "ticker"
+},
+"isin": "US0295951059",
+"verified": true
+},
+"DIA.MC": {
+"chosen": {
+"name": "State Street\u00ae SPDR\u00ae Dow Jones Industrial Average\u00ae ETF Trust",
+"ticker": "DIA",
+"isin": "US78467X1090",
+"conf": "ticker"
+},
+"isin": "US78467X1090",
+"verified": true
+},
+"FCC.MC": {
+"chosen": {
+"name": "Fomento de Construcciones y Contratas SA FCC",
+"ticker": "FMOCF",
+"isin": "ES0122060314",
+"conf": "name+country"
+},
+"isin": "ES0122060314",
+"verified": true
+},
+"FER.MC": {
+"chosen": {
+"name": "Ferrovial International SE Registered Shs",
+"ticker": "FER",
+"isin": "NL0015001FS8",
+"conf": "ticker"
+},
+"isin": "NL0015001FS8",
+"verified": true
+},
+"ELE.MC": {
+"chosen": {
+"name": "Elemental Royalty Corp. Registered Shs",
+"ticker": "ELE",
+"isin": "CA28620K1066",
+"conf": "ticker"
+},
+"isin": "CA28620K1066",
+"verified": true
+},
+"SGRE.MC": {
+"chosen": {
+"name": "Vocento, SAReg.Shs",
+"ticker": "",
+"isin": "ES0114820113",
+"conf": "country?"
+},
+"isin": "ES0114820113",
+"verified": false
+},
+"NTGY.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"GRF.MC": {
+"chosen": {
+"name": "Grifols SA",
+"ticker": "GIFLF",
+"isin": "ES0171996087",
+"conf": "name+country"
+},
+"isin": "ES0171996087",
+"verified": true
+},
+"RDDT": {
+"chosen": {
+"name": "Reddit",
+"ticker": "RDDT",
+"isin": "US75734B1008",
+"conf": "ticker+country"
+},
+"isin": "US75734B1008",
+"verified": true
+},
+"IBE.MC": {
+"chosen": {
+"name": "Iberdrola SA",
+"ticker": "IBDSF",
+"isin": "ES0144580Y14",
+"conf": "name+country"
+},
+"isin": "ES0144580Y14",
+"verified": true
+},
+"JAZ.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"IDR.MC": {
+"chosen": {
+"name": "Idaho Strategic Resources Inc Registered Shs",
+"ticker": "IDR",
+"isin": "US6458272050",
+"conf": "ticker"
+},
+"isin": "US6458272050",
+"verified": true
+},
+"ITX.MC": {
+"chosen": {
+"name": "Inditex S.A. (Industria de Diseno Textil)",
+"ticker": "IDEXF",
+"isin": "ES0148396007",
+"conf": "country?"
+},
+"isin": "ES0148396007",
+"verified": true
+},
+"MAP.MC": {
+"chosen": {
+"name": "Mapfre",
+"ticker": "MPFRF",
+"isin": "ES0124244E34",
+"conf": "name+country"
+},
+"isin": "ES0124244E34",
+"verified": true
+},
+"SOLV": {
+"chosen": {
+"name": "SOLVENTUM CORP Registered Shs When Issued",
+"ticker": "SOLV",
+"isin": "US83444M1018",
+"conf": "ticker+country"
+},
+"isin": "US83444M1018",
+"verified": true
+},
+"OHLA.MC": {
+"chosen": {
+"name": "Holaluz-Clidom SA Bearer Shs",
+"ticker": "",
+"isin": "ES0105456026",
+"conf": "country?"
+},
+"isin": "ES0105456026",
+"verified": false
+},
+"REP.MC": {
+"chosen": {
+"name": "Repsol S.A.",
+"ticker": "REPYF",
+"isin": "ES0173516115",
+"conf": "name+country"
+},
+"isin": "ES0173516115",
+"verified": true
+},
+"SAB.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"GEV": {
+"chosen": {
+"name": "GE Vernova",
+"ticker": "GEV",
+"isin": "US36828A1016",
+"conf": "ticker+country"
+},
+"isin": "US36828A1016",
+"verified": true
+},
+"RED.MC": {
+"chosen": {
+"name": "Red Electrica SA",
+"ticker": "RDEIF",
+"isin": "ES0173093024",
+"conf": "name+country"
+},
+"isin": "ES0173093024",
+"verified": true
+},
+"TL5.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"SCYR.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"KMGL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"OGZDL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"TRE.MC": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MGNTL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"LKOD.L": {
+"chosen": {
+"name": "Kodal Minerals PLC",
+"ticker": "KDLMF",
+"isin": "GB00BH3X7Y70",
+"conf": "country?"
+},
+"isin": "GB00BH3X7Y70",
+"verified": false
+},
+"KVYO": {
+"chosen": {
+"name": "Klaviyo Inc Registered Shs Series-A-",
+"ticker": "KVYO",
+"isin": "US49845K1016",
+"conf": "ticker+country"
+},
+"isin": "US49845K1016",
+"verified": true
+},
+"NVTKL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MNODL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"PHORL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ARBE": {
+"chosen": {
+"name": "Arbe Robotics Ltd. Registered Shs",
+"ticker": "ARBE",
+"isin": "IL0011796625",
+"conf": "ticker"
+},
+"isin": "IL0011796625",
+"verified": true
+},
+"SLNAF": {
+"chosen": {
+"name": "Selina Hospitality PLC Registered Shs",
+"ticker": "SLNAF",
+"isin": "GB00BQ1MW662",
+"conf": "ticker"
+},
+"isin": "GB00BQ1MW662",
+"verified": true
+},
+"MFONL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ROSNL.L": {
+"chosen": {
+"name": "Rosslyn Data Technologies PLC",
+"ticker": "",
+"isin": "GB00BKX5CP01",
+"conf": "country?"
+},
+"isin": "GB00BKX5CP01",
+"verified": false
+},
+"SGGD.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ATADL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"URKAL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ODD": {
+"chosen": {
+"name": "ODDITY Tech",
+"ticker": "ODD",
+"isin": "IL0011974909",
+"conf": "ticker"
+},
+"isin": "IL0011974909",
+"verified": true
+},
+"SVSTL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"VFS": {
+"chosen": {
+"name": "VinFast",
+"ticker": "VFS",
+"isin": "SGXZ55111462",
+"conf": "ticker"
+},
+"isin": "SGXZ55111462",
+"verified": true
+},
+"ARM": {
+"chosen": {
+"name": "Arm Holdings",
+"ticker": "ARM",
+"isin": "US0420682058",
+"conf": "ticker+country"
+},
+"isin": "US0420682058",
+"verified": true
+},
+"SDZNY": {
+"chosen": {
+"name": "Sandoz Group AG (spons. ADRs)",
+"ticker": "SDZNY",
+"isin": "US7999261008",
+"conf": "ticker+country"
+},
+"isin": "US7999261008",
+"verified": true
+},
+"JOBS": {
+"chosen": {
+"name": "51Job Inc.",
+"ticker": "JOBS",
+"isin": "US3168271043",
+"conf": "ticker+country"
+},
+"isin": "US3168271043",
+"verified": true
+},
+"NTES": {
+"chosen": {
+"name": "Netease Inc. (spons. ADRs)",
+"ticker": "NTES",
+"isin": "US64110W1027",
+"conf": "ticker+country"
+},
+"isin": "US64110W1027",
+"verified": true
+},
+"XOS": {
+"chosen": {
+"name": "Xos Inc Registered Shs",
+"ticker": "XOS",
+"isin": "US98423B3069",
+"conf": "ticker+country"
+},
+"isin": "US98423B3069",
+"verified": true
+},
+"MOMO": {
+"chosen": {
+"name": "Momo Inc (A) (spons. ADRs)",
+"ticker": "MOMO",
+"isin": "US4234031049",
+"conf": "ticker+country"
+},
+"isin": "US4234031049",
+"verified": true
+},
+"TTWO": {
+"chosen": {
+"name": "Take Two",
+"ticker": "TTWO",
+"isin": "US8740541094",
+"conf": "ticker+country"
+},
+"isin": "US8740541094",
+"verified": true
+},
+"NESN.SW": {
+"chosen": {
+"name": "Nestl\u00e9 SA (Nestle)",
+"ticker": "NSRGF",
+"isin": "CH0038863350",
+"conf": "country?"
+},
+"isin": "CH0038863350",
+"verified": true
+},
+"ROP.SW": {
+"chosen": {
+"name": "Roper Technolgies Inc.",
+"ticker": "ROP",
+"isin": "US7766961061",
+"conf": "ticker"
+},
+"isin": "US7766961061",
+"verified": true
+},
+"CSGN.SW": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"ABBN.SW": {
+"chosen": {
+"name": "ABB (Asea Brown Boveri)",
+"ticker": "ABLZF",
+"isin": "CH0012221716",
+"conf": "name+country"
+},
+"isin": "CH0012221716",
+"verified": true
+},
+"ADEN.SW": {
+"chosen": {
+"name": "Adecco SA",
+"ticker": "AHEXF",
+"isin": "CH0012138605",
+"conf": "name+country"
+},
+"isin": "CH0012138605",
+"verified": true
+},
+"ATLN.SW": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"BAER.SW": {
+"chosen": {
+"name": "Julius B\u00e4r",
+"ticker": "JBARF",
+"isin": "CH0102484968",
+"conf": "name+country"
+},
+"isin": "CH0102484968",
+"verified": true
+},
+"GEBN.SW": {
+"chosen": {
+"name": "Geberit AG (N)",
+"ticker": "GBERF",
+"isin": "CH0030170408",
+"conf": "name+country"
+},
+"isin": "CH0030170408",
+"verified": true
+},
+"GIVN.SW": {
+"chosen": {
+"name": "Givaudan AG",
+"ticker": "GVDBF",
+"isin": "CH0010645932",
+"conf": "name+country"
+},
+"isin": "CH0010645932",
+"verified": true
+},
+"HOLN.SW": {
+"chosen": {
+"name": "Holcim AG",
+"ticker": "HCMLF",
+"isin": "CH0012214059",
+"conf": "name+country"
+},
+"isin": "CH0012214059",
+"verified": true
+},
+"SCMN.SW": {
+"chosen": {
+"name": "Swisscom AG",
+"ticker": "SWZCF",
+"isin": "CH0008742519",
+"conf": "name+country"
+},
+"isin": "CH0008742519",
+"verified": true
+},
+"SGSN.SW": {
+"chosen": {
+"name": "SGS SA",
+"ticker": "SGSOF",
+"isin": "CH1256740924",
+"conf": "name+country"
+},
+"isin": "CH1256740924",
+"verified": true
+},
+"SLHN.SW": {
+"chosen": {
+"name": "Swiss Life AG (N)",
+"ticker": "SWSDF",
+"isin": "CH0014852781",
+"conf": "name+country"
+},
+"isin": "CH0014852781",
+"verified": true
+},
+"SREN.SW": {
+"chosen": {
+"name": "Swiss Re AG",
+"ticker": "SSREF",
+"isin": "CH0126881561",
+"conf": "name+country"
+},
+"isin": "CH0126881561",
+"verified": true
+},
+"CFR.SW": {
+"chosen": {
+"name": "Cullen-Frost Bankers Inc",
+"ticker": "CFR",
+"isin": "US2298991090",
+"conf": "ticker"
+},
+"isin": "US2298991090",
+"verified": true
+},
+"UHR.SW": {
+"chosen": {
+"name": "Swatch (I)",
+"ticker": "SWGAF",
+"isin": "CH0012255151",
+"conf": "country?"
+},
+"isin": "CH0012255151",
+"verified": true
+},
+"ZURN.SW": {
+"chosen": {
+"name": "Zurich Insurance AG (Z\u00fcrich)",
+"ticker": "ZFSVF",
+"isin": "CH0011075394",
+"conf": "name+country"
+},
+"isin": "CH0011075394",
+"verified": true
+},
+"SYNN.SW": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MRX": {
+"chosen": {
+"name": "Marex Group Limited Registered Shs",
+"ticker": "MRX",
+"isin": "BMG5T40M1045",
+"conf": "ticker"
+},
+"isin": "BMG5T40M1045",
+"verified": true
+},
+"DWL.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"RIGD.L": {
+"chosen": {
+"name": "Rightster Group PLC",
+"ticker": "",
+"isin": "GB00BF8HJ774",
+"conf": "country?"
+},
+"isin": "GB00BF8HJ774",
+"verified": false
+},
+"AXB.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"MHID.L": {
+"chosen": {
+"name": "Midwich Group PLC",
+"ticker": "MIDWF",
+"isin": "GB00BYSXWW41",
+"conf": "country?"
+},
+"isin": "GB00BYSXWW41",
+"verified": false
+},
+"LTOD.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"SBID.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"GAID.L": {
+"chosen": {
+"name": "Guinness Atkinson International Dividend Builder ETF",
+"ticker": "GAID",
+"isin": "US4020317933",
+"conf": "ticker"
+},
+"isin": "US4020317933",
+"verified": false
+},
+"ACN": {
+"chosen": {
+"name": "Accenture plc",
+"ticker": "ACN",
+"isin": "IE00B4BNMY34",
+"conf": "ticker"
+},
+"isin": "IE00B4BNMY34",
+"verified": true
+},
+"ABBV": {
+"chosen": {
+"name": "AbbVie Inc",
+"ticker": "ABBV",
+"isin": "US00287Y1091",
+"conf": "ticker+country"
+},
+"isin": "US00287Y1091",
+"verified": true
+},
+"AAL": {
+"chosen": {
+"name": "American Airlines Inc",
+"ticker": "AAL",
+"isin": "US02376R1023",
+"conf": "ticker+country"
+},
+"isin": "US02376R1023",
+"verified": true
+},
+"TTST.L": {
+"chosen": {
+"name": "Tasty PLCShs",
+"ticker": "",
+"isin": "GB00B17MN067",
+"conf": "country?"
+},
+"isin": "GB00B17MN067",
+"verified": false
+},
+"BIIB": {
+"chosen": {
+"name": "Biogen Inc",
+"ticker": "BIIB",
+"isin": "US09062X1037",
+"conf": "ticker+country"
+},
+"isin": "US09062X1037",
+"verified": true
+},
+"CAN.L": {
+"chosen": {
+"name": "Canaan Inc (A) Spon American Depositary Share Repr 15 Shs -A-",
+"ticker": "CAN",
+"isin": "US1347481020",
+"conf": "ticker"
+},
+"isin": "US1347481020",
+"verified": true
+},
+"VALT.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"CELG": {
+"chosen": {
+"name": "Celgene Corp.DL-Notes 2018(18/28)",
+"ticker": "A19WGA",
+"isin": "US151020BB94",
+"conf": "name+country"
+},
+"isin": "US151020BB94",
+"verified": true
+},
+"PSKY": {
+"chosen": {
+"name": "Paramount Skydance",
+"ticker": "PSKY",
+"isin": "US69932A2042",
+"conf": "ticker+country"
+},
+"isin": "US69932A2042",
+"verified": true
+},
+"CMCSA": {
+"chosen": {
+"name": "Comcast Corp. (Class A)",
+"ticker": "CMCSA",
+"isin": "US20030N1019",
+"conf": "ticker+country"
+},
+"isin": "US20030N1019",
+"verified": true
+},
+"COF": {
+"chosen": {
+"name": "Capital One Financial Corp.",
+"ticker": "COF",
+"isin": "US14040H1059",
+"conf": "ticker+country"
+},
+"isin": "US14040H1059",
+"verified": true
+},
+"GILD": {
+"chosen": {
+"name": "Gilead Sciences Inc.",
+"ticker": "GILD",
+"isin": "US3755581036",
+"conf": "ticker+country"
+},
+"isin": "US3755581036",
+"verified": true
+},
+"CVS": {
+"chosen": {
+"name": "CVS Health Corp",
+"ticker": "CVS",
+"isin": "US1266501006",
+"conf": "ticker+country"
+},
+"isin": "US1266501006",
+"verified": true
+},
+"EMC": {
+"chosen": {
+"name": "Global X Emerging Markets Great Consumer ETF",
+"ticker": "EMC",
+"isin": "US37960A6441",
+"conf": "ticker+country"
+},
+"isin": "US37960A6441",
+"verified": true
+},
+"COST": {
+"chosen": {
+"name": "Costco Wholesale Corp.",
+"ticker": "COST",
+"isin": "US22160K1051",
+"conf": "ticker+country"
+},
+"isin": "US22160K1051",
+"verified": true
+},
+"GPRO": {
+"chosen": {
+"name": "GoPro",
+"ticker": "GPRO",
+"isin": "US38268T1034",
+"conf": "ticker+country"
+},
+"isin": "US38268T1034",
+"verified": true
+},
+"HON": {
+"chosen": {
+"name": "Honeywell Technologies",
+"ticker": "HON",
+"isin": "US4385161066",
+"conf": "ticker+country"
+},
+"isin": "US4385161066",
+"verified": true
+},
+"SWC.L": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"GS": {
+"chosen": {
+"name": "Goldman Sachs",
+"ticker": "GS",
+"isin": "US38141G1040",
+"conf": "ticker+country"
+},
+"isin": "US38141G1040",
+"verified": true
+},
+"K": {
+"chosen": {
+"name": "Kellogg Co Registered Shs",
+"ticker": "K",
+"isin": "US4878361165",
+"conf": "ticker+country"
+},
+"isin": "US4878361165",
+"verified": false
+},
+"CPRI": {
+"chosen": {
+"name": "Capri Holdings (ex Michael Kors)",
+"ticker": "CPRI",
+"isin": "VGG1890L1076",
+"conf": "ticker"
+},
+"isin": "VGG1890L1076",
+"verified": true
+},
+"LOW": {
+"chosen": {
+"name": "Lowe's Companies Inc.",
+"ticker": "LOW",
+"isin": "US5486611073",
+"conf": "ticker+country"
+},
+"isin": "US5486611073",
+"verified": true
+},
+"BKNG": {
+"chosen": {
+"name": "Booking Holdings",
+"ticker": "BKNG",
+"isin": "US09857L1089",
+"conf": "ticker+country"
+},
+"isin": "US09857L1089",
+"verified": true
+},
+"MCK": {
+"chosen": {
+"name": "McKesson Corp.",
+"ticker": "MCK",
+"isin": "US58155Q1031",
+"conf": "ticker+country"
+},
+"isin": "US58155Q1031",
+"verified": true
+},
+"PM": {
+"chosen": {
+"name": "Philip Morris Inc.",
+"ticker": "PM",
+"isin": "US7181721090",
+"conf": "ticker+country"
+},
+"isin": "US7181721090",
+"verified": true
+},
+"PSX": {
+"chosen": {
+"name": "Phillips 66",
+"ticker": "PSX",
+"isin": "US7185461040",
+"conf": "ticker+country"
+},
+"isin": "US7185461040",
+"verified": true
+},
+"QCOM": {
+"chosen": {
+"name": "QUALCOMM Inc.",
+"ticker": "QCOM",
+"isin": "US7475251036",
+"conf": "ticker+country"
+},
+"isin": "US7475251036",
+"verified": true
+},
+"PYPL": {
+"chosen": {
+"name": "PayPal Inc",
+"ticker": "PYPL",
+"isin": "US70450Y1038",
+"conf": "ticker+country"
+},
+"isin": "US70450Y1038",
+"verified": true
+},
+"SHEL": {
+"chosen": {
+"name": "Royal Dutch Shell PLC (spons. ADRs)",
+"ticker": "SHEL",
+"isin": "US7802593050",
+"conf": "ticker+country"
+},
+"isin": "US7802593050",
+"verified": true
+},
+"SHAK": {
+"chosen": {
+"name": "Shake Shack",
+"ticker": "SHAK",
+"isin": "US8190471016",
+"conf": "ticker+country"
+},
+"isin": "US8190471016",
+"verified": true
+},
+"TGT": {
+"chosen": {
+"name": "Target Corp.",
+"ticker": "TGT",
+"isin": "US87612E1064",
+"conf": "ticker+country"
+},
+"isin": "US87612E1064",
+"verified": true
+},
+"UNP": {
+"chosen": {
+"name": "Union Pacific Corp.",
+"ticker": "UNP",
+"isin": "US9078181081",
+"conf": "ticker+country"
+},
+"isin": "US9078181081",
+"verified": true
+},
+"TTM": {
+"chosen": {
+"name": "Tata Motors Ltd. Reg.Shares",
+"ticker": "TTM",
+"isin": "US8765685024",
+"conf": "ticker+country"
+},
+"isin": "US8765685024",
+"verified": true
+},
+"UPS": {
+"chosen": {
+"name": "United Parcel Service Inc. (UPS)",
+"ticker": "UPS",
+"isin": "US9113121068",
+"conf": "ticker+country"
+},
+"isin": "US9113121068",
+"verified": true
+},
+"WFC": {
+"chosen": {
+"name": "Wells Fargo & Co.",
+"ticker": "WFC",
+"isin": "US9497461015",
+"conf": "ticker+country"
+},
+"isin": "US9497461015",
+"verified": true
+},
+"WBA": {
+"chosen": {
+"name": "Wabash National Corp.",
+"ticker": "WNC",
+"isin": "US9295661071",
+"conf": "country?"
+},
+"isin": "US9295661071",
+"verified": false
+},
+"WMB": {
+"chosen": {
+"name": "Williams Companies Inc.",
+"ticker": "WMB",
+"isin": "US9694571004",
+"conf": "ticker+country"
+},
+"isin": "US9694571004",
+"verified": true
+},
+"VLO": {
+"chosen": {
+"name": "Valero Energy Corp.",
+"ticker": "VLO",
+"isin": "US91913Y1001",
+"conf": "ticker+country"
+},
+"isin": "US91913Y1001",
+"verified": true
+},
+"COR": {
+"chosen": {
+"name": "Cencora",
+"ticker": "COR",
+"isin": "US03073E1055",
+"conf": "ticker+country"
+},
+"isin": "US03073E1055",
+"verified": true
+},
+"FNMA": {
+"chosen": {
+"name": "Fannie Mae (Federal National Mortgage Association)",
+"ticker": "FNMA",
+"isin": "US3135861090",
+"conf": "ticker+country"
+},
+"isin": "US3135861090",
+"verified": true
+},
+"GM": {
+"chosen": {
+"name": "General Motors",
+"ticker": "GM",
+"isin": "US37045V1008",
+"conf": "ticker+country"
+},
+"isin": "US37045V1008",
+"verified": true
+},
+"KR": {
+"chosen": {
+"name": "Kroger",
+"ticker": "KR",
+"isin": "US5010441013",
+"conf": "ticker+country"
+},
+"isin": "US5010441013",
+"verified": true
+},
+"MPC": {
+"chosen": {
+"name": "Marathon Petroleum Corporation",
+"ticker": "MPC",
+"isin": "US56585A1025",
+"conf": "ticker+country"
+},
+"isin": "US56585A1025",
+"verified": true
+},
+"CAH": {
+"chosen": {
+"name": "Cardinal Health Inc.",
+"ticker": "CAH",
+"isin": "US14149Y1082",
+"conf": "ticker+country"
+},
+"isin": "US14149Y1082",
+"verified": true
+},
+"ELV": {
+"chosen": {
+"name": "Elevance Health Inc Registered Shs",
+"ticker": "ELV",
+"isin": "US0367521038",
+"conf": "ticker+country"
+},
+"isin": "US0367521038",
+"verified": true
+},
+"ESRX": {
+"chosen": {
+"name": "GSRX Industries Inc Registered Shs",
+"ticker": "GSRX",
+"isin": "US36255V1070",
+"conf": "country?"
+},
+"isin": "US36255V1070",
+"verified": false
+},
+"AET": {
+"chosen": {
+"name": "Aetna Inc.DL-Notes 2012(12/42)",
+"ticker": "A1HCGT",
+"isin": "US00817YAM03",
+"conf": "name+country"
+},
+"isin": "US00817YAM03",
+"verified": true
+},
+"AIG": {
+"chosen": {
+"name": "American International Group (AIG) Inc.",
+"ticker": "AIG",
+"isin": "US0268747849",
+"conf": "ticker+country"
+},
+"isin": "US0268747849",
+"verified": true
+},
+"FMC": {
+"chosen": {
+"name": "FMC Corp.",
+"ticker": "FMC",
+"isin": "US3024913036",
+"conf": "ticker+country"
+},
+"isin": "US3024913036",
+"verified": true
+},
+"COP": {
+"chosen": {
+"name": "ConocoPhillips",
+"ticker": "COP",
+"isin": "US20825C1045",
+"conf": "ticker+country"
+},
+"isin": "US20825C1045",
+"verified": true
+},
+"HUM": {
+"chosen": {
+"name": "Humana Inc.",
+"ticker": "HUM",
+"isin": "US4448591028",
+"conf": "ticker+country"
+},
+"isin": "US4448591028",
+"verified": true
+},
+"ET": {
+"chosen": {
+"name": "Energy Transfer Equity LP Partnership Units",
+"ticker": "ET",
+"isin": "US29273V1008",
+"conf": "ticker+country"
+},
+"isin": "US29273V1008",
+"verified": true
+},
+"SYY": {
+"chosen": {
+"name": "Sysco Corp.",
+"ticker": "SYY",
+"isin": "US8718291078",
+"conf": "ticker+country"
+},
+"isin": "US8718291078",
+"verified": true
+},
+"IM": {
+"chosen": {
+"name": "IMI PLC Unsponsored American Depositary Receipt Repr 1 Shs",
+"ticker": "IMIUY",
+"isin": "US44969D3061",
+"conf": "country?"
+},
+"isin": "US44969D3061",
+"verified": true
+},
+"EPD": {
+"chosen": {
+"name": "Enterprise Products Partners L.P.",
+"ticker": "EPD",
+"isin": "US2937921078",
+"conf": "ticker+country"
+},
+"isin": "US2937921078",
+"verified": true
+},
+"JCI": {
+"chosen": {
+"name": "Johnson Controls International PLC",
+"ticker": "JCI",
+"isin": "IE00BY7QL619",
+"conf": "ticker"
+},
+"isin": "IE00BY7QL619",
+"verified": true
+},
+"PAGP": {
+"chosen": {
+"name": "Plains GP Holdings LP Registered Shs -A-",
+"ticker": "PAGP",
+"isin": "US72651A2078",
+"conf": "ticker+country"
+},
+"isin": "US72651A2078",
+"verified": true
+},
+"BBY": {
+"chosen": {
+"name": "Best Buy Co. Inc.",
+"ticker": "BBY",
+"isin": "US0865161014",
+"conf": "ticker+country"
+},
+"isin": "US0865161014",
+"verified": true
+},
+"WKC": {
+"chosen": {
+"name": "World Fuel Services Corp.",
+"ticker": "WKC",
+"isin": "US9814751064",
+"conf": "ticker+country"
+},
+"isin": "US9814751064",
+"verified": true
+},
+"DAL": {
+"chosen": {
+"name": "Delta Air Lines Inc.",
+"ticker": "DAL",
+"isin": "US2473617023",
+"conf": "ticker+country"
+},
+"isin": "US2473617023",
+"verified": true
+},
+"HCA": {
+"chosen": {
+"name": "HCA Holdings Inc.",
+"ticker": "HCA",
+"isin": "US40412C1018",
+"conf": "ticker+country"
+},
+"isin": "US40412C1018",
+"verified": true
+},
+"UAL": {
+"chosen": {
+"name": "United Airlines Holdings Inc Registered Shs",
+"ticker": "UAL",
+"isin": "US9100471096",
+"conf": "ticker+country"
+},
+"isin": "US9100471096",
+"verified": true
+},
+"TSN": {
+"chosen": {
+"name": "Tyson Foods Inc.",
+"ticker": "TSN",
+"isin": "US9024941034",
+"conf": "ticker+country"
+},
+"isin": "US9024941034",
+"verified": true
+},
+"DE": {
+"chosen": {
+"name": "Deere & Co. (John Deere)",
+"ticker": "DE",
+"isin": "US2441991054",
+"conf": "ticker+country"
+},
+"isin": "US2441991054",
+"verified": true
+},
+"ANDV": {
+"chosen": {
+"name": "Andover Bancorp Inc (OH)",
+"ticker": "ANDC",
+"isin": "US0342631035",
+"conf": "country?"
+},
+"isin": "US0342631035",
+"verified": false
+},
+"ALL": {
+"chosen": {
+"name": "Allstate Corp.",
+"ticker": "ALL",
+"isin": "US0200021014",
+"conf": "ticker+country"
+},
+"isin": "US0200021014",
+"verified": true
+},
+"CI": {
+"chosen": {
+"name": "The Cigna Group Registered Shs",
+"ticker": "CI",
+"isin": "US1255231003",
+"conf": "ticker+country"
+},
+"isin": "US1255231003",
+"verified": true
+},
+"MDLZ": {
+"chosen": {
+"name": "Mondelez",
+"ticker": "MDLZ",
+"isin": "US6092071058",
+"conf": "ticker+country"
+},
+"isin": "US6092071058",
+"verified": true
+},
+"SNEX": {
+"chosen": {
+"name": "StoneX Group Inc Registered Shs",
+"ticker": "SNEX",
+"isin": "US8618961085",
+"conf": "ticker+country"
+},
+"isin": "US8618961085",
+"verified": true
+},
+"GD": {
+"chosen": {
+"name": "General Dynamics Corp.",
+"ticker": "GD",
+"isin": "US3695501086",
+"conf": "ticker+country"
+},
+"isin": "US3695501086",
+"verified": true
+},
+"SHLD": {
+"chosen": {
+"name": "Global X Defense Tech ETF",
+"ticker": "SHLD",
+"isin": "US37960A5294",
+"conf": "ticker+country"
+},
+"isin": "US37960A5294",
+"verified": true
+},
+"TJX": {
+"chosen": {
+"name": "TJX Cos. Inc.",
+"ticker": "TJX",
+"isin": "US8725401090",
+"conf": "ticker+country"
+},
+"isin": "US8725401090",
+"verified": true
+},
+"HAL": {
+"chosen": {
+"name": "Halliburton Co.",
+"ticker": "HAL",
+"isin": "US4062161017",
+"conf": "ticker+country"
+},
+"isin": "US4062161017",
+"verified": true
+},
+"EXC": {
+"chosen": {
+"name": "Exelon Corp.",
+"ticker": "EXC",
+"isin": "US30161N1019",
+"conf": "ticker+country"
+},
+"isin": "US30161N1019",
+"verified": true
+},
+"QVCAQ": {
+"chosen": {
+"name": "QVC Group Inc Registered Shs -A- (A)",
+"ticker": "QVCAQ",
+"isin": "US74915M6057",
+"conf": "ticker+country"
+},
+"isin": "US74915M6057",
+"verified": true
+},
+"DUK": {
+"chosen": {
+"name": "Duke Energy Corp",
+"ticker": "DUK",
+"isin": "US26441C2044",
+"conf": "ticker+country"
+},
+"isin": "US26441C2044",
+"verified": true
+},
+"TECD": {
+"chosen": {
+"name": "Luminar Technologies Inc Luminar Tech Rg -A-",
+"ticker": "LAZRQ",
+"isin": "US5504243032",
+"conf": "country?"
+},
+"isin": "US5504243032",
+"verified": false
+},
+"RADCQ": {
+"chosen": {
+"name": "Rite Aid Corp Registered Shs",
+"ticker": "RADCQ",
+"isin": "US7677548726",
+"conf": "ticker+country"
+},
+"isin": "US7677548726",
+"verified": false
+},
+"BHI": {
+"chosen": {
+"name": "Benson Hill Inc Registered Shs",
+"ticker": "BHILQ",
+"isin": "US0824902029",
+"conf": "country?"
+},
+"isin": "US0824902029",
+"verified": true
+},
+"NOC": {
+"chosen": {
+"name": "Northrop Grumman Corp.",
+"ticker": "NOC",
+"isin": "US6668071029",
+"conf": "ticker+country"
+},
+"isin": "US6668071029",
+"verified": true
+},
+"EMR": {
+"chosen": {
+"name": "Emerson Electric Co.",
+"ticker": "EMR",
+"isin": "US2910111044",
+"conf": "ticker+country"
+},
+"isin": "US2910111044",
+"verified": true
+},
+"NOV": {
+"chosen": {
+"name": "NOV Inc Registered Shs",
+"ticker": "NOV",
+"isin": "US62955J1034",
+"conf": "ticker+country"
+},
+"isin": "US62955J1034",
+"verified": true
+},
+"AFL": {
+"chosen": {
+"name": "Aflac Inc",
+"ticker": "AFL",
+"isin": "US0010551028",
+"conf": "ticker+country"
+},
+"isin": "US0010551028",
+"verified": true
+},
+"TWC": {
+"chosen": {
+"name": "Bilander Acquisition Corp Registered Shs -A-",
+"ticker": "TWCB",
+"isin": "US09001T1060",
+"conf": "country?"
+},
+"isin": "US09001T1060",
+"verified": false
+},
+"RTN": {
+"chosen": {
+"name": "root9B Holdings Inc Registered Shs",
+"ticker": "RTNB",
+"isin": "US7766502022",
+"conf": "country?"
+},
+"isin": "US7766502022",
+"verified": true
+},
+"ARW": {
+"chosen": {
+"name": "Arrow Electronics Inc.",
+"ticker": "ARW",
+"isin": "US0427351004",
+"conf": "ticker+country"
+},
+"isin": "US0427351004",
+"verified": true
+},
+"SPLS": {
+"chosen": {
+"name": "PIMCO US Stocks PLUS Active Bond Exchange Traded Fund",
+"ticker": "SPLS",
+"isin": "US72201R5515",
+"conf": "ticker+country"
+},
+"isin": "US72201R5515",
+"verified": true
+},
+"FCX": {
+"chosen": {
+"name": "Freeport-McMoRan Inc",
+"ticker": "FCX",
+"isin": "US35671D8570",
+"conf": "ticker+country"
+},
+"isin": "US35671D8570",
+"verified": true
+},
+"USB": {
+"chosen": {
+"name": "U.S. Bancorp",
+"ticker": "USB",
+"isin": "US9029733048",
+"conf": "ticker+country"
+},
+"isin": "US9029733048",
+"verified": true
+},
+"NUE": {
+"chosen": {
+"name": "Nucor Corp.",
+"ticker": "NUE",
+"isin": "US6703461052",
+"conf": "ticker+country"
+},
+"isin": "US6703461052",
+"verified": true
+},
+"CYH": {
+"chosen": {
+"name": "Community Health Systems IncShs",
+"ticker": "CYH",
+"isin": "US2036681086",
+"conf": "ticker+country"
+},
+"isin": "US2036681086",
+"verified": true
+},
+"KMB": {
+"chosen": {
+"name": "Kimberly-Clark Corp.",
+"ticker": "KMB",
+"isin": "US4943681035",
+"conf": "ticker+country"
+},
+"isin": "US4943681035",
+"verified": true
+},
+"HES": {
+"chosen": {
+"name": "Hess Corp",
+"ticker": "HES",
+"isin": "US42809H1077",
+"conf": "ticker+country"
+},
+"isin": "US42809H1077",
+"verified": true
+},
+"XRX": {
+"chosen": {
+"name": "Xerox",
+"ticker": "XRX",
+"isin": "US98421M1062",
+"conf": "ticker+country"
+},
+"isin": "US98421M1062",
+"verified": true
+},
+"MAN": {
+"chosen": {
+"name": "Manpower Inc.",
+"ticker": "MAN",
+"isin": "US56418H1005",
+"conf": "ticker+country"
+},
+"isin": "US56418H1005",
+"verified": true
+},
+"WHR": {
+"chosen": {
+"name": "Whirlpool Corp.",
+"ticker": "WHR",
+"isin": "US9633201069",
+"conf": "ticker+country"
+},
+"isin": "US9633201069",
+"verified": true
+},
+"DHR": {
+"chosen": {
+"name": "Danaher Corp.",
+"ticker": "DHR",
+"isin": "US2358511028",
+"conf": "ticker+country"
+},
+"isin": "US2358511028",
+"verified": true
+},
+"DINO": {
+"chosen": {
+"name": "HF Sinclair Corporation",
+"ticker": "DINO",
+"isin": "US4039491000",
+"conf": "ticker+country"
+},
+"isin": "US4039491000",
+"verified": true
+},
+"DVN": {
+"chosen": {
+"name": "Devon Energy Corp.",
+"ticker": "DVN",
+"isin": "US25179M1036",
+"conf": "ticker+country"
+},
+"isin": "US25179M1036",
+"verified": true
+},
+"CMI": {
+"chosen": {
+"name": "Cummins Inc.",
+"ticker": "CMI",
+"isin": "US2310211063",
+"conf": "ticker+country"
+},
+"isin": "US2310211063",
+"verified": true
+},
+"IEP": {
+"chosen": {
+"name": "Icahn Enterprises",
+"ticker": "IEP",
+"isin": "US4511001012",
+"conf": "ticker+country"
+},
+"isin": "US4511001012",
+"verified": true
+},
+"PBF": {
+"chosen": {
+"name": "PBF Energy Inc (A)",
+"ticker": "PBF",
+"isin": "US69318G1067",
+"conf": "ticker+country"
+},
+"isin": "US69318G1067",
+"verified": true
+},
+"PCAR": {
+"chosen": {
+"name": "Paccar Inc.",
+"ticker": "PCAR",
+"isin": "US6937181088",
+"conf": "ticker+country"
+},
+"isin": "US6937181088",
+"verified": true
+},
+"LLY": {
+"chosen": {
+"name": "Eli Lilly",
+"ticker": "LLY",
+"isin": "US5324571083",
+"conf": "ticker+country"
+},
+"isin": "US5324571083",
+"verified": true
+},
+"PGR": {
+"chosen": {
+"name": "Progressive Corp.",
+"ticker": "PGR",
+"isin": "US7433151039",
+"conf": "ticker+country"
+},
+"isin": "US7433151039",
+"verified": true
+},
+"HIG": {
+"chosen": {
+"name": "Hartford Financial Services Group Inc.",
+"ticker": "HIG",
+"isin": "US4165151048",
+"conf": "ticker+country"
+},
+"isin": "US4165151048",
+"verified": true
+},
+"KSS": {
+"chosen": {
+"name": "Kohl's Corp.",
+"ticker": "KSS",
+"isin": "US5002551043",
+"conf": "ticker+country"
+},
+"isin": "US5002551043",
+"verified": true
+},
+"SO": {
+"chosen": {
+"name": "Southern Co.",
+"ticker": "SO",
+"isin": "US8425871071",
+"conf": "ticker+country"
+},
+"isin": "US8425871071",
+"verified": true
+},
+"SVU": {
+"chosen": {
+"name": "RSE Archive LLC Membership Interests Series -Smurf Rolex Submariner Smurf-",
+"ticker": "VIVBS",
+"isin": "US74985A8870",
+"conf": "country?"
+},
+"isin": "US74985A8870",
+"verified": false
+},
+"GT": {
+"chosen": {
+"name": "Goodyear Tire & Rubber Co.",
+"ticker": "GT",
+"isin": "US3825501014",
+"conf": "ticker+country"
+},
+"isin": "US3825501014",
+"verified": true
+},
+"EOG": {
+"chosen": {
+"name": "EOG Resources Inc.",
+"ticker": "EOG",
+"isin": "US26875P1012",
+"conf": "ticker+country"
+},
+"isin": "US26875P1012",
+"verified": true
+},
+"LUMN": {
+"chosen": {
+"name": "Lumen Technologies Inc Registered Shs",
+"ticker": "LUMN",
+"isin": "US5502411037",
+"conf": "ticker+country"
+},
+"isin": "US5502411037",
+"verified": true
+},
+"MO": {
+"chosen": {
+"name": "Altria Inc.",
+"ticker": "MO",
+"isin": "US02209S1033",
+"conf": "ticker+country"
+},
+"isin": "US02209S1033",
+"verified": true
+},
+"THC": {
+"chosen": {
+"name": "Tenet Healthcare Corp",
+"ticker": "THC",
+"isin": "US88033G4073",
+"conf": "ticker+country"
+},
+"isin": "US88033G4073",
+"verified": true
+},
+"GIS": {
+"chosen": {
+"name": "General Mills Inc.",
+"ticker": "GIS",
+"isin": "US3703341046",
+"conf": "ticker+country"
+},
+"isin": "US3703341046",
+"verified": true
+},
+"LUV": {
+"chosen": {
+"name": "Southwest Airlines Co.",
+"ticker": "LUV",
+"isin": "US8447411088",
+"conf": "ticker+country"
+},
+"isin": "US8447411088",
+"verified": true
+},
+"LEA": {
+"chosen": {
+"name": "Lear Corp",
+"ticker": "LEA",
+"isin": "US5218652049",
+"conf": "ticker+country"
+},
+"isin": "US5218652049",
+"verified": true
+},
+"CAG": {
+"chosen": {
+"name": "ConAgra Foods Inc.",
+"ticker": "CAG",
+"isin": "US2058871029",
+"conf": "ticker+country"
+},
+"isin": "US2058871029",
+"verified": true
+},
+"PAG": {
+"chosen": {
+"name": "Penske Automotive Group IncShs",
+"ticker": "PAG",
+"isin": "US70959W1036",
+"conf": "ticker+country"
+},
+"isin": "US70959W1036",
+"verified": true
+},
+"AES": {
+"chosen": {
+"name": "AES Corp.",
+"ticker": "AES",
+"isin": "US00130H1059",
+"conf": "ticker+country"
+},
+"isin": "US00130H1059",
+"verified": true
+},
+"GLP": {
+"chosen": {
+"name": "Global Partners LPPartnership Units",
+"ticker": "GLP",
+"isin": "US37946R1095",
+"conf": "ticker+country"
+},
+"isin": "US37946R1095",
+"verified": true
+},
+"PCG": {
+"chosen": {
+"name": "PG&E Corp.",
+"ticker": "PCG",
+"isin": "US69331C1080",
+"conf": "ticker+country"
+},
+"isin": "US69331C1080",
+"verified": true
+},
+"TMO": {
+"chosen": {
+"name": "Thermo Fisher Scientific Inc",
+"ticker": "TMO",
+"isin": "US8835561023",
+"conf": "ticker+country"
+},
+"isin": "US8835561023",
+"verified": true
+},
+"NEE": {
+"chosen": {
+"name": "NextEra Energy Inc",
+"ticker": "NEE",
+"isin": "US65339F1012",
+"conf": "ticker+country"
+},
+"isin": "US65339F1012",
+"verified": true
+},
+"X": {
+"chosen": {
+"name": "United States Steel Corp. (U. S. Steel, US Steel)",
+"ticker": "X",
+"isin": "US9129091081",
+"conf": "ticker+country"
+},
+"isin": "US9129091081",
+"verified": true
+},
+"AEP": {
+"chosen": {
+"name": "American Electric Power Co. Inc.",
+"ticker": "AEP",
+"isin": "US0255371017",
+"conf": "ticker+country"
+},
+"isin": "US0255371017",
+"verified": true
+},
+"BAX": {
+"chosen": {
+"name": "Baxter International Inc.",
+"ticker": "BAX",
+"isin": "US0718131099",
+"conf": "ticker+country"
+},
+"isin": "US0718131099",
+"verified": true
+},
+"BNY": {
+"chosen": {
+"name": "Bank of New York Mellon",
+"ticker": "BNY",
+"isin": "US0640581007",
+"conf": "ticker+country"
+},
+"isin": "US0640581007",
+"verified": true
+},
+"CNC": {
+"chosen": {
+"name": "Centene Corp.",
+"ticker": "CNC",
+"isin": "US15135B1017",
+"conf": "ticker+country"
+},
+"isin": "US15135B1017",
+"verified": true
+},
+"JBL": {
+"chosen": {
+"name": "Jabil Circuit Inc.",
+"ticker": "JBL",
+"isin": "US4663131039",
+"conf": "ticker+country"
+},
+"isin": "US4663131039",
+"verified": true
+},
+"KMI": {
+"chosen": {
+"name": "Kinder Morgan Inc (P)",
+"ticker": "KMI",
+"isin": "US49456B1017",
+"conf": "ticker+country"
+},
+"isin": "US49456B1017",
+"verified": true
+},
+"PNC": {
+"chosen": {
+"name": "PNC Financial Services Group Inc.",
+"ticker": "PNC",
+"isin": "US6934751057",
+"conf": "ticker+country"
+},
+"isin": "US6934751057",
+"verified": true
+},
+"BMY": {
+"chosen": {
+"name": "Bristol-Myers Squibb Co.",
+"ticker": "BMY",
+"isin": "US1101221083",
+"conf": "ticker+country"
+},
+"isin": "US1101221083",
+"verified": true
+},
+"ODP": {
+"chosen": {
+"name": "Odimo Inc.",
+"ticker": "ODMO",
+"isin": "US67606R1077",
+"conf": "country?"
+},
+"isin": "US67606R1077",
+"verified": false
+},
+"NRG": {
+"chosen": {
+"name": "NRG Energy Inc.",
+"ticker": "NRG",
+"isin": "US6293775085",
+"conf": "ticker+country"
+},
+"isin": "US6293775085",
+"verified": true
+},
+"PPG": {
+"chosen": {
+"name": "PPG Industries Inc.",
+"ticker": "PPG",
+"isin": "US6935061076",
+"conf": "ticker+country"
+},
+"isin": "US6935061076",
+"verified": true
+},
+"MUSA": {
+"chosen": {
+"name": "Murphy USA Inc When Issued",
+"ticker": "MUSA",
+"isin": "US6267551025",
+"conf": "ticker+country"
+},
+"isin": "US6267551025",
+"verified": true
+},
+"ITW": {
+"chosen": {
+"name": "Illinois Tool Works Inc.",
+"ticker": "ITW",
+"isin": "US4523081093",
+"conf": "ticker+country"
+},
+"isin": "US4523081093",
+"verified": true
+},
+"OMC": {
+"chosen": {
+"name": "Omnicom Group Inc.",
+"ticker": "OMC",
+"isin": "US6819191064",
+"conf": "ticker+country"
+},
+"isin": "US6819191064",
+"verified": true
+},
+"FE": {
+"chosen": {
+"name": "FirstEnergy Corp",
+"ticker": "FE",
+"isin": "US3379321074",
+"conf": "ticker+country"
+},
+"isin": "US3379321074",
+"verified": true
+},
+"WNR": {
+"chosen": {
+"name": "Winners Inc Registered Shs",
+"ticker": "WNRS",
+"isin": "US97478A3041",
+"conf": "country?"
+},
+"isin": "US97478A3041",
+"verified": true
+},
+"DISH": {
+"chosen": {
+"name": "Dish Network Corp.",
+"ticker": "DISH",
+"isin": "US25470M1099",
+"conf": "ticker+country"
+},
+"isin": "US25470M1099",
+"verified": true
+},
+"ARMK": {
+"chosen": {
+"name": "Aramark",
+"ticker": "ARMK",
+"isin": "US03852U1060",
+"conf": "ticker+country"
+},
+"isin": "US03852U1060",
+"verified": true
+},
+"ECL": {
+"chosen": {
+"name": "Ecolab Inc.",
+"ticker": "ECL",
+"isin": "US2788651006",
+"conf": "ticker+country"
+},
+"isin": "US2788651006",
+"verified": true
+},
+"GPC": {
+"chosen": {
+"name": "Genuine Parts Co.",
+"ticker": "GPC",
+"isin": "US3724601055",
+"conf": "ticker+country"
+},
+"isin": "US3724601055",
+"verified": true
+},
+"L": {
+"chosen": {
+"name": "Loews Corp.",
+"ticker": "L",
+"isin": "US5404241086",
+"conf": "ticker+country"
+},
+"isin": "US5404241086",
+"verified": true
+},
+"HNT_OLD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"CB": {
+"chosen": {
+"name": "Chubb Ltd",
+"ticker": "CB",
+"isin": "CH0044328745",
+"conf": "ticker"
+},
+"isin": "CH0044328745",
+"verified": true
+},
+"APA": {
+"chosen": {
+"name": "APA Corporation Registered Shs",
+"ticker": "APA",
+"isin": "US03743Q1085",
+"conf": "ticker+country"
+},
+"isin": "US03743Q1085",
+"verified": true
+},
+"TXT": {
+"chosen": {
+"name": "Textron Inc.",
+"ticker": "TXT",
+"isin": "US8832031012",
+"conf": "ticker+country"
+},
+"isin": "US8832031012",
+"verified": true
+},
+"VIAOLD": {
+"chosen": null,
+"isin": null,
+"verified": false
+},
+"WFM": {
+"chosen": {
+"name": "Allspring Special Mid Cap Value Fund - Class Inst",
+"ticker": "WFMIX",
+"isin": "US9499154824",
+"conf": "country?"
+},
+"isin": "US9499154824",
+"verified": true
+},
+"LNC": {
+"chosen": {
+"name": "Lincoln National Corp.",
+"ticker": "LNC",
+"isin": "US5341871094",
+"conf": "ticker+country"
+},
+"isin": "US5341871094",
+"verified": true
+},
+"WM": {
+"chosen": {
+"name": "Waste Management Inc.",
+"ticker": "WM",
+"isin": "US94106L1098",
+"conf": "ticker+country"
+},
+"isin": "US94106L1098",
+"verified": true
+},
+"JWN": {
+"chosen": {
+"name": "Nordstrom Inc.",
+"ticker": "JWN",
+"isin": "US6556641008",
+"conf": "ticker+country"
+},
+"isin": "US6556641008",
+"verified": true
+},
+"CHRW": {
+"chosen": {
+"name": "C.H. Robinson Worldwide Inc.",
+"ticker": "CHRW",
+"isin": "US12541W2098",
+"conf": "ticker+country"
+},
+"isin": "US12541W2098",
+"verified": true
+},
+"EIX": {
+"chosen": {
+"name": "Edison International",
+"ticker": "EIX",
+"isin": "US2810201077",
+"conf": "ticker+country"
+},
+"isin": "US2810201077",
+"verified": true
+},
+"YUM": {
+"chosen": {
+"name": "YUM! Brands Inc.",
+"ticker": "YUM",
+"isin": "US9884981013",
+"conf": "ticker+country"
+},
+"isin": "US9884981013",
+"verified": true
+},
+"PH": {
+"chosen": {
+"name": "Parker Hannifin Corp.",
+"ticker": "PH",
+"isin": "US7010941042",
+"conf": "ticker+country"
+},
+"isin": "US7010941042",
+"verified": true
+},
+"DVA": {
+"chosen": {
+"name": "DaVita Inc Registered Shs",
+"ticker": "DVA",
+"isin": "US23918K1088",
+"conf": "ticker+country"
+},
+"isin": "US23918K1088",
+"verified": true
+},
+"KMX": {
+"chosen": {
+"name": "CarMax Inc.",
+"ticker": "KMX",
+"isin": "US1431301027",
+"conf": "ticker+country"
+},
+"isin": "US1431301027",
+"verified": true
+},
+"WCG": {
+"chosen": {
+"name": "Wegener CorpShs",
+"ticker": "WGNR",
+"isin": "US9485851045",
+"conf": "country?"
+},
+"isin": "US9485851045",
+"verified": false
+},
+"TXN": {
+"chosen": {
+"name": "Texas Instruments Inc. (TI)",
+"ticker": "TXN",
+"isin": "US8825081040",
+"conf": "ticker+country"
+},
+"isin": "US8825081040",
+"verified": true
+},
+"MRSH": {
+"chosen": {
+"name": "Marsh & McLennan Cos. Inc.",
+"ticker": "MRSH",
+"isin": "US5717481023",
+"conf": "ticker+country"
+},
+"isin": "US5717481023",
+"verified": true
+},
+"ED": {
+"chosen": {
+"name": "Consolidated Edison Inc.",
+"ticker": "ED",
+"isin": "US2091151041",
+"conf": "ticker+country"
+},
+"isin": "US2091151041",
+"verified": true
+},
+"OKE": {
+"chosen": {
+"name": "ONEOK Inc (New)",
+"ticker": "OKE",
+"isin": "US6826801036",
+"conf": "ticker+country"
+},
+"isin": "US6826801036",
+"verified": true
+},
+"CSX": {
+"chosen": {
+"name": "CSX Corp.",
+"ticker": "CSX",
+"isin": "US1264081035",
+"conf": "ticker+country"
+},
+"isin": "US1264081035",
+"verified": true
+},
+"ETR": {
+"chosen": {
+"name": "Entergy Corp.",
+"ticker": "ETR",
+"isin": "US29364G1031",
+"conf": "ticker+country"
+},
+"isin": "US29364G1031",
+"verified": true
+},
+"JEF": {
+"chosen": {
+"name": "Jefferies Financial Group",
+"ticker": "JEF",
+"isin": "US47233W1099",
+"conf": "ticker+country"
+},
+"isin": "US47233W1099",
+"verified": true
+},
+"J": {
+"chosen": {
+"name": "Jacobs Solutions Inc Registered Shs",
+"ticker": "J",
+"isin": "US46982L1089",
+"conf": "ticker+country"
+},
+"isin": "US46982L1089",
+"verified": true
+},
+"D": {
+"chosen": {
+"name": "Dominion Energy Inc.",
+"ticker": "D",
+"isin": "US25746U1097",
+"conf": "ticker+country"
+},
+"isin": "US25746U1097",
+"verified": true
+},
+"VFC": {
+"chosen": {
+"name": "V.F. Corp.",
+"ticker": "VFC",
+"isin": "US9182041080",
+"conf": "ticker+country"
+},
+"isin": "US9182041080",
+"verified": true
+},
+"PX": {
+"chosen": {
+"name": "Phoenix Education Partners Inc Registered shs",
+"ticker": "PXED",
+"isin": "US7189681007",
+"conf": "country?"
+},
+"isin": "US7189681007",
+"verified": true
+},
+"JCP": {
+"chosen": {
+"name": "JPMorgan Core Plus Bond Fund Class R2",
+"ticker": "JCPZX",
+"isin": "US4812C24783",
+"conf": "country?"
+},
+"isin": "US4812C24783",
+"verified": true
+},
+"ADP": {
+"chosen": {
+"name": "Automatic Data Processing Inc.",
+"ticker": "ADP",
+"isin": "US0530151036",
+"conf": "ticker+country"
+},
+"isin": "US0530151036",
+"verified": true
+},
+"LLL": {
+"chosen": {
+"name": "Lamperd Less Lethal IncShs",
+"ticker": "LLLI",
+"isin": "US5136651099",
+"conf": "country?"
+},
+"isin": "US5136651099",
+"verified": true
+},
+"CDW": {
+"chosen": {
+"name": "CDW Corp (New)",
+"ticker": "CDW",
+"isin": "US12514G1085",
+"conf": "ticker+country"
+},
+"isin": "US12514G1085",
+"verified": true
+},
+"XEL": {
+"chosen": {
+"name": "Xcel Energy Inc.",
+"ticker": "XEL",
+"isin": "US98389B1008",
+"conf": "ticker+country"
+},
+"isin": "US98389B1008",
+"verified": true
+},
+"NSC": {
+"chosen": {
+"name": "Norfolk Southern Corp.",
+"ticker": "NSC",
+"isin": "US6558441084",
+"conf": "ticker+country"
+},
+"isin": "US6558441084",
+"verified": true
+},
+"PPL": {
+"chosen": {
+"name": "PPL Corp.",
+"ticker": "PPL",
+"isin": "US69351T1060",
+"conf": "ticker+country"
+},
+"isin": "US69351T1060",
+"verified": true
+},
+"BBBYQ": {
+"chosen": {
+"name": "Bed Bath & Beyond Inc.",
+"ticker": "BBBYQ",
+"isin": "US0758961009",
+"conf": "ticker+country"
+},
+"isin": "US0758961009",
+"verified": false
+},
+"RRD": {
+"chosen": {
+"name": "Reddit",
+"ticker": "RDDT",
+"isin": "US75734B1008",
+"conf": "country?"
+},
+"isin": "US75734B1008",
+"verified": false
+},
+"HUN": {
+"chosen": {
+"name": "Huntsman Corp.",
+"ticker": "HUN",
+"isin": "US4470111075",
+"conf": "ticker+country"
+},
+"isin": "US4470111075",
+"verified": true
+},
+"SWK": {
+"chosen": {
+"name": "Stanley Black & Decker Inc",
+"ticker": "SWK",
+"isin": "US8545021011",
+"conf": "ticker+country"
+},
+"isin": "US8545021011",
+"verified": true
+},
+"BBWI": {
+"chosen": {
+"name": "Bath & Body Works",
+"ticker": "BBWI",
+"isin": "US0708301041",
+"conf": "ticker+country"
+},
+"isin": "US0708301041",
+"verified": true
+},
+"BLK": {
+"chosen": {
+"name": "BlackRock Inc Registered Shs",
+"ticker": "BLK",
+"isin": "US09290D1019",
+"conf": "ticker+country"
+},
+"isin": "US09290D1019",
+"verified": true
+},
+"SHW": {
+"chosen": {
+"name": "Sherwin-Williams Co.",
+"ticker": "SHW",
+"isin": "US8243481061",
+"conf": "ticker+country"
+},
+"isin": "US8243481061",
+"verified": true
+},
+"SRE": {
+"chosen": {
+"name": "Sempra Energy",
+"ticker": "SRE",
+"isin": "US8168511090",
+"conf": "ticker+country"
+},
+"isin": "US8168511090",
+"verified": true
+},
+"ROST": {
+"chosen": {
+"name": "Ross Stores Inc.",
+"ticker": "ROST",
+"isin": "US7782961038",
+"conf": "ticker+country"
+},
+"isin": "US7782961038",
+"verified": true
+},
+"EL": {
+"chosen": {
+"name": "Est\u00e9e Lauder Companies Inc. (ELC) (Estee Lauder)",
+"ticker": "EL",
+"isin": "US5184391044",
+"conf": "ticker+country"
+},
+"isin": "US5184391044",
+"verified": true
+},
+"RGA": {
+"chosen": {
+"name": "Reinsurance Group America Inc",
+"ticker": "RGA",
+"isin": "US7593516047",
+"conf": "ticker+country"
+},
+"isin": "US7593516047",
+"verified": true
+},
+"PEG": {
+"chosen": {
+"name": "Public Service Enterprise Group Inc.",
+"ticker": "PEG",
+"isin": "US7445731067",
+"conf": "ticker+country"
+},
+"isin": "US7445731067",
+"verified": true
+},
+"CAM": {
+"chosen": {
+"name": "AB California Intermediate Municipal ETF",
+"ticker": "CAM",
+"isin": "US00039J7726",
+"conf": "ticker+country"
+},
+"isin": "US00039J7726",
+"verified": true
+},
+"NAV": {
+"chosen": {
+"name": "Navient Corp",
+"ticker": "NAVI",
+"isin": "US63938C1080",
+"conf": "country?"
+},
+"isin": "US63938C1080",
+"verified": true
+},
+"CST": {
+"chosen": {
+"name": "Costar Technologies Inc",
+"ticker": "CSTI",
+"isin": "US22161J2069",
+"conf": "country?"
+},
+"isin": "US22161J2069",
+"verified": false
+},
+"STT": {
+"chosen": {
+"name": "State Street Corp.",
+"ticker": "STT",
+"isin": "US8574771031",
+"conf": "ticker+country"
+},
+"isin": "US8574771031",
+"verified": true
+},
+"UNM": {
+"chosen": {
+"name": "Unum Group",
+"ticker": "UNM",
+"isin": "US91529Y1064",
+"conf": "ticker+country"
+},
+"isin": "US91529Y1064",
+"verified": true
+},
+"RS": {
+"chosen": {
+"name": "Reliance Steel & Aluminum Co.",
+"ticker": "RS",
+"isin": "US7595091023",
+"conf": "ticker+country"
+},
+"isin": "US7595091023",
+"verified": true
+},
+"HLT": {
+"chosen": {
+"name": "Hilton Worldwide Holdings Inc",
+"ticker": "HLT",
+"isin": "US43300A2033",
+"conf": "ticker+country"
+},
+"isin": "US43300A2033",
+"verified": true
+},
+"APD": {
+"chosen": {
+"name": "Air Products and Chemicals Inc.",
+"ticker": "APD",
+"isin": "US0091581068",
+"conf": "ticker+country"
+},
+"isin": "US0091581068",
+"verified": true
+},
+"HSIC": {
+"chosen": {
+"name": "Henry Schein Inc.",
+"ticker": "HSIC",
+"isin": "US8064071025",
+"conf": "ticker+country"
+},
+"isin": "US8064071025",
+"verified": true
+},
+"PFG": {
+"chosen": {
+"name": "Principal Financial Group Inc.",
+"ticker": "PFG",
+"isin": "US74251V1026",
+"conf": "ticker+country"
+},
+"isin": "US74251V1026",
+"verified": true
+},
+"AIZ": {
+"chosen": {
+"name": "Assurant IncShs",
+"ticker": "AIZ",
+"isin": "US04621X1081",
+"conf": "ticker+country"
+},
+"isin": "US04621X1081",
+"verified": true
+},
+"CTSH": {
+"chosen": {
+"name": "Cognizant Corp.",
+"ticker": "CTSH",
+"isin": "US1924461023",
+"conf": "ticker+country"
+},
+"isin": "US1924461023",
+"verified": true
+},
+"GPI": {
+"chosen": {
+"name": "Group 1 Automotive Inc.",
+"ticker": "GPI",
+"isin": "US3989051095",
+"conf": "ticker+country"
+},
+"isin": "US3989051095",
+"verified": true
+},
+"MGM": {
+"chosen": {
+"name": "MGM Resorts International",
+"ticker": "MGM",
+"isin": "US5529531015",
+"conf": "ticker+country"
+},
+"isin": "US5529531015",
+"verified": true
+},
+"GWW": {
+"chosen": {
+"name": "Grainger Inc., W.W.",
+"ticker": "GWW",
+"isin": "US3848021040",
+"conf": "ticker+country"
+},
+"isin": "US3848021040",
+"verified": true
+},
+"TFC": {
+"chosen": {
+"name": "Truist Financial Corporation",
+"ticker": "TFC",
+"isin": "US89832Q1094",
+"conf": "ticker+country"
+},
+"isin": "US89832Q1094",
+"verified": true
+},
+"AAP": {
+"chosen": {
+"name": "Advance Auto Parts Inc.",
+"ticker": "AAP",
+"isin": "US00751Y1064",
+"conf": "ticker+country"
+},
+"isin": "US00751Y1064",
+"verified": true
+},
+"ALLY": {
+"chosen": {
+"name": "Ally Financial Inc",
+"ticker": "ALLY",
+"isin": "US02005N1000",
+"conf": "ticker+country"
+},
+"isin": "US02005N1000",
+"verified": true
+},
+"SYK": {
+"chosen": {
+"name": "Stryker Corp.",
+"ticker": "SYK",
+"isin": "US8636671013",
+"conf": "ticker+country"
+},
+"isin": "US8636671013",
+"verified": true
+},
+"GLW": {
+"chosen": {
+"name": "Corning Inc.",
+"ticker": "GLW",
+"isin": "US2193501051",
+"conf": "ticker+country"
+},
+"isin": "US2193501051",
+"verified": true
+},
+"MOH": {
+"chosen": {
+"name": "Molina Healthcare",
+"ticker": "MOH",
+"isin": "US60855R1005",
+"conf": "ticker+country"
+},
+"isin": "US60855R1005",
+"verified": true
+},
+"AGCO": {
+"chosen": {
+"name": "AGCO Corp.",
+"ticker": "AGCO",
+"isin": "US0010841023",
+"conf": "ticker+country"
+},
+"isin": "US0010841023",
+"verified": true
+},
+"DFS": {
+"chosen": {
+"name": "Discover Financial Services",
+"ticker": "DFS",
+"isin": "US2547091080",
+"conf": "ticker+country"
+},
+"isin": "US2547091080",
+"verified": true
+},
+"EMN": {
+"chosen": {
+"name": "Eastman Chemical Company",
+"ticker": "EMN",
+"isin": "US2774321002",
+"conf": "ticker+country"
+},
+"isin": "US2774321002",
+"verified": true
+},
+"GNW": {
+"chosen": {
+"name": "Genworth Financial Inc.",
+"ticker": "GNW",
+"isin": "US37247D1063",
+"conf": "ticker+country"
+},
+"isin": "US37247D1063",
+"verified": true
+},
+"DF": {
+"chosen": {
+"name": "DFP Hldgs Ltd Registered shs",
+"ticker": "DFPH",
+"isin": "US2519391047",
+"conf": "country?"
+},
+"isin": "US2519391047",
+"verified": true
+},
+"AZO": {
+"chosen": {
+"name": "AutoZone Inc.",
+"ticker": "AZO",
+"isin": "US0533321024",
+"conf": "ticker+country"
+},
+"isin": "US0533321024",
+"verified": true
+},
+"HRL": {
+"chosen": {
+"name": "Hormel Foods Corp.",
+"ticker": "HRL",
+"isin": "US4404521001",
+"conf": "ticker+country"
+},
+"isin": "US4404521001",
+"verified": true
+},
+"PCP": {
+"chosen": {
+"name": "Periphas Capital Partnering Corporation Registered Shs -A-",
+"ticker": "PCPC",
+"isin": "US7138951006",
+"conf": "country?"
+},
+"isin": "US7138951006",
+"verified": false
+},
+"CNP": {
+"chosen": {
+"name": "CenterPoint Energy Inc.",
+"ticker": "CNP",
+"isin": "US15189T1079",
+"conf": "ticker+country"
+},
+"isin": "US15189T1079",
+"verified": true
+},
+"SAH": {
+"chosen": {
+"name": "Sonic Automotive Inc.",
+"ticker": "SAH",
+"isin": "US83545G1022",
+"conf": "ticker+country"
+},
+"isin": "US83545G1022",
+"verified": true
+},
+"FNF": {
+"chosen": {
+"name": "Fidelity National Financial Inc FNF Group Shs When Issued",
+"ticker": "FNF",
+"isin": "US31620R3030",
+"conf": "ticker+country"
+},
+"isin": "US31620R3030",
+"verified": true
+},
+"GME": {
+"chosen": {
+"name": "GameStop Corp",
+"ticker": "GME",
+"isin": "US36467W1099",
+"conf": "ticker+country"
+},
+"isin": "US36467W1099",
+"verified": true
+},
+"CHTR": {
+"chosen": {
+"name": "Charter Inc (A) (Charter Communications)",
+"ticker": "CHTR",
+"isin": "US16119P1084",
+"conf": "ticker+country"
+},
+"isin": "US16119P1084",
+"verified": true
+},
+"HDS": {
+"chosen": {
+"name": "Hudson Technologies IncShs",
+"ticker": "HDSN",
+"isin": "US4441441098",
+"conf": "country?"
+},
+"isin": "US4441441098",
+"verified": true
+},
+"CBRE": {
+"chosen": {
+"name": "CBRE Group Inc. (A)",
+"ticker": "CBRE",
+"isin": "US12504L1098",
+"conf": "ticker+country"
+},
+"isin": "US12504L1098",
+"verified": true
+},
+"AMAT": {
+"chosen": {
+"name": "Applied Materials Inc.",
+"ticker": "AMAT",
+"isin": "US0382221051",
+"conf": "ticker+country"
+},
+"isin": "US0382221051",
+"verified": true
+},
+"RSG": {
+"chosen": {
+"name": "Republic Services Inc.",
+"ticker": "RSG",
+"isin": "US7607591002",
+"conf": "ticker+country"
+},
+"isin": "US7607591002",
+"verified": true
+},
+"CCK": {
+"chosen": {
+"name": "Crown Holdings Inc.",
+"ticker": "CCK",
+"isin": "US2283681060",
+"conf": "ticker+country"
+},
+"isin": "US2283681060",
+"verified": true
+},
+"UHS": {
+"chosen": {
+"name": "Universal Health Services Inc.",
+"ticker": "UHS",
+"isin": "US9139031002",
+"conf": "ticker+country"
+},
+"isin": "US9139031002",
+"verified": true
+},
+"STLD": {
+"chosen": {
+"name": "Steel Dynamics Inc.",
+"ticker": "STLD",
+"isin": "US8581191009",
+"conf": "ticker+country"
+},
+"isin": "US8581191009",
+"verified": true
+},
+"AVP": {
+"chosen": {
+"name": "AvePoint Inc Registered Shs",
+"ticker": "AVPT",
+"isin": "US0536041041",
+"conf": "country?"
+},
+"isin": "US0536041041",
+"verified": true
+},
+"DRI": {
+"chosen": {
+"name": "Darden Restaurants Inc.",
+"ticker": "DRI",
+"isin": "US2371941053",
+"conf": "ticker+country"
+},
+"isin": "US2371941053",
+"verified": true
+},
+"CZRDEL": {
+"chosen": {
+"name": "Arrived Homes 4 LLC Membership Int Series-Cordelia-",
+"ticker": "HCDLS",
+"isin": "US04272U4031",
+"conf": "country?"
+},
+"isin": "US04272U4031",
+"verified": false
+},
+"TRGP": {
+"chosen": {
+"name": "Targa Resources Corp.",
+"ticker": "TRGP",
+"isin": "US87612G1013",
+"conf": "ticker+country"
+},
+"isin": "US87612G1013",
+"verified": true
+},
+"DLTR": {
+"chosen": {
+"name": "Dollar Tree Inc",
+"ticker": "DLTR",
+"isin": "US2567461080",
+"conf": "ticker+country"
+},
+"isin": "US2567461080",
+"verified": true
+},
+"NWSA": {
+"chosen": {
+"name": "News Corp LLC",
+"ticker": "NWSA",
+"isin": "US65249B1098",
+"conf": "ticker+country"
+},
+"isin": "US65249B1098",
+"verified": true
+},
+"BALL": {
+"chosen": {
+"name": "Ball Corp.",
+"ticker": "BALL",
+"isin": "US0584981064",
+"conf": "ticker+country"
+},
+"isin": "US0584981064",
+"verified": true
+},
+"MAS": {
+"chosen": {
+"name": "Masco Corp.",
+"ticker": "MAS",
+"isin": "US5745991068",
+"conf": "ticker+country"
+},
+"isin": "US5745991068",
+"verified": true
+},
+"BEN": {
+"chosen": {
+"name": "Franklin Resources Inc.",
+"ticker": "BEN",
+"isin": "US3546131018",
+"conf": "ticker+country"
+},
+"isin": "US3546131018",
+"verified": true
+},
+"RAI": {
+"chosen": {
+"name": "Rain Therapeutics Inc Registered Shs",
+"ticker": "RAIN",
+"isin": "US75082Q1058",
+"conf": "country?"
+},
+"isin": "US75082Q1058",
+"verified": false
+},
+"BDX": {
+"chosen": {
+"name": "Becton, Dickinson & Co. (BD)",
+"ticker": "BDX",
+"isin": "US0758871091",
+"conf": "ticker+country"
+},
+"isin": "US0758871091",
+"verified": true
+},
+"BRCM": {
+"chosen": {
+"name": "Brambles Ltd (spons. ADRs)",
+"ticker": "BXBLY",
+"isin": "US1051052090",
+"conf": "country?"
+},
+"isin": "US1051052090",
+"verified": false
+},
+"CPB": {
+"chosen": {
+"name": "Campbell Soup Co.",
+"ticker": "CPB",
+"isin": "US1344291091",
+"conf": "ticker+country"
+},
+"isin": "US1344291091",
+"verified": true
+},
+"ACM": {
+"chosen": {
+"name": "Aecom Technology Corp",
+"ticker": "ACM",
+"isin": "US00766T1007",
+"conf": "ticker+country"
+},
+"isin": "US00766T1007",
+"verified": true
+},
+"DK": {
+"chosen": {
+"name": "Delek US Holdings Inc (New) Registered Shs",
+"ticker": "DK",
+"isin": "US24665A1034",
+"conf": "ticker+country"
+},
+"isin": "US24665A1034",
+"verified": true
+},
+"DOV": {
+"chosen": {
+"name": "Dover Corp.",
+"ticker": "DOV",
+"isin": "US2600031080",
+"conf": "ticker+country"
+},
+"isin": "US2600031080",
+"verified": true
+},
+"VC": {
+"chosen": {
+"name": "Visteon Corp",
+"ticker": "VC",
+"isin": "US92839U2069",
+"conf": "ticker+country"
+},
+"isin": "US92839U2069",
+"verified": true
+},
+"BWA": {
+"chosen": {
+"name": "BorgWarner Inc.",
+"ticker": "BWA",
+"isin": "US0997241064",
+"conf": "ticker+country"
+},
+"isin": "US0997241064",
+"verified": true
+},
+"JAH": {
+"chosen": {
+"name": "Jammin Java Corp",
+"ticker": "JAMN",
+"isin": "US4707511089",
+"conf": "country?"
+},
+"isin": "US4707511089",
+"verified": false
+},
+"PVH": {
+"chosen": {
+"name": "PVH Corp.",
+"ticker": "PVH",
+"isin": "US6936561009",
+"conf": "ticker+country"
+},
+"isin": "US6936561009",
+"verified": true
+},
+"MUR": {
+"chosen": {
+"name": "Murphy Oil Corp.",
+"ticker": "MUR",
+"isin": "US6267171022",
+"conf": "ticker+country"
+},
+"isin": "US6267171022",
+"verified": true
+},
+"DHI": {
+"chosen": {
+"name": "D.R. Horton Inc.",
+"ticker": "DHI",
+"isin": "US23331A1097",
+"conf": "ticker+country"
+},
+"isin": "US23331A1097",
+"verified": true
+},
+"CPN": {
+"chosen": {
+"name": "Coupang",
+"ticker": "CPNG",
+"isin": "US22266T1097",
+"conf": "country?"
+},
+"isin": "US22266T1097",
+"verified": true
+},
+"LEN": {
+"chosen": {
+"name": "Lennar Corp.",
+"ticker": "LEN",
+"isin": "US5260571048",
+"conf": "ticker+country"
+},
+"isin": "US5260571048",
+"verified": true
+},
+"MHK": {
+"chosen": {
+"name": "Mohawk Industries Inc.",
+"ticker": "MHK",
+"isin": "US6081901042",
+"conf": "ticker+country"
+},
+"isin": "US6081901042",
+"verified": true
+},
+"NAVA.OL": {
+"chosen": {
+"name": "Navamedic ASAShs",
+"ticker": "",
+"isin": "NO0010205966",
+"conf": "name+country"
+},
+"isin": "NO0010205966",
+"verified": true
+},
+"AASB.OL": {
+"chosen": null,
+"isin": null,
+"verified": false
+}
+}
+}
