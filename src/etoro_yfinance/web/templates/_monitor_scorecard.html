@@ -21,10 +21,10 @@
 {% endmacro %}
 <div class="mb-4">
   <div class="text-xs font-semibold text-slate-500 mb-1">Regime-filter scorecard
-    <span class="font-normal text-slate-400">— median across {{ scorecard.n }} sectors ·
+    <span class="font-normal text-slate-400">— median across {{ scorecard.n }} sectors, net of {{ mm }}%/yr money-market &amp; {{ cost }} bps costs ·
       <span class="text-slate-500">always-in</span> →
       <span class="text-slate-600">old</span> (200-day SMA) →
-      <span class="text-slate-600">new</span> (Vol-target: inverse-vol sizing)</span></div>
+      <span class="text-slate-600">new</span> (Vol-target)</span></div>
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
     {{ card('Max drawdown', 'maxdd', true, 'Worst peak-to-trough of the sector index.&#10;&#10;always-in → old (200-SMA) → new (vol-target). Shallower (less negative) is better; vol-targeting de-risks into turbulence, before the slow MA reacts.') }}
     {{ card('Sortino', 'sortino', false, 'Downside-risk-adjusted return (√252, rf 0) — the best fit for a downside filter.&#10;&#10;always-in → old → new. Higher is better; scaling size down in high-vol regimes should lift this most.') }}

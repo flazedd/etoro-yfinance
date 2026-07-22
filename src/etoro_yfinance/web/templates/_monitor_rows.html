@@ -1,4 +1,4 @@
-{% import "_monitor_macros.html" as mm %}
+{% import "_monitor_macros.html" as mac %}
 {# Sortable header. Every column toggles asc<->desc (sort.js); Instruments carries
    data-sort-default="desc" so the table loads sorted by instrument count, high→low. #}
 {% macro sth(label, num=false, default=false, tip='') %}
@@ -9,8 +9,17 @@
 
 {% if computing %}
 <div class="text-xs px-3 py-2 border-b border-amber-200 bg-amber-50 text-amber-700"
-     hx-get="/monitor/rows?variant={{ variant }}" hx-trigger="load delay:1000ms" hx-target="#monitor-rows" hx-swap="innerHTML">
+     hx-get="/monitor/rows?variant={{ variant }}&mm={{ mm }}&cost={{ cost }}" hx-trigger="load delay:1000ms" hx-target="#monitor-rows" hx-swap="innerHTML">
   Computing sector indices from the price store… rows fill in as each sector finishes.
+</div>
+{% endif %}
+
+{% if sectors and net and net.n %}
+<div class="text-xs px-3 py-2 border-b border-slate-100 text-slate-500">
+  At <b>{{ mm }}%/yr</b> money-market yield and <b>{{ cost }} bps</b> costs, the
+  <b>{{ filter_labels[variant] }}</b> filter (equity + money-market) net-beats buy-and-hold in
+  <b class="{{ 'text-emerald-600' if net.profitable * 2 > net.n else 'text-slate-600' }}">{{ net.profitable }} / {{ net.n }}</b> sectors{% if net.median is not none %}
+  · median edge <b class="{{ 'text-emerald-600' if net.median > 0 else 'text-rose-600' }}">{{ '%+.1f%%'|format(net.median * 100) }}/yr</b>{% endif %}.
 </div>
 {% endif %}
 
@@ -32,11 +41,12 @@
       {{ sth('Sharpe f/a', num=true, tip='filtered / always-in Sharpe (rf = 0, ×√252). Sorts on filtered.') }}
       {{ sth('Sortino f/a', num=true, tip='filtered / always-in Sortino (downside deviation only). Sorts on filtered.') }}
       {{ sth('Max DD f/a', num=true, tip='filtered / always-in max drawdown (worst peak-to-trough). Sorts on filtered; shallower — less negative — is better.') }}
+      {{ sth('MM edge', num=true, tip='Net annual return of the selected filter (idle cash earns the money-market yield, minus transaction costs on turnover) minus buy-and-hold. ✓ positive = using the filter + money-market fund is profitable vs just holding. Set the yield & cost in the header.') }}
       <th class="px-3 py-2 font-medium">Chart</th>
     </tr>
   </thead>
   <tbody class="divide-y divide-slate-100">
-    {% for s in sectors %}{{ mm.sectorrow(s, variant) }}{% endfor %}
+    {% for s in sectors %}{{ mac.sectorrow(s, variant) }}{% endfor %}
   </tbody>
 </table>
 {% endif %}

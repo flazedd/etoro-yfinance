@@ -32,6 +32,11 @@
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['sharpe_' ~ variant] if m['sharpe_' ~ variant] is not none else '' }}">{{ metric(m['sharpe_' ~ variant], m['sharpe_always'], false) }}</td>
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['sortino_' ~ variant] if m['sortino_' ~ variant] is not none else '' }}">{{ metric(m['sortino_' ~ variant], m['sortino_always'], false) }}</td>
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['maxdd_' ~ variant] if m['maxdd_' ~ variant] is not none else '' }}">{{ metric(m['maxdd_' ~ variant], m['maxdd_always'], true) }}</td>
+  <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ s.net.edge if s.net else '' }}">
+    {% if s.net %}<span class="{{ 'text-emerald-600' if s.net.edge > 0 else 'text-rose-600' }}"
+        data-tip="net {{ '%.1f%%'|format(s.net.net * 100) }}/yr (filter + money-market) vs buy-and-hold {{ '%.1f%%'|format(s.net.always * 100) }}/yr">{{ '✓' if s.net.edge > 0 else '✗' }} {{ '%+.1f%%'|format(s.net.edge * 100) }}</span>
+    {% else %}<span class="text-slate-300">—</span>{% endif %}
+  </td>
   <td class="px-3 py-2 whitespace-nowrap">
     {% if s.date_from %}
       <button class="chart-btn" hx-get="/monitor/chart?sector={{ s.name | urlencode }}&variant={{ variant }}"

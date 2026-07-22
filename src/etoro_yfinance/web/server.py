@@ -696,14 +696,27 @@ def create_app() -> FastAPI:
     def _monitor_variant(variant: str) -> str:
         return variant if variant in monitor_mod.FILTERS else "sma"  # proven filter is the default
 
-    def _monitor_rows_ctx(variant: str = "sma") -> dict[str, Any]:
+    def _monitor_rows_ctx(variant: str = "sma", mm: float = 2.0, cost: float = 20.0) -> dict[str, Any]:
         variant = _monitor_variant(variant)
-        sectors = monitor_mod.list_summaries()
+        sectors, edges = [], []
+        for name in monitor_mod.list_sectors():
+            doc = monitor_mod.load_cache(name)  # one read; drives summary + net metrics
+            summ = monitor_mod.summarize(name, doc)
+            net_metrics = monitor_mod.sector_metrics_net((doc or {}).get("series"), mm, cost)
+            if any(v is not None for v in net_metrics.values()):
+                summ["metrics"] = net_metrics  # all f/a columns + scorecard are now net
+            edge = monitor_mod.net_edge(summ["metrics"], variant)
+            summ["net"] = edge
+            sectors.append(summ)
+            edges.append(edge)
         return {
             "sectors": sectors,
             "computing": monitor_job["running"],
             "scorecard": monitor_mod.filter_scorecard(sectors),
+            "net": monitor_mod.net_summary(edges),
             "variant": variant,
+            "mm": mm,
+            "cost": cost,
             "filters": monitor_mod.FILTERS,
             "filter_labels": monitor_mod.FILTER_LABELS,
         }
@@ -713,22 +726,28 @@ def create_app() -> FastAPI:
         return resp
 
     @app.get("/monitor", response_class=HTMLResponse)
-    def monitor_page(request: Request, variant: str = "sma") -> HTMLResponse:
+    def monitor_page(
+        request: Request, variant: str = "sma", mm: float = 2.0, cost: float = 20.0
+    ) -> HTMLResponse:
         if not monitor_mod.has_any_cache():
             _start_monitor_job()  # compute every sector's timeseries by default on first visit
-        return page(request, "monitor.html", {"active": "monitor", **_monitor_rows_ctx(variant)})
+        return page(request, "monitor.html", {"active": "monitor", **_monitor_rows_ctx(variant, mm, cost)})
 
     @app.get("/monitor/rows", response_class=HTMLResponse)
-    def monitor_rows(request: Request, variant: str = "sma") -> HTMLResponse:
-        # Polled while a compute runs / swapped by the filter toggle; carries its
-        # own poll trigger and out-of-band refreshes of the scorecard + controls.
-        return page(request, "_monitor_poll.html", _monitor_rows_ctx(variant))
+    def monitor_rows(
+        request: Request, variant: str = "sma", mm: float = 2.0, cost: float = 20.0
+    ) -> HTMLResponse:
+        # Polled while a compute runs / swapped by the filter toggle or cost inputs;
+        # carries its poll trigger and OOB refreshes of the scorecard + controls.
+        return page(request, "_monitor_poll.html", _monitor_rows_ctx(variant, mm, cost))
 
     @app.post("/monitor/run", response_class=HTMLResponse)
-    def monitor_run(request: Request, variant: str = "sma") -> HTMLResponse:
+    def monitor_run(
+        request: Request, variant: str = "sma", mm: float = 2.0, cost: float = 20.0
+    ) -> HTMLResponse:
         started = _start_monitor_job()
         msg = "Recomputing all sector indices…" if started else "A compute is already running…"
-        return _toast(page(request, "_monitor_poll.html", _monitor_rows_ctx(variant)), msg)
+        return _toast(page(request, "_monitor_poll.html", _monitor_rows_ctx(variant, mm, cost)), msg)
 
     @app.get("/monitor/chart", response_class=HTMLResponse)
     def monitor_chart(request: Request, sector: str = "", variant: str = "sma") -> HTMLResponse:

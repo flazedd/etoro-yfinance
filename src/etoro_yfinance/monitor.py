@@ -407,13 +407,12 @@ def _default_doc(name: str) -> dict[str, Any]:
     }
 
 
-def sector_summary(name: str) -> dict[str, Any]:
-    """The cached derived doc without the (large) series, or a default if uncomputed.
+def summarize(name: str, doc: dict[str, Any] | None) -> dict[str, Any]:
+    """A cached derived doc minus the (large) series, or a default if uncomputed.
 
-    Backfills any metric keys missing from an older cache (written before a new
-    metric was added) with None, so the UI renders it as "—" rather than raising.
+    Backfills any metric/variant keys missing from an older cache (written before
+    a new field was added) so the UI renders "—" rather than raising.
     """
-    doc = load_cache(name)
     if doc is None:
         return _default_doc(name)
     out = {k: v for k, v in doc.items() if k != "series"}
@@ -434,8 +433,84 @@ def sector_summary(name: str) -> dict[str, Any]:
     return out
 
 
+def sector_summary(name: str) -> dict[str, Any]:
+    return summarize(name, load_cache(name))
+
+
 def list_summaries() -> list[dict[str, Any]]:
     return [sector_summary(s) for s in list_sectors()]
+
+
+def _series_streams(series: list[dict[str, Any]]) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    """From the cached series: the buy-and-hold daily return and the position
+    path held each day (lagged one day, no lookahead) for each filter — `sma`
+    (100%/0% by trend) and `vol` (the stored exposure)."""
+    idx = np.array([s["index"] for s in series], dtype="float64")
+    n = len(idx)
+    prev = np.where(idx[:-1] == 0, np.nan, idx[:-1])
+    ret = np.zeros(n, dtype="float64")
+    ret[1:] = np.nan_to_num(idx[1:] / prev - 1.0)
+    sma_raw = np.array([1.0 if s.get("trend_label") == "bull" else 0.0 for s in series])
+    vol_raw = np.array([(s.get("exposure") or 0.0) for s in series], dtype="float64")
+    pos = {}
+    for name, raw in (("sma", sma_raw), ("vol", vol_raw)):
+        p = np.empty(n, dtype="float64")
+        p[0], p[1:] = 0.0, raw[:-1]  # position set on the prior close
+        pos[name] = p
+    return ret, pos
+
+
+def sector_metrics_net(
+    series: list[dict[str, Any]] | None, mm_pct: float, cost_bps: float
+) -> dict[str, float | None]:
+    """All CAGR/Sharpe/Sortino/max-DD, net of the money-market yield and turnover
+    costs, computed at render time from the cached series.
+
+    `always` is pure buy-and-hold (fully invested, no cash leg, no trades → cost
+    /yield-free). The `sma` and `vol` streams credit idle cash a `mm_pct` %/yr
+    money-market yield and charge `cost_bps` on every dollar of turnover
+    (|Δposition|) — the switches of the bull/bear filter *and* the daily resizing
+    of the vol filter both pay it."""
+    if not series or len(series) < 2:
+        return dict.fromkeys(METRIC_KEYS)
+    ret, pos = _series_streams(series)
+    mm_daily = (1.0 + mm_pct / 100.0) ** (1.0 / TRADING_DAYS_YR) - 1.0
+    c = cost_bps / 1e4
+    streams = {"always": ret}
+    for name, p in pos.items():
+        turnover = np.abs(np.diff(p, prepend=0.0))
+        streams[name] = p * ret + (1.0 - p) * mm_daily - turnover * c
+    out: dict[str, float | None] = dict.fromkeys(METRIC_KEYS)
+    for variant, stream in streams.items():
+        m = _stream_metrics(stream)
+        for fam in _METRIC_FAMILIES:
+            out[f"{fam}_{variant}"] = _num(m[fam], 6)
+    return out
+
+
+def net_edge(
+    metrics: dict[str, float | None] | None, variant: str
+) -> dict[str, float] | None:
+    """Net profitability of a filter vs buy-and-hold, from a net-metrics dict:
+    net CAGR, the buy-and-hold CAGR, and the edge (positive = the filter +
+    money-market fund beats just holding)."""
+    if not metrics:
+        return None
+    net, base = metrics.get(f"cagr_{variant}"), metrics.get("cagr_always")
+    if net is None or base is None:
+        return None
+    return {"net": net, "always": base, "edge": round(net - base, 6)}
+
+
+def net_summary(edges: list[dict[str, float] | None]) -> dict[str, Any]:
+    """Aggregate the per-sector net edges: how many sectors the filter is
+    net-profitable in, and the median edge."""
+    vals = [e["edge"] for e in edges if e is not None]
+    return {
+        "n": len(vals),
+        "profitable": sum(1 for e in vals if e > 0),
+        "median": round(float(np.median(vals)), 6) if vals else None,
+    }
 
 
 def filter_scorecard(summaries: list[dict[str, Any]]) -> dict[str, Any]:

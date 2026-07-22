@@ -146,6 +146,54 @@ def test_group_metrics_without_vol_exposure_yields_none() -> None:
     assert m["sharpe_vol"] is None  # no vol_exposure column → vol keys None
 
 
+def _mkseries(index: list[float], trend: list[str]) -> list[dict]:  # type: ignore[type-arg]
+    return [
+        {"date": f"2020-01-{i + 1:02d}", "index": index[i], "trend_label": trend[i],
+         "exposure": 1.0 if trend[i] == "bull" else 0.0}
+        for i in range(len(index))
+    ]
+
+
+def test_net_metrics_credit_mm_yield_and_charge_costs() -> None:
+    # Index rises then falls; sma sits in cash for the back half (bear).
+    series = _mkseries(
+        [100.0, 110.0, 121.0, 121.0, 110.0, 100.0],
+        ["bull", "bull", "bull", "bear", "bear", "bear"],
+    )
+    free = mon.sector_metrics_net(series, mm_pct=0.0, cost_bps=0.0)
+    yielded = mon.sector_metrics_net(series, mm_pct=10.0, cost_bps=0.0)
+    costly = mon.sector_metrics_net(series, mm_pct=10.0, cost_bps=50.0)
+    # A money-market yield on the cash (bear) leg raises net CAGR; costs lower it.
+    assert yielded["cagr_sma"] > free["cagr_sma"]
+    assert costly["cagr_sma"] < yielded["cagr_sma"]
+    # always-in is pure buy-and-hold — untouched by yield/cost, and 0 here (round trip).
+    assert free["cagr_always"] == pytest.approx(0.0)
+    assert yielded["cagr_always"] == pytest.approx(0.0)
+    # every metric key is present
+    assert set(mon.METRIC_KEYS) <= set(yielded)
+
+
+def test_net_edge_from_metrics() -> None:
+    m = {"cagr_sma": 0.08, "cagr_vol": 0.06, "cagr_always": 0.05}
+    assert mon.net_edge(m, "sma")["edge"] == pytest.approx(0.03)
+    assert mon.net_edge(m, "vol")["edge"] == pytest.approx(0.01)
+    assert mon.net_edge({"cagr_sma": None, "cagr_always": 0.05}, "sma") is None
+    assert mon.net_edge(None, "sma") is None
+
+
+def test_net_metrics_none_without_series() -> None:
+    assert all(v is None for v in mon.sector_metrics_net(None, 4.0, 5.0).values())
+    assert all(v is None for v in mon.sector_metrics_net([], 4.0, 5.0).values())
+
+
+def test_net_summary_counts_profitable_sectors() -> None:
+    edges = [{"edge": 0.02}, {"edge": -0.01}, {"edge": 0.005}, None]
+    s = mon.net_summary(edges)
+    assert s["n"] == 3
+    assert s["profitable"] == 2
+    assert s["median"] == pytest.approx(round(float(np.median([0.02, -0.01, 0.005])), 6))
+
+
 def test_filter_scorecard() -> None:
     def mk(sma, always, vol, dd_sma, dd_a, dd_vol, has_data=True):  # type: ignore[no-untyped-def]
         return {
