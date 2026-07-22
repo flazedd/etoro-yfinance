@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Monitor{% endblock %}
+{% block main_class %}mx-auto max-w-none{% endblock %}
+{% block content %}
+<script src="/static/lightweight-charts.standalone.production.js"></script>
+
+<div class="flex items-end justify-between mb-4">
+  <div>
+    <h1 class="text-xl font-semibold">Regime monitor</h1>
+    <p class="text-sm text-slate-500" style="max-width:880px">Each sector is the equal-weighted index of its constituents; a day
+      is <b class="text-emerald-600">bull</b> above the index's 200-day moving average, <b class="text-rose-600">bear</b> below.
+      The <b>filtered</b> book holds only after a bull day (cash after bear); <b>always-in</b> stays invested throughout.
+      Research only — survivorship bias flatters every figure.</p>
+  </div>
+  <div id="monitor-controls" class="shrink-0">
+    {% include "_monitor_controls.html" %}
+  </div>
+</div>
+
+<div id="monitor-scorecard">
+  {% include "_monitor_scorecard.html" %}
+</div>
+
+<div id="monitor-rows" class="bg-white rounded-lg border border-slate-200 overflow-auto">
+  {% include "_monitor_rows.html" %}
+</div>
+<div id="chart-modal"></div>
+<div id="monitor-toast"></div>
+
+<script>
+  // Toasts driven by the HX-Trigger response header ({"monitorToast": "..."}).
+  document.body.addEventListener('monitorToast', function (e) {
+    var t = document.getElementById('monitor-toast');
+    var msg = e.detail && (e.detail.value !== undefined ? e.detail.value : e.detail);
+    t.textContent = msg || '';
+    t.className = 'show';
+    clearTimeout(window.__monToast);
+    window.__monToast = setTimeout(function () { t.className = ''; }, 3500);
+  });
+</script>
+{% endblock %}

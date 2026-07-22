@@ -3,5 +3,5 @@
 {% import "_facets.html" as facets %}
 {{ facets.sel('asset_type', 'all types', types, asset_type, oob=true) }}
 {{ facets.sel('status', 'any status', statuses, status, oob=true) }}
-{% if sectors %}{{ facets.sel('sector', 'all sectors', sectors, sector, extra=' max-w-56', oob=true) }}{% endif %}
-{{ facets.sel('view', 'view: all ({:,})'.format(all_count), view_counts, view, prefix='view: ', extra=' bg-slate-50', oob=true) }}
+{% if sectors %}{{ facets.sel('sector', 'all sectors', sectors, sector, oob=true) }}{% endif %}
+{{ facets.sel('view', 'view: all ({:,})'.format(all_count), view_counts, view, prefix='view: ', extra=' w-40 bg-slate-50', oob=true) }}

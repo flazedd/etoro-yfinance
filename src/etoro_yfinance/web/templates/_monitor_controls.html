@@ -1,0 +1,15 @@
+{# Filter toggle (old 200-SMA ⇄ new Band) + Run update. Re-rendered out-of-band
+   with the rows so the active state stays in sync with the table/chart. #}
+<div class="flex items-center gap-2">
+  <div class="inline-flex rounded-md border border-slate-300 overflow-hidden text-xs"
+       data-tip="Filter used for the Label, Since and f/a columns and the charts.&#10;&#10;200-SMA: fully in when the index is above its 200-day average, cash when below.&#10;Vol-target: same trend gate, but sizes the position inversely to recent volatility — de-risks in turbulence, full in calm.">
+    {% for f in filters %}
+    <button hx-get="/monitor/rows?variant={{ f }}" hx-target="#monitor-rows" hx-swap="innerHTML"
+            class="px-3 py-1.5 font-medium {{ 'bg-slate-800 text-white' if variant == f else 'bg-white text-slate-600 hover:bg-slate-50' }}">
+      {{ filter_labels[f] }} <span class="{{ 'text-slate-300' if variant == f else 'text-slate-400' }}">{{ 'old' if f == 'sma' else 'new' }}</span>
+    </button>
+    {% endfor %}
+  </div>
+  <button class="rules-btn" hx-post="/monitor/run?variant={{ variant }}" hx-target="#monitor-rows" hx-swap="innerHTML"
+          data-tip="Recompute all sector indices from the price store (background; rows refresh as it goes).">Run update</button>
+</div>

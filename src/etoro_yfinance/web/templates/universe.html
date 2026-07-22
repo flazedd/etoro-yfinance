@@ -41,16 +41,15 @@
   {% endfor %}
 </div>
 
-<form class="flex flex-wrap gap-3 items-center mb-3"
+<form class="flex flex-wrap gap-3 items-end mb-3"
       hx-get="/universe/rows" hx-target="#rows-wrap" hx-trigger="input changed delay:200ms, change"
       hx-push-url="false">
   <input name="q" value="{{ q }}" placeholder="search eToro symbol / name / yfinance ticker"
          class="border border-slate-300 rounded-md px-3 py-1.5 text-sm w-80">
-  {{ facets.sel('asset_type', 'all types', types, asset_type) }}
-  {{ facets.sel('status', 'any status', statuses, status) }}
-  {% if sectors %}{{ facets.sel('sector', 'all sectors', sectors, sector, extra=' max-w-56') }}{% endif %}
-  {{ facets.sel('view', 'view: all ({:,})'.format(all_count), view_counts, view, prefix='view: ', extra=' bg-slate-50') }}
-  <button type="button" class="chart-btn" hx-get="/universe/new" hx-target="#chart-modal">+ create universe</button>
+  {{ facets.sel('asset_type', 'all types', types, asset_type, badge='eToro', badge_class='src-etoro') }}
+  {{ facets.sel('status', 'any status', statuses, status, badge='derived', badge_class='src-derived') }}
+  {% if sectors %}{{ facets.sel('sector', 'all sectors', sectors, sector, badge='derived', badge_class='src-derived') }}{% endif %}
+  {{ facets.sel('view', 'view: all ({:,})'.format(all_count), view_counts, view, prefix='view: ', extra=' w-40 bg-slate-50', badge='derived', badge_class='src-derived') }}
   <input type="number" name="min_adv" value="{{ min_adv or '' }}" placeholder="min €/day liquidity"
          min="0" step="100000"
          class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-40">
@@ -58,6 +57,7 @@
     <input type="checkbox" name="show_internal" value="true" {{ 'checked' if show_internal }}>
     show internal
   </label>
+  <button type="button" class="chart-btn ml-auto" hx-get="/universe/new" hx-target="#chart-modal">+ create universe</button>
 </form>
 
 <div id="rows-wrap" data-sortable-wrap class="bg-white rounded-lg border border-slate-200 overflow-auto max-h-[75vh] tbl-box">

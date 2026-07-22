@@ -17,7 +17,7 @@ from datetime import date
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import FastAPI, Form, Query, Request
+from fastapi import FastAPI, Form, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -673,6 +673,91 @@ def create_app() -> FastAPI:
     @app.get("/api/diagnostics")
     def api_diagnostics() -> JSONResponse:
         return JSONResponse(_diag())
+
+    # ── monitor (regime bull/bear from a 200-day MA) ─────────────────────────
+    from etoro_yfinance import monitor as monitor_mod
+
+    # A single background recompute of every sector index (~a few seconds).
+    monitor_job = {"running": False}
+
+    def _monitor_worker() -> None:
+        try:
+            monitor_mod.run_daily_update()
+        finally:
+            monitor_job["running"] = False
+
+    def _start_monitor_job() -> bool:
+        if monitor_job["running"]:
+            return False
+        monitor_job["running"] = True
+        threading.Thread(target=_monitor_worker, daemon=True).start()
+        return True
+
+    def _monitor_variant(variant: str) -> str:
+        return variant if variant in monitor_mod.FILTERS else "sma"  # proven filter is the default
+
+    def _monitor_rows_ctx(variant: str = "sma") -> dict[str, Any]:
+        variant = _monitor_variant(variant)
+        sectors = monitor_mod.list_summaries()
+        return {
+            "sectors": sectors,
+            "computing": monitor_job["running"],
+            "scorecard": monitor_mod.filter_scorecard(sectors),
+            "variant": variant,
+            "filters": monitor_mod.FILTERS,
+            "filter_labels": monitor_mod.FILTER_LABELS,
+        }
+
+    def _toast(resp: HTMLResponse, msg: str) -> HTMLResponse:
+        resp.headers["HX-Trigger"] = json.dumps({"monitorToast": msg})
+        return resp
+
+    @app.get("/monitor", response_class=HTMLResponse)
+    def monitor_page(request: Request, variant: str = "sma") -> HTMLResponse:
+        if not monitor_mod.has_any_cache():
+            _start_monitor_job()  # compute every sector's timeseries by default on first visit
+        return page(request, "monitor.html", {"active": "monitor", **_monitor_rows_ctx(variant)})
+
+    @app.get("/monitor/rows", response_class=HTMLResponse)
+    def monitor_rows(request: Request, variant: str = "sma") -> HTMLResponse:
+        # Polled while a compute runs / swapped by the filter toggle; carries its
+        # own poll trigger and out-of-band refreshes of the scorecard + controls.
+        return page(request, "_monitor_poll.html", _monitor_rows_ctx(variant))
+
+    @app.post("/monitor/run", response_class=HTMLResponse)
+    def monitor_run(request: Request, variant: str = "sma") -> HTMLResponse:
+        started = _start_monitor_job()
+        msg = "Recomputing all sector indices…" if started else "A compute is already running…"
+        return _toast(page(request, "_monitor_poll.html", _monitor_rows_ctx(variant)), msg)
+
+    @app.get("/monitor/chart", response_class=HTMLResponse)
+    def monitor_chart(request: Request, sector: str = "", variant: str = "sma") -> HTMLResponse:
+        if sector not in monitor_mod.sector_tickers():
+            return page(request, "_monitor_chart.html", {"g": {}, "error": "sector not found"})
+        doc = monitor_mod.load_cache(sector)
+        ctx = {
+            "g": monitor_mod.sector_summary(sector),
+            "series": (doc or {}).get("series", []),
+            "variant": _monitor_variant(variant),
+            "filter_labels": monitor_mod.FILTER_LABELS,
+        }
+        return page(request, "_monitor_chart.html", ctx)
+
+    # ── monitor JSON API ──────────────────────────────────────────────────────
+    @app.get("/api/sectors")
+    def api_sectors() -> JSONResponse:
+        return JSONResponse(monitor_mod.list_summaries())
+
+    @app.get("/api/sectors/series")
+    def api_sector_series(sector: str = "") -> JSONResponse:
+        try:
+            return JSONResponse(monitor_mod.sector_series(sector))
+        except monitor_mod.NotFoundError as e:
+            raise HTTPException(status_code=404, detail=str(e)) from e
+
+    @app.post("/api/run")
+    def api_run() -> JSONResponse:
+        return JSONResponse(monitor_mod.run_daily_update())
 
     @app.get("/healthz")
     def healthz() -> dict[str, bool]:

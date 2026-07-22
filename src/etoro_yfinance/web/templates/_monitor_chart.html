@@ -1,0 +1,92 @@
+<div class="chart-backdrop" onclick="if(event.target===this)document.getElementById('chart-modal').innerHTML=''">
+  <div class="chart-card" style="width:min(1200px,97vw);max-height:94vh;overflow:auto">
+    {% set st = g.variants[variant] if (g.variants is defined and variant) else None %}
+    <div class="flex items-start justify-between mb-1">
+      <div class="text-sm">
+        <span class="font-semibold">{{ g.name }}</span>
+        {% if g.count is defined %}<span class="badge bg-slate-100 text-slate-500 ml-1">{{ '{:,}'.format(g.count) }} instruments{% if g.n_used is not none and g.n_used != g.count %} · {{ g.n_used }} with data{% endif %}</span>{% endif %}
+        {% if variant %}<span class="badge bg-slate-100 text-slate-600 ml-1">{{ filter_labels[variant] }}</span>{% endif %}
+        {% if g.date_from %}<span class="text-slate-400 ml-2">{{ g.date_from }} → {{ g.date_to }}</span>{% endif %}
+        {% if st and st.label == 'bear' %}<span class="badge bg-rose-100 text-rose-700 ml-2">BEAR since {{ st.since }}</span>
+        {% elif st and st.label %}<span class="badge bg-emerald-100 text-emerald-700 ml-2">BULL since {{ st.since }}</span>{% endif %}
+      </div>
+      <button class="text-slate-400 hover:text-slate-700 text-lg leading-none px-1"
+              onclick="document.getElementById('chart-modal').innerHTML=''">&times;</button>
+    </div>
+
+    {% if error %}
+      <div class="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">{{ error }}</div>
+    {% elif not series %}
+      <div class="text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded p-3">
+        No data yet for <b>{{ g.name }}</b>. Press <b>Run update</b>.
+      </div>
+    {% else %}
+    <div class="flex items-center text-xs text-slate-500 mb-2" style="gap:16px">
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:#2563eb;display:inline-block"></span>Index</span>
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:#f59e0b;display:inline-block"></span>200-day MA</span>
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:rgba(16,185,129,.16);display:inline-block;border-radius:2px"></span>Bull</span>
+      <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:rgba(244,63,94,.18);display:inline-block;border-radius:2px"></span>Bear</span>
+      {% if variant == 'vol' %}<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:rgba(14,165,233,.35);display:inline-block;border-radius:2px"></span>Exposure (0–100%)</span>{% endif %}
+      <span class="text-slate-400">log scale</span>
+    </div>
+    <div id="mon-chart" style="height:440px"></div>
+    <script type="application/json" id="mon-data">{{ series | tojson }}</script>
+    <script>
+      (function () {
+        var data = JSON.parse(document.getElementById('mon-data').textContent);
+        var VARIANT = {{ variant | tojson }};        // 'sma' | 'vol'
+        if (!window.LightweightCharts) return;
+        var LWC = LightweightCharts;
+        var chart = LWC.createChart(document.getElementById('mon-chart'), {
+          autoSize: true,
+          layout: { background: { type: 'solid', color: '#ffffff' }, textColor: '#64748b', fontSize: 11 },
+          grid: { vertLines: { visible: false }, horzLines: { color: '#f1f5f9' } },
+          rightPriceScale: { borderVisible: false, mode: LWC.PriceScaleMode.Logarithmic },
+          timeScale: { borderVisible: false, minBarSpacing: 0 },
+          crosshair: { horzLine: { visible: false } },
+        });
+        if (window.LWCReset) LWCReset(chart);
+
+        // Regime coloring behind the lines: green on bull days, red on bear days,
+        // per the SELECTED filter's label. Two continuous area fills (0/1) keep
+        // opacity constant at any zoom (unlike a gapped histogram).
+        function band(color, lab) {
+          var s = chart.addSeries(LWC.AreaSeries, {
+            priceScaleId: 'regime', lineColor: 'rgba(0,0,0,0)',
+            topColor: color, bottomColor: color,
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          });
+          s.setData(data.map(function (d) { return { time: d.date, value: d.trend_label === lab ? 1 : 0 }; }));
+        }
+        band('rgba(16,185,129,0.13)', 'bull');   // both variants share the 200-SMA trend shading
+        band('rgba(244,63,94,0.15)', 'bear');
+        chart.priceScale('regime').applyOptions({ scaleMargins: { top: 0, bottom: 0 }, visible: false });
+
+        // Vol-target: overlay the position size (0..1) as a blue area pinned to the
+        // bottom strip, so you can see it de-risk in turbulence and rebuild in calm.
+        if (VARIANT === 'vol') {
+          var exp = chart.addSeries(LWC.AreaSeries, {
+            priceScaleId: 'exp', lineColor: '#0ea5e9', lineWidth: 1,
+            topColor: 'rgba(14,165,233,0.28)', bottomColor: 'rgba(14,165,233,0.03)',
+            priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+          });
+          exp.setData(data.map(function (d) { return { time: d.date, value: d.exposure }; }));
+          chart.priceScale('exp').applyOptions({ scaleMargins: { top: 0.74, bottom: 0 }, visible: false });
+        }
+
+        function line(color, pts, w) {
+          var s = chart.addSeries(LWC.LineSeries, { color: color, lineWidth: w || 2, priceLineVisible: false, lastValueVisible: false });
+          s.setData(pts); return s;
+        }
+        var maPts = data.filter(function (d) { return d.ma_200 !== null; });
+        line('#f59e0b', maPts.map(function (d) { return { time: d.date, value: d.ma_200 }; }), 1);
+        line('#2563eb', data.map(function (d) { return { time: d.date, value: d.index }; }), 2);
+        chart.timeScale().fitContent();
+      })();
+    </script>
+    <p class="text-xs text-slate-400 mt-2">Green/red shading is the 200-day-MA trend (bull ≥ MA, bear below).
+      {% if variant == 'vol' %}The blue strip is the <b>vol-targeted position size</b> — full in calm bull markets, scaled down as volatility rises (and 0 in bear), so it de-risks into turbulence before the slow MA reacts.{% else %}The <b>200-SMA</b> filter is fully in on bull days and in cash the day after a bear day.{% endif %}
+      Survivorship bias flatters this history.</p>
+    {% endif %}
+  </div>
+</div>

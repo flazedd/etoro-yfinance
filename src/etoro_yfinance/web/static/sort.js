@@ -68,12 +68,32 @@
     if (wrap && wrap.dataset) wrap.dataset.sortState = idx + ":" + type + ":" + dir;
   });
 
-  // After HTMX swaps a fresh table in, re-apply the remembered sort.
+  // Apply the remembered sort if there is one, else the table's declared default
+  // (a th[data-sort-default="asc|desc"]). Records the choice so it survives swaps.
+  function initTable(table) {
+    var wrap = table.parentNode;
+    if (wrap && wrap.dataset && wrap.dataset.sortState !== undefined) {
+      var p = wrap.dataset.sortState.split(":");
+      apply(table, parseInt(p[0], 10), p[1], p[2]);
+      return;
+    }
+    var dth = table.querySelector("th[data-sort-default]");
+    if (!dth) return;
+    var idx = Array.prototype.indexOf.call(dth.parentNode.children, dth);
+    var type = dth.dataset.type === "num" ? "num" : "text";
+    var dir = dth.dataset.sortDefault === "asc" ? "asc" : "desc";
+    apply(table, idx, type, dir);
+    if (wrap && wrap.dataset) wrap.dataset.sortState = idx + ":" + type + ":" + dir;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("table.sortable").forEach(initTable);
+  });
+
+  // After HTMX swaps a fresh table in, re-apply the remembered sort (or default).
   document.body.addEventListener("htmx:afterSwap", function (e) {
     var wrap = e.target;
-    if (!wrap || !wrap.dataset || wrap.dataset.sortState === undefined) return;
-    var parts = wrap.dataset.sortState.split(":");
-    var table = wrap.querySelector("table.sortable");
-    if (table) apply(table, parseInt(parts[0], 10), parts[1], parts[2]);
+    var table = wrap && wrap.querySelector ? wrap.querySelector("table.sortable") : null;
+    if (table) initTable(table);
   });
 })();

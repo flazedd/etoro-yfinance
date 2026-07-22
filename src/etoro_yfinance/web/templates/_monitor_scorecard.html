@@ -1,0 +1,35 @@
+{# Regime-filter scorecard, A/B: does the new vol-targeted variant beat the old
+   raw 200-SMA cross? Median across sectors: always-in → old (200-SMA) → new
+   (vol-target), plus the share of sectors where the new filter beats the old.
+   Drawdown + Sortino matter most for a downside filter; CAGR is the return cost. #}
+{% if scorecard and scorecard.n %}
+{% macro fmt(v, pct) %}{% if v is none %}—{% elif pct %}{{ '%.1f%%'|format(v * 100) }}{% else %}{{ '%.2f'|format(v) }}{% endif %}{% endmacro %}
+{% macro card(title, fam, pct, tip) %}
+  {% set sc = scorecard[fam] %}
+  {% set old_ok = sc.sma is not none and sc.always is not none and sc.sma > sc.always %}
+  {% set new_ok = sc.vol is not none and sc.sma is not none and sc.vol > sc.sma %}
+  <div class="bg-white rounded-lg border border-slate-200 px-3 py-2">
+    <div class="text-xs text-slate-500" data-tip="{{ tip }}">{{ title }} <span class="text-slate-300">ⓘ</span></div>
+    <div class="text-sm font-semibold tabular" style="white-space:nowrap">
+      <span class="text-slate-400">{{ fmt(sc.always, pct) }}</span><span class="text-slate-300"> → </span><span class="{{ 'text-emerald-600' if old_ok else 'text-rose-600' }}">{{ fmt(sc.sma, pct) }}</span><span class="text-slate-300"> → </span><span class="{{ 'text-emerald-600' if new_ok else 'text-rose-600' }}">{{ fmt(sc.vol, pct) }}</span>
+    </div>
+    <div class="text-xs text-slate-400">
+      new beats old in
+      <b class="{{ 'text-emerald-600' if (sc.beats or 0) >= 0.5 else 'text-slate-500' }}">{{ (sc.beats * 100) | round | int if sc.beats is not none else '—' }}%</b>
+    </div>
+  </div>
+{% endmacro %}
+<div class="mb-4">
+  <div class="text-xs font-semibold text-slate-500 mb-1">Regime-filter scorecard
+    <span class="font-normal text-slate-400">— median across {{ scorecard.n }} sectors ·
+      <span class="text-slate-500">always-in</span> →
+      <span class="text-slate-600">old</span> (200-day SMA) →
+      <span class="text-slate-600">new</span> (Vol-target: inverse-vol sizing)</span></div>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    {{ card('Max drawdown', 'maxdd', true, 'Worst peak-to-trough of the sector index.&#10;&#10;always-in → old (200-SMA) → new (vol-target). Shallower (less negative) is better; vol-targeting de-risks into turbulence, before the slow MA reacts.') }}
+    {{ card('Sortino', 'sortino', false, 'Downside-risk-adjusted return (√252, rf 0) — the best fit for a downside filter.&#10;&#10;always-in → old → new. Higher is better; scaling size down in high-vol regimes should lift this most.') }}
+    {{ card('Sharpe', 'sharpe', false, 'Volatility-adjusted return (√252, rf 0).&#10;&#10;Cutting exposure when volatility is high (and poorly rewarded) is close to a mechanical Sharpe improver — this is the headline test for vol-targeting.') }}
+    {{ card('CAGR (return cost)', 'cagr', true, 'Annualised return. The vol brake re-risks in calm uptrends, so it should give back less return than the binary cross — the CAGR cost should shrink.') }}
+  </div>
+</div>
+{% endif %}

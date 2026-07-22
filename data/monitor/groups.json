@@ -1,0 +1,650 @@
+{
+ "groups": [
+  {
+   "id": 1,
+   "name": "Bank Loan",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495335+00:00",
+   "members": [
+    {
+     "ticker": "BKLN",
+     "added_at": "2026-07-22T17:59:27.106504+00:00"
+    },
+    {
+     "ticker": "SRLN",
+     "added_at": "2026-07-22T17:59:29.561770+00:00"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Basic Materials",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495349+00:00",
+   "members": []
+  },
+  {
+   "id": 3,
+   "name": "Commodities Broad Basket",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495350+00:00",
+   "members": []
+  },
+  {
+   "id": 4,
+   "name": "Commodities Focused",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495352+00:00",
+   "members": []
+  },
+  {
+   "id": 5,
+   "name": "Communication Services",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495353+00:00",
+   "members": []
+  },
+  {
+   "id": 6,
+   "name": "Communications",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495355+00:00",
+   "members": []
+  },
+  {
+   "id": 7,
+   "name": "Conglomerates",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495356+00:00",
+   "members": []
+  },
+  {
+   "id": 8,
+   "name": "Consumer Cyclical",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495360+00:00",
+   "members": []
+  },
+  {
+   "id": 9,
+   "name": "Consumer Defensive",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495362+00:00",
+   "members": []
+  },
+  {
+   "id": 10,
+   "name": "Consumer Goods",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495363+00:00",
+   "members": []
+  },
+  {
+   "id": 11,
+   "name": "Convertibles",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495364+00:00",
+   "members": []
+  },
+  {
+   "id": 12,
+   "name": "Corporate Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495365+00:00",
+   "members": []
+  },
+  {
+   "id": 13,
+   "name": "Crypto",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495366+00:00",
+   "members": []
+  },
+  {
+   "id": 14,
+   "name": "Defined Outcome",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495367+00:00",
+   "members": []
+  },
+  {
+   "id": 15,
+   "name": "Derivative Income",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495368+00:00",
+   "members": []
+  },
+  {
+   "id": 16,
+   "name": "Diversified Emerging Mkts",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495369+00:00",
+   "members": []
+  },
+  {
+   "id": 17,
+   "name": "Emerging Markets Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495371+00:00",
+   "members": []
+  },
+  {
+   "id": 18,
+   "name": "Energy",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495372+00:00",
+   "members": []
+  },
+  {
+   "id": 19,
+   "name": "Energy Limited Partnership",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495373+00:00",
+   "members": []
+  },
+  {
+   "id": 20,
+   "name": "Equity Digital Assets",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495375+00:00",
+   "members": []
+  },
+  {
+   "id": 21,
+   "name": "Equity Energy",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495376+00:00",
+   "members": []
+  },
+  {
+   "id": 22,
+   "name": "Equity Precious Metals",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495377+00:00",
+   "members": []
+  },
+  {
+   "id": 23,
+   "name": "Europe Stock",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495378+00:00",
+   "members": []
+  },
+  {
+   "id": 24,
+   "name": "Financial",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495379+00:00",
+   "members": []
+  },
+  {
+   "id": 25,
+   "name": "Financial Services",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495380+00:00",
+   "members": []
+  },
+  {
+   "id": 26,
+   "name": "Focused Region",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495381+00:00",
+   "members": []
+  },
+  {
+   "id": 27,
+   "name": "Foreign Large Blend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495382+00:00",
+   "members": []
+  },
+  {
+   "id": 28,
+   "name": "Foreign Large Growth",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495383+00:00",
+   "members": []
+  },
+  {
+   "id": 29,
+   "name": "Foreign Large Value",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495384+00:00",
+   "members": []
+  },
+  {
+   "id": 30,
+   "name": "Foreign Small/Mid Blend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495385+00:00",
+   "members": []
+  },
+  {
+   "id": 31,
+   "name": "Global Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495386+00:00",
+   "members": []
+  },
+  {
+   "id": 32,
+   "name": "Global Bond-USD Hedged",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495387+00:00",
+   "members": []
+  },
+  {
+   "id": 33,
+   "name": "Global Conservative Allocation",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495388+00:00",
+   "members": []
+  },
+  {
+   "id": 34,
+   "name": "Global Large-Stock Blend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495389+00:00",
+   "members": []
+  },
+  {
+   "id": 35,
+   "name": "Global Moderate Allocation",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495390+00:00",
+   "members": []
+  },
+  {
+   "id": 36,
+   "name": "Global Moderately Aggressive Allocation",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495391+00:00",
+   "members": []
+  },
+  {
+   "id": 37,
+   "name": "Global Real Estate",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495392+00:00",
+   "members": []
+  },
+  {
+   "id": 38,
+   "name": "Global Small/Mid Stock",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495393+00:00",
+   "members": []
+  },
+  {
+   "id": 39,
+   "name": "Government Mortgage-Backed Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495394+00:00",
+   "members": []
+  },
+  {
+   "id": 40,
+   "name": "Greater China Region",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495395+00:00",
+   "members": []
+  },
+  {
+   "id": 41,
+   "name": "Health",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495396+00:00",
+   "members": []
+  },
+  {
+   "id": 42,
+   "name": "Healthcare",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495397+00:00",
+   "members": []
+  },
+  {
+   "id": 43,
+   "name": "High Yield Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495398+00:00",
+   "members": []
+  },
+  {
+   "id": 44,
+   "name": "High Yield Muni",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495399+00:00",
+   "members": []
+  },
+  {
+   "id": 45,
+   "name": "India Equity",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495401+00:00",
+   "members": []
+  },
+  {
+   "id": 46,
+   "name": "Industrial Goods",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495402+00:00",
+   "members": []
+  },
+  {
+   "id": 47,
+   "name": "Industrials",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495402+00:00",
+   "members": []
+  },
+  {
+   "id": 48,
+   "name": "Inflation-Protected Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495403+00:00",
+   "members": []
+  },
+  {
+   "id": 49,
+   "name": "Infrastructure",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495404+00:00",
+   "members": []
+  },
+  {
+   "id": 50,
+   "name": "Intermediate Core Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495406+00:00",
+   "members": []
+  },
+  {
+   "id": 51,
+   "name": "Intermediate Core-Plus Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495406+00:00",
+   "members": []
+  },
+  {
+   "id": 52,
+   "name": "Intermediate Government",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495407+00:00",
+   "members": []
+  },
+  {
+   "id": 53,
+   "name": "Japan Stock",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495409+00:00",
+   "members": []
+  },
+  {
+   "id": 54,
+   "name": "Large Blend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495410+00:00",
+   "members": []
+  },
+  {
+   "id": 55,
+   "name": "Large Growth",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495410+00:00",
+   "members": []
+  },
+  {
+   "id": 56,
+   "name": "Large Value",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495411+00:00",
+   "members": []
+  },
+  {
+   "id": 57,
+   "name": "Long Government",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495412+00:00",
+   "members": []
+  },
+  {
+   "id": 58,
+   "name": "Long-Short Equity",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495413+00:00",
+   "members": []
+  },
+  {
+   "id": 59,
+   "name": "Long-Term Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495415+00:00",
+   "members": []
+  },
+  {
+   "id": 60,
+   "name": "Mid-Cap Blend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495416+00:00",
+   "members": []
+  },
+  {
+   "id": 61,
+   "name": "Mid-Cap Growth",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495417+00:00",
+   "members": []
+  },
+  {
+   "id": 62,
+   "name": "Mid-Cap Value",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495418+00:00",
+   "members": []
+  },
+  {
+   "id": 63,
+   "name": "Miscellaneous Sector",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495419+00:00",
+   "members": []
+  },
+  {
+   "id": 64,
+   "name": "Moderately Conservative Allocation",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495420+00:00",
+   "members": []
+  },
+  {
+   "id": 65,
+   "name": "Muni National Interm",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495421+00:00",
+   "members": []
+  },
+  {
+   "id": 66,
+   "name": "Muni National Short",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495422+00:00",
+   "members": []
+  },
+  {
+   "id": 67,
+   "name": "Natural Resources",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495423+00:00",
+   "members": []
+  },
+  {
+   "id": 68,
+   "name": "Nontraditional Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495424+00:00",
+   "members": []
+  },
+  {
+   "id": 69,
+   "name": "Pacific/Asia ex-Japan Stk",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495425+00:00",
+   "members": []
+  },
+  {
+   "id": 70,
+   "name": "Preferred Stock",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495426+00:00",
+   "members": []
+  },
+  {
+   "id": 71,
+   "name": "Real Estate",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495427+00:00",
+   "members": []
+  },
+  {
+   "id": 72,
+   "name": "Securitized Bond - Focused",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495428+00:00",
+   "members": []
+  },
+  {
+   "id": 73,
+   "name": "Services",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495429+00:00",
+   "members": []
+  },
+  {
+   "id": 74,
+   "name": "Short Government",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495430+00:00",
+   "members": []
+  },
+  {
+   "id": 75,
+   "name": "Short-Term Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495431+00:00",
+   "members": []
+  },
+  {
+   "id": 76,
+   "name": "Short-Term Inflation-Protected Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495432+00:00",
+   "members": []
+  },
+  {
+   "id": 77,
+   "name": "Small Blend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495433+00:00",
+   "members": []
+  },
+  {
+   "id": 78,
+   "name": "Small Growth",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495435+00:00",
+   "members": []
+  },
+  {
+   "id": 79,
+   "name": "Small Value",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495436+00:00",
+   "members": []
+  },
+  {
+   "id": 80,
+   "name": "Systematic Trend",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495437+00:00",
+   "members": []
+  },
+  {
+   "id": 81,
+   "name": "Target Maturity",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495438+00:00",
+   "members": []
+  },
+  {
+   "id": 82,
+   "name": "Technology",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495439+00:00",
+   "members": []
+  },
+  {
+   "id": 83,
+   "name": "Trading--Inverse Commodities",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495441+00:00",
+   "members": []
+  },
+  {
+   "id": 84,
+   "name": "Trading--Inverse Debt",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495442+00:00",
+   "members": []
+  },
+  {
+   "id": 85,
+   "name": "Trading--Inverse Equity",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495443+00:00",
+   "members": []
+  },
+  {
+   "id": 86,
+   "name": "Trading--Leveraged Commodities",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495444+00:00",
+   "members": []
+  },
+  {
+   "id": 87,
+   "name": "Trading--Leveraged Debt",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495445+00:00",
+   "members": []
+  },
+  {
+   "id": 88,
+   "name": "Trading--Leveraged Equity",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495446+00:00",
+   "members": []
+  },
+  {
+   "id": 89,
+   "name": "Trading--Miscellaneous",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495447+00:00",
+   "members": []
+  },
+  {
+   "id": 90,
+   "name": "Ultrashort Bond",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495448+00:00",
+   "members": []
+  },
+  {
+   "id": 91,
+   "name": "Utilities",
+   "kind": "sector",
+   "created_at": "2026-07-22T17:52:37.495449+00:00",
+   "members": []
+  }
+ ]
+}

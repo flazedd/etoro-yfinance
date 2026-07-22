@@ -1,0 +1,5 @@
+{# Returned by the poll / filter-toggle / Run-update: rows go to #monitor-rows,
+   and the scorecard + controls refresh out-of-band so everything stays in sync. #}
+{% include "_monitor_rows.html" %}
+<div id="monitor-scorecard" hx-swap-oob="true">{% include "_monitor_scorecard.html" %}</div>
+<div id="monitor-controls" hx-swap-oob="true">{% include "_monitor_controls.html" %}</div>

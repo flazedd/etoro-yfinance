@@ -1,0 +1,45 @@
+{# One <tr> per universe sector, rendered for the selected filter `variant`
+   ('sma' = raw 200-SMA cross, 'band' = hysteresis ±3%). Label/Since and the
+   f/a metric columns all reflect that variant. #}
+
+{% macro metric(filt, always, pct) %}
+  {%- if filt is none or always is none -%}
+    <span class="text-slate-300">—</span>
+  {%- else -%}
+    {%- set tint = 'text-emerald-600' if filt > always else ('text-rose-600' if filt < always else 'text-slate-700') -%}
+    <b class="{{ tint }}" data-tip="filtered / always-in">{{ '%.1f%%'|format(filt * 100) if pct else '%.2f'|format(filt) }}</b><span class="text-slate-400"> / {{ '%.1f%%'|format(always * 100) if pct else '%.2f'|format(always) }}</span>
+  {%- endif -%}
+{% endmacro %}
+
+{% macro sectorrow(s, variant) %}
+{% set m = s.metrics %}
+{% set st = s.variants[variant] %}
+<tr class="hover:bg-slate-50">
+  <td class="px-3 py-2 font-medium" data-sort-value="{{ s.name | lower }}">{{ s.name }}</td>
+  <td class="px-3 py-2 tabular text-xs text-slate-500 whitespace-nowrap" data-sort-value="{{ s.count }}"
+      data-tip="Instruments in this sector, equal-weighted into its index{% if s.n_used is not none %}&#10;&#10;{{ s.n_used }} had price data at the last update{% endif %}">
+    {{ '{:,}'.format(s.count) }}{% if s.n_used is not none and s.n_used != s.count %} <span class="text-slate-400">({{ s.n_used }})</span>{% endif %}
+  </td>
+  <td class="px-3 py-2 whitespace-nowrap" data-sort-value="{{ st.label }}">
+    {% if st.label == 'bear' %}<span class="badge bg-rose-100 text-rose-700">BEAR</span>
+    {% else %}<span class="badge bg-emerald-100 text-emerald-700">BULL</span>{% endif %}
+    {% if variant == 'vol' and st.exposure is not none %}<span class="text-xs text-slate-400 tabular" data-tip="Current vol-targeted position size">{{ (st.exposure * 100) | round | int }}%</span>{% endif %}
+  </td>
+  <td class="px-3 py-2 tabular text-xs text-slate-500" data-sort-value="{{ st.since or '' }}">{{ st.since or '—' }}</td>
+  <td class="px-3 py-2 tabular text-xs text-slate-500" data-sort-value="{{ s.date_from or '' }}">{{ s.date_from or '—' }}</td>
+  <td class="px-3 py-2 tabular text-xs text-slate-500" data-sort-value="{{ s.date_to or '' }}">{{ s.date_to or '—' }}</td>
+  <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['cagr_' ~ variant] if m['cagr_' ~ variant] is not none else '' }}">{{ metric(m['cagr_' ~ variant], m['cagr_always'], true) }}</td>
+  <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['sharpe_' ~ variant] if m['sharpe_' ~ variant] is not none else '' }}">{{ metric(m['sharpe_' ~ variant], m['sharpe_always'], false) }}</td>
+  <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['sortino_' ~ variant] if m['sortino_' ~ variant] is not none else '' }}">{{ metric(m['sortino_' ~ variant], m['sortino_always'], false) }}</td>
+  <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['maxdd_' ~ variant] if m['maxdd_' ~ variant] is not none else '' }}">{{ metric(m['maxdd_' ~ variant], m['maxdd_always'], true) }}</td>
+  <td class="px-3 py-2 whitespace-nowrap">
+    {% if s.date_from %}
+      <button class="chart-btn" hx-get="/monitor/chart?sector={{ s.name | urlencode }}&variant={{ variant }}"
+              hx-target="#chart-modal" hx-swap="innerHTML">▸ View</button>
+    {% else %}
+      <button class="chart-btn" disabled style="opacity:.5;cursor:not-allowed"
+              data-tip="No data yet — computing…">▸ View</button>
+    {% endif %}
+  </td>
+</tr>
+{% endmacro %}
