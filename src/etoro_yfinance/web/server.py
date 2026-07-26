@@ -694,9 +694,11 @@ def create_app() -> FastAPI:
         return True
 
     def _monitor_variant(variant: str) -> str:
-        return variant if variant in monitor_mod.FILTERS else "sma"  # proven filter is the default
+        return variant if variant in monitor_mod.FILTERS else monitor_mod.DEFAULT_FILTER
 
-    def _monitor_rows_ctx(variant: str = "sma", mm: float = 2.0, cost: float = 20.0) -> dict[str, Any]:
+    def _monitor_rows_ctx(
+        variant: str = monitor_mod.DEFAULT_FILTER, mm: float = 2.0, cost: float = 20.0
+    ) -> dict[str, Any]:
         variant = _monitor_variant(variant)
         sectors, edges = [], []
         for name in monitor_mod.list_sectors():
@@ -727,7 +729,7 @@ def create_app() -> FastAPI:
 
     @app.get("/monitor", response_class=HTMLResponse)
     def monitor_page(
-        request: Request, variant: str = "sma", mm: float = 2.0, cost: float = 20.0
+        request: Request, variant: str = monitor_mod.DEFAULT_FILTER, mm: float = 2.0, cost: float = 20.0
     ) -> HTMLResponse:
         if not monitor_mod.has_any_cache():
             _start_monitor_job()  # compute every sector's timeseries by default on first visit
@@ -735,7 +737,7 @@ def create_app() -> FastAPI:
 
     @app.get("/monitor/rows", response_class=HTMLResponse)
     def monitor_rows(
-        request: Request, variant: str = "sma", mm: float = 2.0, cost: float = 20.0
+        request: Request, variant: str = monitor_mod.DEFAULT_FILTER, mm: float = 2.0, cost: float = 20.0
     ) -> HTMLResponse:
         # Polled while a compute runs / swapped by the filter toggle or cost inputs;
         # carries its poll trigger and OOB refreshes of the scorecard + controls.
@@ -743,14 +745,14 @@ def create_app() -> FastAPI:
 
     @app.post("/monitor/run", response_class=HTMLResponse)
     def monitor_run(
-        request: Request, variant: str = "sma", mm: float = 2.0, cost: float = 20.0
+        request: Request, variant: str = monitor_mod.DEFAULT_FILTER, mm: float = 2.0, cost: float = 20.0
     ) -> HTMLResponse:
         started = _start_monitor_job()
         msg = "Recomputing all sector indices…" if started else "A compute is already running…"
         return _toast(page(request, "_monitor_poll.html", _monitor_rows_ctx(variant, mm, cost)), msg)
 
     @app.get("/monitor/chart", response_class=HTMLResponse)
-    def monitor_chart(request: Request, sector: str = "", variant: str = "sma") -> HTMLResponse:
+    def monitor_chart(request: Request, sector: str = "", variant: str = monitor_mod.DEFAULT_FILTER) -> HTMLResponse:
         if sector not in monitor_mod.sector_tickers():
             return page(request, "_monitor_chart.html", {"g": {}, "error": "sector not found"})
         doc = monitor_mod.load_cache(sector)

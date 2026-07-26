@@ -58,6 +58,7 @@ METRIC_KEYS = tuple(f"{fam}_{v}" for fam in _METRIC_FAMILIES for v in _METRIC_VA
 # in position size, so it shares the trend label but has its own metrics.
 FILTERS = ("sma", "vol")
 FILTER_LABELS = {"sma": "200-SMA", "vol": "Vol-target"}
+DEFAULT_FILTER = "vol"  # the monitor opens on the vol-targeted variant
 _VARIANT_LABEL_COL = {"sma": "confirmed_label", "vol": "confirmed_label"}
 
 
