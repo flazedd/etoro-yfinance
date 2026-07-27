@@ -1,0 +1,112 @@
+{% if res.error %}
+  <div class="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded p-3">{{ res.error }}</div>
+{% else %}
+{% set inv = res.min_eigenvalue is not none and res.min_eigenvalue > 0 %}
+<div class="cor-cards mb-4">
+  <div class="cor-card" data-tip="Pearson correlation between the model's implied correlation and the realized one, across every pair.&#10;&#10;This is the scatter's tightness as one number. Good: high, near 1. Low means the model is ranking pairs wrongly, not merely scaling them wrongly.">
+    <div class="k">Model vs realized ⓘ</div>
+    <div class="v">{{ '%.2f'|format(res.agreement) if res.agreement is not none else '—' }}</div>
+    <div class="s">agreement across pairs</div>
+  </div>
+  <div class="cor-card" data-tip="Mean |model − realized| correlation across every pair.&#10;&#10;Good: low. Note this can be small while agreement is poor (a model that says 0.3 for everything scores well here and badly there) — read the two together.">
+    <div class="k">Mean error ⓘ</div>
+    <div class="v">{{ '%.3f'|format(res.mean_abs_error) if res.mean_abs_error is not none else '—' }}</div>
+    <div class="s">average correlation gap</div>
+  </div>
+  <div class="cor-card" data-tip="The smallest eigenvalue of V, computed directly. Positive means V is positive-definite and therefore invertible — the real check an optimizer needs.&#10;&#10;The factor structure guarantees this whenever Ψ > 0, so 'check' here means an instrument has collapsed to zero residual variance.">
+    <div class="k">Invertible ⓘ</div>
+    <div class="v {{ 'text-emerald-700' if inv else 'text-amber-700' }}">{{ 'yes' if inv else 'check' }}</div>
+    <div class="s">min eigenvalue {{ '%.2e'|format(res.min_eigenvalue) if res.min_eigenvalue is not none else '—' }}</div>
+  </div>
+  <div class="cor-card" data-tip="Instrument pairs behind the statistics on this row, and the median share of an instrument's variance the factors explain (R²).&#10;&#10;A low median R² means the factor set is thin for this universe: most of what these instruments do is their own.">
+    <div class="k">Pairs ⓘ</div>
+    <div class="v">{{ '{:,}'.format(res.n_pairs) }}</div>
+    <div class="s">{{ res.n_instruments }} instruments · median R² {{ '%.2f'|format(res.median_r2) if res.median_r2 is not none else '—' }}</div>
+  </div>
+</div>
+
+<div class="cor-panel">
+  <div class="flex items-center justify-between" style="gap:12px;flex-wrap:wrap">
+    <div>
+      <div class="cor-h">Every pair: model-implied vs realized correlation</div>
+      <div class="cor-cap">
+        Each dot is a pair of instruments. On the diagonal line = the model's correlation matches
+        reality. A tight cloud on the diagonal means the model is working; a wide scatter means it
+        is missing structure; a cloud parallel to but off the diagonal means it is biased.
+      </div>
+    </div>
+    <div class="cor-note" style="text-align:right">
+      {{ res.start }} → {{ res.end }} · {{ res.days }} trading days<br>
+      realized window {{ res.params.real_window|int }}d
+      {%- if res.n_pairs > res.pairs|length %} · showing {{ '{:,}'.format(res.pairs|length) }} of {{ '{:,}'.format(res.n_pairs) }} dots (statistics use all){% endif %}
+    </div>
+  </div>
+  <canvas id="cor-sc" class="cor-scatter mt-3" style="max-width:760px"></canvas>
+</div>
+
+<script type="application/json" id="cor-sc-data">{{ res.pairs | tojson }}</script>
+<script>
+  (function () {
+    var pts = JSON.parse(document.getElementById('cor-sc-data').textContent);
+    var cv = document.getElementById('cor-sc');
+    if (!cv) return;
+    var W = 760, H = 560, PAD = 44, PB = 40;
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr;
+    cv.style.height = (H * (cv.clientWidth || W) / W) + 'px';
+    var g = cv.getContext('2d');
+    g.scale(dpr, dpr);
+    var x0 = PAD, x1 = W - 14, y0 = 14, y1 = H - PB;
+    function X(v) { return x0 + (v + 1) / 2 * (x1 - x0); }
+    function Y(v) { return y1 - (v + 1) / 2 * (y1 - y0); }
+
+    g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+    // grid + axes, recessive
+    g.strokeStyle = '#f1f5f9'; g.lineWidth = 1;
+    g.fillStyle = '#94a3b8'; g.font = '11px ui-sans-serif, system-ui, sans-serif';
+    [-1, -0.5, 0, 0.5, 1].forEach(function (t) {
+      g.beginPath(); g.moveTo(x0, Y(t)); g.lineTo(x1, Y(t)); g.stroke();
+      g.beginPath(); g.moveTo(X(t), y0); g.lineTo(X(t), y1); g.stroke();
+      g.textAlign = 'right'; g.textBaseline = 'middle'; g.fillText(t.toFixed(1), x0 - 6, Y(t));
+      g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText(t.toFixed(1), X(t), y1 + 6);
+    });
+    g.strokeStyle = '#e2e8f0';
+    g.beginPath(); g.moveTo(x0, Y(0)); g.lineTo(x1, Y(0)); g.stroke();
+    g.beginPath(); g.moveTo(X(0), y0); g.lineTo(X(0), y1); g.stroke();
+    // the 45° reference line — where a perfect model puts every dot
+    g.save();
+    g.setLineDash([6, 5]); g.strokeStyle = '#64748b'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(X(-1), Y(-1)); g.lineTo(X(1), Y(1)); g.stroke();
+    g.restore();
+    // dots — one series, so one hue; alpha carries density
+    g.fillStyle = 'rgba(42,120,214,' + (pts.length > 4000 ? 0.22 : pts.length > 800 ? 0.4 : 0.62) + ')';
+    var rad = pts.length > 4000 ? 1.6 : pts.length > 800 ? 2.1 : 2.8;
+    pts.forEach(function (p) {
+      g.beginPath(); g.arc(X(p.model), Y(p.realized), rad, 0, 6.2832); g.fill();
+    });
+    g.fillStyle = '#64748b'; g.font = '12px ui-sans-serif, system-ui, sans-serif';
+    g.textAlign = 'center'; g.fillText('model-implied correlation', (x0 + x1) / 2, y1 + 24);
+    g.save(); g.translate(13, (y0 + y1) / 2); g.rotate(-Math.PI / 2);
+    g.textBaseline = 'top'; g.fillText('realized correlation', 0, 0); g.restore();
+
+    // Hover: name the nearest pair. Writing data-tip on the canvas reuses the
+    // app-wide cursor tooltip (base.html) — its document listener runs after
+    // this one for the same event, so the text is never stale.
+    cv.addEventListener('mousemove', function (e) {
+      var r = cv.getBoundingClientRect(), s = W / r.width;
+      var mx = (e.clientX - r.left) * s, my = (e.clientY - r.top) * s;
+      var best = null, bd = 12 * 12;
+      for (var i = 0; i < pts.length; i++) {
+        var dx = X(pts[i].model) - mx, dy = Y(pts[i].realized) - my, d = dx * dx + dy * dy;
+        if (d < bd) { bd = d; best = pts[i]; }
+      }
+      if (best) {
+        cv.setAttribute('data-tip', best.a + ' ↔ ' + best.b + '\n\nmodel ' + best.model.toFixed(2) +
+          ' · realized ' + best.realized.toFixed(2) + '\ngap ' + (best.model - best.realized).toFixed(2));
+      } else {
+        cv.removeAttribute('data-tip');
+      }
+    });
+  })();
+</script>
+{% endif %}

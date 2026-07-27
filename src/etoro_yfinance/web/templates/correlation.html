@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Correlation{% endblock %}
+{% block content %}
+<script src="/static/lightweight-charts.standalone.production.js"></script>
+
+<div class="mb-4">
+  <h1 class="text-xl font-semibold">Correlation</h1>
+  <p class="text-sm text-slate-500" style="max-width:1100px">
+    A factor covariance model — <b>V = BΩBᵀ + Ψ</b> — built end to end and shown working, or not.
+    Each instrument's daily returns are regressed on {{ factors|length }} tradable factor proxies
+    (<b>B</b>, the exposures); the factors' own covariance is estimated in two clocks — fast for
+    volatility, slow for correlation (<b>Ω</b>); what the factors cannot explain becomes diagonal
+    idiosyncratic variance (<b>Ψ</b>). Every estimator is a causal EWMA, so the model line on any
+    date is what the model would have said <i>on</i> that date — which is what makes comparing it
+    to the realized rolling correlation a test rather than a fit. This page is a
+    <b>verification tool</b>: nothing here trades.
+  </p>
+  <p class="cor-note mt-3">
+    Factors:
+    {% for name, ticker in factors %}<span class="font-mono">{{ name }}={{ ticker }}</span>{% if not loop.last %} · {% endif %}{% endfor %}
+    · returns are EUR-converted (a covariance mixing quote currencies would measure FX)
+    · the eToro-today universe means survivorship bias flatters every number here.
+  </p>
+</div>
+
+<!-- ── 1+2. whole-universe health + the every-pair scatter ─────────────────── -->
+<form id="cor-uni" class="flex flex-wrap gap-3 items-end mb-4"
+      hx-get="/correlation/overview" hx-target="#cor-overview" hx-trigger="change">
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">universe</span>
+    <select name="view" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
+      {% for u in saved_universes %}
+      <option value="{{ u.name }}"{% if u.name == view %} selected{% endif %}>{{ u.name }}{% if u.count is not none %} ({{ u.count }}){% endif %}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="flex flex-col gap-1 text-sm"
+         data-tip="How many instruments the whole-universe fit covers, taken most-liquid-first.&#10;&#10;Every pair of the full 5k universe is 13 million points — the diagnostic runs on the top slice, which is also the slice an optimizer would size. Pairs grow with the square: 150 names = 11k pairs.">
+    <span class="text-slate-500">instruments ⓘ</span>
+    <select name="n" class="border border-slate-300 rounded-md px-2 py-1.5 text-sm bg-slate-50">
+      {% for s in sizes %}
+      <option value="{{ s }}"{% if s == size %} selected{% endif %}>top {{ s }} by turnover</option>
+      {% endfor %}
+    </select>
+  </label>
+  <span class="cor-note" style="padding-bottom:7px">{{ n_instruments }} instruments available in this universe</span>
+</form>
+
+<div id="cor-overview" class="mb-6"
+     hx-get="/correlation/overview" hx-include="#cor-uni" hx-trigger="load">
+  <div class="text-sm text-slate-500">fitting the model…</div>
+</div>
+
+<!-- ── 3. the pair inspector ───────────────────────────────────────────────── -->
+<h2 class="text-lg font-semibold mt-6">Pair inspector</h2>
+<p class="cor-cap mb-3" style="max-width:1100px">
+  Pick any two instruments. The model shows what it believes drives each of them, why it links
+  them, and how its implied correlation has tracked the realized one.
+</p>
+
+<form id="cor-pair-form" class="flex flex-wrap gap-3 items-end mb-4"
+      hx-get="/correlation/pair" hx-target="#cor-pair" hx-trigger="load, change, submit"
+      hx-indicator="#cor-spin">
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">instrument A</span>
+    <input name="a" list="cor-instruments" value="{{ a }}" autocomplete="off" spellcheck="false"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-full" style="width:190px">
+  </label>
+  <label class="flex flex-col gap-1 text-sm">
+    <span class="text-slate-500">instrument B</span>
+    <input name="b" list="cor-instruments" value="{{ b }}" autocomplete="off" spellcheck="false"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm w-full" style="width:190px">
+  </label>
+  {% set knobs = [
+    ('h_b', 'H exposure', params.h_b, 'Half-life of the exposure regression weights, in days. Long = stable betas; short = betas that chase the recent tape.'),
+    ('h_psi', 'H idio', params.h_psi, 'Half-life of the idiosyncratic variance EWMA — how fast the model updates what it cannot explain.'),
+    ('h_omega_v', 'H factor vol', params.h_omega_v, 'Half-life of the factor volatility EWMA. This is the fast clock: shorten it and the model line reacts to a volatility jump within days instead of months.'),
+    ('h_omega_c', 'H factor corr', params.h_omega_c, 'Half-life of the factor correlation EWMA. This is the slow clock: factor relationships are structural, so it is deliberately long.'),
+    ('real_window', 'realized window', params.real_window, 'Length of the trailing window for the realized (orange) correlation — a plain sample statistic, computed without the factor model.'),
+  ] %}
+  {% for name, label, value, tip in knobs %}
+  <label class="flex flex-col gap-1 text-sm" data-tip="{{ tip }}">
+    <span class="text-slate-500">{{ label }} ⓘ</span>
+    <input type="number" name="{{ name }}" value="{{ value|int }}" min="5" max="5000" step="5"
+           class="border border-slate-300 rounded-md px-2 py-1.5 text-sm" style="width:104px">
+  </label>
+  {% endfor %}
+  <button type="submit" class="chart-btn" style="padding:8px 14px">Inspect</button>
+  <span id="cor-spin" class="htmx-indicator text-sm text-slate-500">computing…</span>
+</form>
+
+<datalist id="cor-instruments">
+  {% for r in instruments %}<option value="{{ r.ticker }}">{{ r.name }}{% if r.sector %} · {{ r.sector }}{% endif %}</option>{% endfor %}
+</datalist>
+
+<div id="cor-pair"><div class="text-sm text-slate-500">loading pair…</div></div>
+{% endblock %}

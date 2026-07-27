@@ -31,6 +31,20 @@ from . import diagnostics as diag
 _HERE = Path(__file__).parent
 _UNIVERSE_CAP = 1500  # rows rendered at once (the universe is ~15.5k)
 
+# ── /correlation sizing ──────────────────────────────────────────────────────
+# The covariance page is a diagnostic, and every pair of a 5k universe is 13M
+# points — nobody reads that and no browser draws it. The whole-universe view
+# therefore fits the model on the top-N members by turnover (the names an
+# optimizer would actually size), which keeps N² pairs and the eigen-decomposition
+# of V within a second or two. The pair inspector is unrestricted: any two
+# instruments with stored prices can be picked.
+_COV_DEFAULT_VIEW = "backtest"
+_COV_SIZES = (60, 150, 300, 600)
+_COV_PICKER_CAP = 2500  # instruments offered in the pair picker's datalist
+_COV_MAX_SCATTER = 20000  # scatter points sent to the browser (stats use them all)
+_COV_CACHE: dict[str, Any] = {}
+_COV_LOCK = threading.Lock()
+
 
 def create_app() -> FastAPI:
     app = FastAPI(title="eToro ↔ yfinance", docs_url=None, redoc_url=None)
@@ -665,6 +679,202 @@ def create_app() -> FastAPI:
             },
         )
 
+    # ── correlation (factor covariance model V = BΩBᵀ + Ψ) ───────────────────
+    @app.get("/correlation", response_class=HTMLResponse)
+    def correlation_page(
+        request: Request, view: str = "", a: str = "", b: str = ""
+    ) -> HTMLResponse:
+        """The covariance diagnostic screen: whole-universe agreement up top, a
+        pair inspector below, the model's internals on demand."""
+        from etoro_yfinance import covariance as cov
+
+        saved = [
+            {"name": u, "count": universe_mod.load(u).get("count")}
+            for u in universe_mod.list_saved()
+        ]
+        view = view if view in universe_mod.list_saved() else _COV_DEFAULT_VIEW
+        insts = _cov_instruments(view)
+        da, db = _cov_default_pair(insts)
+        return page(
+            request,
+            "correlation.html",
+            {
+                "active": "correlation",
+                "saved_universes": saved,
+                "view": view,
+                "instruments": insts[:_COV_PICKER_CAP],
+                "n_instruments": len(insts),
+                "a": a or da,
+                "b": b or db,
+                "factors": list(cov.FACTORS.items()),
+                "sizes": _COV_SIZES,
+                "size": _COV_SIZES[1],
+                "params": cov.DEFAULT_PARAMS,
+            },
+        )
+
+    @app.get("/correlation/overview", response_class=HTMLResponse)
+    def correlation_overview(
+        request: Request,
+        view: str = "",
+        n: str = "150",
+        h_b: str = "",
+        h_psi: str = "",
+        h_omega_v: str = "",
+        h_omega_c: str = "",
+        real_window: str = "",
+    ) -> HTMLResponse:
+        """Fit the model over the top-`n` universe members by turnover and
+        compare every pair to its realized correlation. The fit is a few seconds
+        of parquet reads, so it runs in the background job store like the
+        backtest; identical settings are served from the result cache."""
+        from etoro_yfinance import covariance as cov
+
+        view = view if view in universe_mod.list_saved() else _COV_DEFAULT_VIEW
+        size = int(_to_float(n)) or 150
+        params = _cov_params(h_b, h_psi, h_omega_v, h_omega_c, real_window)
+        key = f"{view}|{size}|{params}"
+        with _COV_LOCK:
+            cached = _COV_CACHE.get(key)
+        if cached is not None:
+            return templates.TemplateResponse(
+                request, "_correlation_overview.html", {"res": cached, "view": view, "n": size}
+            )
+
+        tickers = [r["ticker"] for r in _cov_instruments(view)[:size]]
+        _reap_jobs(time.time())
+        job_id = uuid.uuid4().hex[:12]
+        with _BT_LOCK:
+            _BT_JOBS[job_id] = {
+                "pct": 0.0,
+                "label": "starting…",
+                "result": None,
+                "error": None,
+                "view": view,
+                "n": size,
+                "ts": time.time(),
+            }
+
+        def _update(**fields: Any) -> None:
+            with _BT_LOCK:
+                if job_id in _BT_JOBS:
+                    _BT_JOBS[job_id].update(ts=time.time(), **fields)
+
+        def _worker() -> None:
+            try:
+                res = cov.overview(
+                    tickers,
+                    params=params,
+                    max_pairs=_COV_MAX_SCATTER,
+                    progress=lambda f, s: _update(pct=min(0.95, f), label=s),
+                )
+                with _COV_LOCK:
+                    _COV_CACHE[key] = res
+                    while len(_COV_CACHE) > 8:  # a handful of settings, no more
+                        _COV_CACHE.pop(next(iter(_COV_CACHE)))
+                _update(pct=1.0, result=res)
+            except Exception as e:  # surface failures to the poller
+                _update(pct=1.0, error=str(e))
+
+        threading.Thread(target=_worker, daemon=True).start()
+        return templates.TemplateResponse(
+            request,
+            "_correlation_running.html",
+            {"job_id": job_id, "pct": 0, "label": "starting…"},
+        )
+
+    @app.get("/correlation/progress", response_class=HTMLResponse)
+    def correlation_progress(request: Request, job: str = "") -> HTMLResponse:
+        _reap_jobs(time.time())
+        with _BT_LOCK:
+            j = dict(_BT_JOBS.get(job) or {})
+        if not j:
+            return templates.TemplateResponse(
+                request,
+                "_correlation_overview.html",
+                {"res": {"error": "job expired — reload the page"}, "view": "", "n": 0},
+            )
+        if j.get("result") is None and not j.get("error"):
+            return templates.TemplateResponse(
+                request,
+                "_correlation_running.html",
+                {"job_id": job, "pct": j["pct"], "label": j["label"]},
+            )
+        with _BT_LOCK:
+            _BT_JOBS.pop(job, None)
+        res = j.get("result") or {"error": j.get("error")}
+        return templates.TemplateResponse(
+            request,
+            "_correlation_overview.html",
+            {"res": res, "view": j.get("view", ""), "n": j.get("n", 0)},
+        )
+
+    @app.get("/correlation/pair", response_class=HTMLResponse)
+    def correlation_pair(
+        request: Request,
+        a: str = "",
+        b: str = "",
+        h_b: str = "",
+        h_psi: str = "",
+        h_omega_v: str = "",
+        h_omega_c: str = "",
+        real_window: str = "",
+    ) -> HTMLResponse:
+        """The pair inspector fragment — exposures, the shared-factor
+        decomposition, the tracking chart and the internals panels."""
+        params = _cov_params(h_b, h_psi, h_omega_v, h_omega_c, real_window)
+        res = _cov_pair(a, b, params)
+        return templates.TemplateResponse(
+            request, "_correlation_pair.html", {"res": res, "a": a, "b": b, "params": params}
+        )
+
+    # JSON API (spec §6) — the same numbers the fragments render.
+    @app.get("/api/correlation/instruments")
+    def api_correlation_instruments(view: str = "", limit: int = 0) -> JSONResponse:
+        rows = _cov_instruments(view if view in universe_mod.list_saved() else _COV_DEFAULT_VIEW)
+        rows = rows[:limit] if limit else rows
+        return JSONResponse([{"ticker": r["ticker"], "name": r["name"]} for r in rows])
+
+    @app.get("/api/correlation/pair")
+    def api_correlation_pair(
+        a: str = "",
+        b: str = "",
+        h_b: str = "",
+        h_psi: str = "",
+        h_omega_v: str = "",
+        h_omega_c: str = "",
+        real_window: str = "",
+    ) -> JSONResponse:
+        res = _cov_pair(a, b, _cov_params(h_b, h_psi, h_omega_v, h_omega_c, real_window))
+        return JSONResponse(res, status_code=(400 if "error" in res else 200))
+
+    @app.get("/api/correlation/overview")
+    def api_correlation_overview(
+        view: str = "",
+        n: int = 150,
+        h_b: str = "",
+        h_psi: str = "",
+        h_omega_v: str = "",
+        h_omega_c: str = "",
+        real_window: str = "",
+    ) -> JSONResponse:
+        from etoro_yfinance import covariance as cov
+
+        view = view if view in universe_mod.list_saved() else _COV_DEFAULT_VIEW
+        params = _cov_params(h_b, h_psi, h_omega_v, h_omega_c, real_window)
+        key = f"{view}|{n}|{params}"
+        with _COV_LOCK:
+            cached = _COV_CACHE.get(key)
+        if cached is None:
+            tickers = [r["ticker"] for r in _cov_instruments(view)[: max(n, 2)]]
+            try:
+                cached = cov.overview(tickers, params=params, max_pairs=_COV_MAX_SCATTER)
+            except cov.MissingFactorError as e:
+                return JSONResponse({"error": str(e)}, status_code=503)
+            with _COV_LOCK:
+                _COV_CACHE[key] = cached
+        return JSONResponse(cached)
+
     # ── diagnostics (system health) ──────────────────────────────────────────
     @app.get("/diagnostics", response_class=HTMLResponse)
     def diagnostics(request: Request) -> HTMLResponse:
@@ -891,6 +1101,91 @@ def _universe_ctx(
         "liquid": bool(counts.get("liquidity_checked")),
         "has_sector": bool(counts.get("sector_known")),
     }
+
+
+def _cov_params(
+    h_b: str = "",
+    h_psi: str = "",
+    h_omega_v: str = "",
+    h_omega_c: str = "",
+    real_window: str = "",
+) -> Any:
+    """Model half-lives from the request, each falling back to the fixed default.
+    Exposed so the page can move one knob and show what it does — changing the
+    factor-vol half-life, say, visibly changes how fast the model line reacts."""
+    from etoro_yfinance import covariance as cov
+
+    d = cov.DEFAULT_PARAMS
+
+    def pos(s: str, default: float, lo: float, hi: float) -> float:
+        v = _to_float(s)
+        return min(max(v, lo), hi) if v > 0 else default
+
+    return cov.Params(
+        h_b=pos(h_b, d.h_b, 5, 5000),
+        h_psi=pos(h_psi, d.h_psi, 5, 5000),
+        h_omega_v=pos(h_omega_v, d.h_omega_v, 5, 5000),
+        h_omega_c=pos(h_omega_c, d.h_omega_c, 5, 5000),
+        real_window=int(pos(real_window, d.real_window, 5, 1000)),
+    )
+
+
+def _cov_instruments(view: str) -> list[dict[str, Any]]:
+    """Universe members that have a stored EUR price series, most liquid first.
+    Turnover order is what makes the top-N slice meaningful."""
+    from etoro_yfinance import prices
+
+    rows = (
+        universe_mod.load(view).get("instruments", [])
+        if view in universe_mod.list_saved()
+        else universe_mod.select()
+    )
+    stored = set(prices.available_tickers(eur=True))
+    out, seen = [], set()
+    for r in sorted(rows, key=lambda r: -(r.get("adv_eur") or 0.0)):
+        t = r.get("yf")
+        if not t or t in seen or t not in stored:
+            continue
+        seen.add(t)
+        out.append(
+            {
+                "ticker": t,
+                "name": r.get("name") or t,
+                "type": r.get("type") or "",
+                "sector": r.get("sector") or "",
+            }
+        )
+    return out
+
+
+def _cov_default_pair(insts: list[dict[str, Any]]) -> tuple[str, str]:
+    """The two most liquid single stocks that share a sector — the page opens on
+    a pair the model should obviously link, so a broken model is visible on
+    arrival. Stocks, not ETFs: two S&P trackers would correlate at 0.99 through
+    sheer redundancy and demonstrate nothing about the factor structure."""
+    by_sector: dict[str, list[str]] = {}
+    for r in insts[:200]:
+        if r["sector"] and r["type"] == "Stocks":
+            by_sector.setdefault(r["sector"], []).append(r["ticker"])
+    for members in by_sector.values():
+        if len(members) >= 2:
+            return members[0], members[1]
+    if len(insts) >= 2:
+        return insts[0]["ticker"], insts[1]["ticker"]
+    return "", ""
+
+
+def _cov_pair(a: str, b: str, params: Any) -> dict[str, Any]:
+    from etoro_yfinance import covariance as cov
+
+    if not a or not b:
+        return {"error": "pick two instruments"}
+    if a == b:
+        return {"error": "pick two different instruments"}
+    try:
+        return cov.pair_report(a, b, params=params)
+    except cov.MissingFactorError as e:
+        return {"error": str(e)}
 
 
 def _to_float(s: str) -> float:

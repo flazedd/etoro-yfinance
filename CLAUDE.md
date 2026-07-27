@@ -13,6 +13,7 @@ uv run python -m etoro_yfinance.web.server --port 8642   # ad-hoc server on anot
 uv run python scripts/alpha_lab.py              # signal scoreboard (develop window, ~5 min)
 uv run python scripts/alpha_lab.py --placebo    # harness self-test: must admit nothing
 uv run python scripts/etoro_universe.py         # rebuild the eToro→yfinance mapping (network)
+uv run python scripts/fetch_factors.py          # ingest missing covariance factor proxies (network)
 ```
 
 Always run Python via `uv run python` — never bare `python`/`python3`.
@@ -74,6 +75,19 @@ in `flags` (`FLAG_INFO` maps names → 3-char abbr + tooltip text).
 `combo_ic` is the family-balanced combination (equal weight *within* family,
 then across families — never flat across signals; momentum variants correlate
 0.6–0.95).
+
+**Covariance** — `src/etoro_yfinance/covariance.py`, surfaced at `/correlation`.
+A diagnostic factor risk model `V = BΩBᵀ + Ψ` over EUR returns: `B` from
+EWMA-weighted least squares of each instrument on the `FACTORS` proxies (config
+— `scripts/fetch_factors.py` ingests any that aren't in the store), `Ω` in two
+clocks (fast vol, slow correlation), `Ψ` diagonal residual variance. Every
+estimator is a causal EWMA (`S_t = x_t + θS_{t−1}`, weight-sum normalized), so
+`pair_pass()` emits the model's implied correlation for each day in **one
+forward pass** — the tracking chart is a test against the realized rolling
+correlation, not a fit. `fit()`/`overview()` do the whole-universe version (top-N
+by turnover; every pair of 5k names is 13M points). Nothing here trades. Known
+property, not a bug: the 8 proxies are collinear (market↔tech ≈ 0.88), so
+individual betas offset each other — read the exposure set, not one bar.
 
 **Web** — `src/etoro_yfinance/web/`. FastAPI + Jinja2 + HTMX; long jobs
 (backtest, alpha-lab scoring) run in a background thread with a shared

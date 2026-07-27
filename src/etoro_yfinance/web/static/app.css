@@ -111,3 +111,32 @@ th .badge { margin-top: 3px; align-self: flex-start; }
   transition: opacity .2s, transform .2s;
 }
 #monitor-toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── /correlation: factor covariance diagnostics ──────────────────────────── */
+.cor-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.cor-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; }
+.cor-card .k { font-size: 11px; color: #64748b; font-weight: 600; }
+.cor-card .v { font-size: 23px; font-weight: 600; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.cor-card .s { font-size: 11px; color: #94a3b8; }
+.cor-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
+.cor-h { font-size: 12px; font-weight: 600; color: #475569; }
+.cor-cap { font-size: 11.5px; color: #64748b; line-height: 1.5; }
+/* Exposure bars: label · bar drawn from a centered zero line · value. */
+.cor-bars { display: grid; grid-template-columns: 82px 1fr 54px; gap: 3px 8px; align-items: center; font-size: 11px; }
+.cor-bars .lab { color: #475569; text-align: right; white-space: nowrap; }
+.cor-bars .val { font-variant-numeric: tabular-nums; color: #334155; text-align: right; }
+.cor-track { position: relative; height: 13px; background: #f8fafc; border-radius: 3px; }
+.cor-track::before { content: ""; position: absolute; left: 50%; top: -1px; bottom: -1px; width: 1px; background: #cbd5e1; }
+.cor-track i { position: absolute; top: 1px; bottom: 1px; border-radius: 3px; display: block; }
+/* Variance split: one stacked bar per instrument, 2px surface gaps between segments. */
+.cor-stack { display: flex; height: 22px; border-radius: 4px; overflow: hidden; background: #f1f5f9; }
+.cor-stack > span { display: block; box-shadow: inset -2px 0 0 #fff; }
+.cor-legend { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 11px; color: #475569; }
+.cor-legend b { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; }
+/* Factor correlation heatmap. */
+.cor-heat { border-collapse: separate; border-spacing: 2px; font-size: 10.5px; }
+.cor-heat th { color: #64748b; font-weight: 600; text-align: right; padding: 0 4px; white-space: nowrap; }
+.cor-heat thead th { text-align: center; writing-mode: vertical-rl; transform: rotate(180deg); height: 62px; padding: 2px 0; }
+.cor-heat td { width: 34px; height: 22px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; cursor: help; }
+.cor-scatter { display: block; width: 100%; height: auto; cursor: crosshair; }
+.cor-note { font-size: 11px; color: #94a3b8; }
