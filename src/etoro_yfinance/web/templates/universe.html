@@ -25,23 +25,7 @@
 {% else %}
 <div id="store-switch" class="mb-3">{% include "_store_switch.html" %}</div>
 
-{% set c = snap.counts %}
-<div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4">
-  {% set cards = [
-    ('Instruments', c.total, 'text-slate-900'),
-    ('Mapped → yfinance', c.mapped, 'text-emerald-600'),
-    ('US', c.by_status.get('us', 0), 'text-slate-900'),
-    ('International', c.by_status.get('intl', 0), 'text-slate-900'),
-    ('Unmapped', c.by_status.get('unmapped', 0), 'text-rose-600'),
-    ('Internal (eToro)', c.by_status.get('internal', 0), 'text-slate-400'),
-  ] %}
-  {% for label,val,color in cards %}
-  <div class="bg-white rounded-lg border border-slate-200 px-3 py-2">
-    <div class="text-xs text-slate-500">{{ label }}</div>
-    <div class="text-lg font-semibold tabular {{ color }}">{{ '{:,}'.format(val) }}</div>
-  </div>
-  {% endfor %}
-</div>
+{% include "_universe_cards.html" %}
 
 <form id="universe-filters" class="flex flex-wrap gap-3 items-end mb-3"
       hx-get="/universe/rows" hx-target="#rows-wrap" hx-trigger="input changed delay:200ms, change"

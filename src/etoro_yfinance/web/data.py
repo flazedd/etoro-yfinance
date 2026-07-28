@@ -172,6 +172,7 @@ def _overlay_store(doc: dict[str, Any], store: str) -> dict[str, Any]:
         for r in rows:
             r["dropped"] = False
             r["drop_reason"] = None
+            r["in_store"] = bool(r.get("bars"))
         return doc
     for r in rows:
         rep = reports.get(r.get("yf")) if r.get("yf") else None
@@ -182,6 +183,9 @@ def _overlay_store(doc: dict[str, Any], store: str) -> dict[str, Any]:
             r["bars"] = cov.get("rows") or None
             for k in ("price_from", "price_to", "vol_from", "vol_to"):
                 r[k] = cov.get(k)
+        # does this store hold a series for the instrument at all? (drives the
+        # count cards — an instrument the filter rejected is not priced here)
+        r["in_store"] = bool(cov.get("rows")) if rep else bool(r.get("bars"))
     doc.setdefault("counts", {})["validated"] = True
     return doc
 

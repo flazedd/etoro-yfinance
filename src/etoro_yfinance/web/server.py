@@ -1064,6 +1064,29 @@ def _reap_jobs(now: float) -> None:
             del _BT_JOBS[jid]
 
 
+def store_counts(all_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """The universe count cards for the selected price store.
+
+    `Instruments`, `Unmapped` and `Internal` are facts about eToro's universe —
+    they do not depend on which store you are looking at. The mapped buckets do:
+    an instrument only counts if the store actually holds a series for it, so
+    switching to clean drops the ones the quality filter rejected, and the cards
+    answer "how much of the universe can I price from here".
+    """
+    priced = Counter(
+        r.get("status") for r in all_rows if r.get("yf") and r.get("in_store")
+    )
+    every = Counter(r.get("status") for r in all_rows)
+    by_status = {k: priced.get(k, 0) for k in ("us", "intl", "crypto", "forex")}
+    for k in ("unmapped", "internal"):  # never have a series by definition
+        by_status[k] = every.get(k, 0)
+    return {
+        "total": len(all_rows),
+        "mapped": sum(priced.values()),
+        "by_status": by_status,
+    }
+
+
 def _universe_ctx(
     *,
     q: str,
@@ -1110,6 +1133,7 @@ def _universe_ctx(
     counts = snap.get("counts", {})
     return {
         "snap": snap,
+        "counts": store_counts(all_rows),  # cards follow the selected store
         "rows": rows[:_UNIVERSE_CAP],
         "shown": len(rows),
         "asset_type": asset_type,
@@ -1118,7 +1142,6 @@ def _universe_ctx(
         "view": view,
         "store": store,
         "stores": datamod.STORES,
-        "dropped_count": sum(1 for r in rows if r.get("dropped")),
         "saved_universes": saved,
         **facets,
         "validated": bool(counts.get("validated")),

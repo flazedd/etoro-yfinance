@@ -3,14 +3,9 @@
   'crypto':'bg-blue-100 text-blue-700', 'forex':'bg-indigo-100 text-indigo-700',
   'unmapped':'bg-rose-100 text-rose-700', 'internal':'bg-slate-100 text-slate-400',
 } %}
-<div class="px-3 py-2 text-xs text-slate-500 border-b border-slate-100">
-  {{ '{:,}'.format(shown) }} instruments{% if shown > rows|length %} · showing first {{ '{:,}'.format(rows|length) }} — narrow the filter{% endif %} · click a column to sort
-  · yfinance columns from the <b class="{{ 'text-amber-600' if store == 'raw' else 'text-slate-600' }}">{{ store }}</b> store{% if store == 'raw' %} (Yahoo as fetched, unrepaired){% endif %}{% if dropped_count %}
-  · <b class="text-rose-600">{{ '{:,}'.format(dropped_count) }}</b> struck through — rejected by the quality filter{% endif %}
-</div>
 {% set src_label = {'etoro':'eToro', 'yfinance':'yfinance', 'derived':'derived'} %}
-{% macro th(label, source, sort=true, numeric=false) %}
-  <th {% if sort %}data-sort {% endif %}{% if numeric %}data-type="num" {% endif %}class="px-3 py-2 font-medium align-bottom{% if sort %} cursor-pointer select-none hover:text-slate-700{% endif %}">
+{% macro th(label, source, sort=true, numeric=false, cls='') %}
+  <th {% if sort %}data-sort {% endif %}{% if numeric %}data-type="num" {% endif %}class="px-3 py-2 font-medium align-bottom {{ cls }}{% if sort %} cursor-pointer select-none hover:text-slate-700{% endif %}">
     <div class="flex flex-col">
       <span>{{ label }}{% if sort %}<span class="caret"></span>{% endif %}</span>
       {% if source %}<span class="badge src-{{ source }}">{{ src_label[source] }}</span>{% endif %}
@@ -18,7 +13,7 @@
   </th>
 {% endmacro %}
 {% macro datecell(val) %}
-  <td class="px-3 py-1.5 tabular text-xs whitespace-nowrap" data-sort-value="{{ val or '' }}">
+  <td class="px-3 py-1.5 tabular text-xs whitespace-nowrap col-date" data-sort-value="{{ val or '' }}">
     {% if val %}<span class="text-slate-600">{{ val }}</span>{% else %}<span class="badge badge-miss">missing</span>{% endif %}
   </td>
 {% endmacro %}
@@ -43,11 +38,11 @@
       {# ── yfinance ── #}
       {{ th('→ yfinance', 'yfinance') }}
       {% if validated %}
-        {{ th('Bars', 'yfinance', numeric=true) }}
-        {{ th('Price from', 'yfinance') }}
-        {{ th('Price to', 'yfinance') }}
-        {{ th('Vol from', 'yfinance') }}
-        {{ th('Vol to', 'yfinance') }}
+        {{ th('Bars', 'yfinance', numeric=true, cls='col-bars') }}
+        {{ th('Price from', 'yfinance', cls='col-date') }}
+        {{ th('Price to', 'yfinance', cls='col-date') }}
+        {{ th('Vol from', 'yfinance', cls='col-date') }}
+        {{ th('Vol to', 'yfinance', cls='col-date') }}
       {% endif %}
       {% if liquid %}{{ th('Liq €/day', 'yfinance', numeric=true) }}{% endif %}
       {# ── rest ── #}
@@ -89,14 +84,16 @@
       {% endif %}
       {# ── yfinance ── #}
       <td class="px-3 py-1.5 tabular font-medium" data-sort-value="{{ (r.yf or '')|lower }}">
+        {# The rejection is shown by striking the ticker, not by an extra badge:
+           a badge is only present in the clean view, and its width would reflow
+           every column when the store is switched. Line-through costs none. #}
         {% if not r.yf %}<span class="text-slate-300">—</span>
-        {% elif r.dropped %}<span style="text-decoration:line-through" class="text-slate-400"
-             data-tip="Rejected by the quality filter ({{ r.drop_reason }}) — present in the raw store, absent from the clean and euro stores.">{{ r.yf }}</span>
-          <span class="badge bg-rose-100 text-rose-700">{{ r.drop_reason }}</span>
+        {% elif r.dropped %}<span style="text-decoration:line-through" class="text-rose-400"
+             data-tip="Rejected by the quality filter: {{ r.drop_reason }}.&#10;&#10;Present in the raw store, absent from the clean and euro stores — switch to raw to see it.">{{ r.yf }}</span>
         {% else %}{{ r.yf }}{% endif %}
       </td>
       {% if validated %}
-        <td class="px-3 py-1.5 tabular text-xs" data-sort-value="{{ r.bars or 0 }}">
+        <td class="px-3 py-1.5 tabular text-xs col-bars" data-sort-value="{{ r.bars or 0 }}">
           {% if r.bars %}{{ '{:,}'.format(r.bars) }}{% else %}<span class="badge badge-miss">missing</span>{% endif %}
         </td>
         {{ datecell(r.price_from) }}
@@ -131,4 +128,5 @@
 </table>
 {% if oob %}{% include "_facets_oob.html" %}
 <div id="store-switch" class="mb-3" hx-swap-oob="true">{% include "_store_switch.html" %}</div>
+{% include "_universe_cards.html" %}
 {% endif %}

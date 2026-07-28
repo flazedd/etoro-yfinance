@@ -97,6 +97,37 @@ def test_instrument_without_a_report_keeps_its_snapshot_row(store: Path) -> None
     assert rows["CCC"]["drop_reason"] is None
 
 
+def test_store_counts_only_count_what_the_store_prices() -> None:
+    from etoro_yfinance.web.server import store_counts
+
+    rows = [
+        {"yf": "A", "status": "us", "in_store": True},
+        {"yf": "B", "status": "us", "in_store": False},  # rejected / never stored
+        {"yf": "C", "status": "intl", "in_store": True},
+        {"yf": "D", "status": "crypto", "in_store": True},
+        {"yf": None, "status": "unmapped", "in_store": False},
+        {"yf": None, "status": "internal", "in_store": False},
+    ]
+    c = store_counts(rows)
+    assert c["total"] == 6  # every eToro instrument, priced or not
+    assert c["mapped"] == 3  # B has no series in this store
+    assert c["by_status"]["us"] == 1
+    assert c["by_status"]["intl"] == 1
+    # unmapped/internal never have a series, so they are counted regardless
+    assert c["by_status"]["unmapped"] == 1
+    assert c["by_status"]["internal"] == 1
+
+
+def test_store_counts_shrink_when_the_filter_rejects(store: Path) -> None:
+    from etoro_yfinance.web.server import store_counts
+
+    raw = store_counts(wd.load_etoro_universe("raw")["rows"])
+    clean = store_counts(wd.load_etoro_universe("clean")["rows"])
+    assert raw["mapped"] == 2  # AAA and BBB both exist in the raw store
+    assert clean["mapped"] == 1  # BBB was rejected
+    assert raw["total"] == clean["total"]  # the eToro universe does not move
+
+
 def test_no_quality_reports_at_all_leaves_the_page_working(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

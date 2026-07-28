@@ -20,6 +20,13 @@ table.sortable thead th { position: sticky; top: 0; z-index: 1; background: #f8f
 }
 .name-clip { max-width: 200px; }
 .exch-clip { max-width: 120px; }
+/* Columns whose content changes with the raw/clean price store: a date, a bar
+   count and the "missing" badge are all different widths, and in an auto-layout
+   table inside a centred fit-content box that reflows every column AND shifts
+   the whole table sideways. Reserving the widest case keeps the layout still
+   when the store is switched. */
+.tbl-fit .col-date { min-width: 78px; }
+.tbl-fit .col-bars { min-width: 58px; }
 /* The card/box wrapping a table shrinks to the table's width (so it doesn't
    stretch full-width around a narrow table) and centers, capped at the viewport
    so a wide table scrolls inside it instead of overflowing the page. */

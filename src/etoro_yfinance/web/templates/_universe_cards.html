@@ -1,0 +1,23 @@
+{# Universe count cards, counted over the selected price store: the mapped
+   buckets only include instruments it actually holds a series for, so switching
+   to clean drops the ones the quality filter rejected. The eToro-side facts
+   (total, unmapped, internal) do not move. Re-rendered out-of-band with the
+   rows so the cards follow the store switch. #}
+{% set c = counts %}
+{% set store_tip = 'Instruments the ' ~ store ~ ' store holds a price series for.&#10;&#10;Switch the price store above to see the other side; the difference is what the quality filter rejected.' %}
+<div id="universe-cards" class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% set cards = [
+    ('Instruments', c.total, 'text-slate-900', 'Every tradable instrument in the eToro universe — an eToro fact, the same for both stores.'),
+    ('Mapped → yfinance', c.mapped, 'text-emerald-600', store_tip),
+    ('US', c.by_status.get('us', 0), 'text-slate-900', store_tip),
+    ('International', c.by_status.get('intl', 0), 'text-slate-900', store_tip),
+    ('Unmapped', c.by_status.get('unmapped', 0), 'text-rose-600', 'No Yahoo equivalent, so no price series in either store.'),
+    ('Internal (eToro)', c.by_status.get('internal', 0), 'text-slate-400', 'eToro synthetic instruments — never mapped, never priced.'),
+  ] %}
+  {% for label,val,color,tip in cards %}
+  <div class="bg-white rounded-lg border border-slate-200 px-3 py-2" data-tip="{{ tip }}">
+    <div class="text-xs text-slate-500">{{ label }}</div>
+    <div class="text-lg font-semibold tabular {{ color }}">{{ '{:,}'.format(val) }}</div>
+  </div>
+  {% endfor %}
+</div>
