@@ -17,8 +17,39 @@
     {% if val %}<span class="text-slate-600">{{ val }}</span>{% else %}<span class="badge badge-miss">missing</span>{% endif %}
   </td>
 {% endmacro %}
+{# ── quality tells ────────────────────────────────────────────────────────────
+   One scalar per failure mode the audit actually found in this store. Coloured
+   amber past "worth a look" and rose past "almost certainly broken", so a bad
+   series is visible without reading the numbers. Every cell reserves its width
+   (col-q) — these values change with the raw/clean switch, and an auto-layout
+   table would otherwise reflow every column when you toggle. #}
+{% macro qtint(v, warn, bad, invert=false) %}
+  {%- if v is none -%}text-slate-300
+  {%- elif (v <= bad if invert else v >= bad) -%}text-rose-600 font-semibold
+  {%- elif (v <= warn if invert else v >= warn) -%}text-amber-600
+  {%- else -%}text-slate-600{%- endif -%}
+{% endmacro %}
+{# `ret` takes a fraction (0.15 → +15.0%) and collapses anything past +900% to a
+   bounded multiple (×681k) — an unbounded "×680,637" is wider than the column
+   and only occurs in one store, which would reflow the table on every toggle.
+   `pct` takes a value already in percent. #}
+{% macro qcell(v, warn, bad, invert=false, kind='ret', tip='') %}
+  <td class="px-3 py-1.5 tabular text-xs col-q {{ qtint(v, warn, bad, invert) }}"
+      data-sort-value="{{ v if v is not none else -999999 }}"{% if tip %} data-tip="{{ tip }}"{% endif %}>
+    {%- if v is none -%}—
+    {%- elif kind == 'days' -%}{{ v }}d
+    {%- elif kind == 'int' -%}{{ '{:,}'.format(v) }}
+    {%- elif kind == 'pct' -%}{{ '%.1f%%'|format(v) }}
+    {%- elif v >= 9 -%}
+      {%- set m = 1 + v -%}
+      {%- if m >= 1000000 -%}×{{ '%.0f'|format(m / 1000000) }}M
+      {%- elif m >= 1000 -%}×{{ '%.0f'|format(m / 1000) }}k
+      {%- else -%}×{{ '%.0f'|format(m) }}{%- endif -%}
+    {%- else -%}{{ '%+.1f%%'|format(v * 100) }}{%- endif -%}
+  </td>
+{% endmacro %}
 {% macro eur(v) %}{% if v is none %}<span class="text-slate-300">—</span>{% elif v >= 1000000000 %}€{{ '%.1f'|format(v/1000000000) }}B{% elif v >= 1000000 %}€{{ '%.1f'|format(v/1000000) }}M{% elif v >= 1000 %}€{{ '%.0f'|format(v/1000) }}K{% else %}€{{ '%.0f'|format(v) }}{% endif %}{% endmacro %}
-{% set ncols = 8 + (1 if has_sector else 0) + (5 if validated else 0) + (3 if eligible else 0) + (2 if liquid else 0) %}
+{% set ncols = 8 + (1 if has_sector else 0) + (11 if validated else 0) + (3 if eligible else 0) + (2 if liquid else 0) %}
 <table class="sortable tbl-fit text-sm">
   <thead class="bg-slate-50 text-slate-500 text-xs">
     <tr class="text-left">
@@ -43,6 +74,12 @@
         {{ th('Price to', 'yfinance', cls='col-date') }}
         {{ th('Vol from', 'yfinance', cls='col-date') }}
         {{ th('Vol to', 'yfinance', cls='col-date') }}
+        {{ th('Max ↑', 'derived', numeric=true, cls='col-q') }}
+        {{ th('Max ↓', 'derived', numeric=true, cls='col-q') }}
+        {{ th('Flat', 'derived', numeric=true, cls='col-q') }}
+        {{ th('0-vol', 'derived', numeric=true, cls='col-q') }}
+        {{ th('Gap', 'derived', numeric=true, cls='col-q') }}
+        {{ th('OHLC✗', 'derived', numeric=true, cls='col-q') }}
       {% endif %}
       {% if liquid %}{{ th('Liq €/day', 'yfinance', numeric=true) }}{% endif %}
       {# ── rest ── #}
@@ -100,6 +137,12 @@
         {{ datecell(r.price_to) }}
         {{ datecell(r.vol_from) }}
         {{ datecell(r.vol_to) }}
+        {{ qcell(r.max_up, 1.0, 9.0, tip='Biggest one-day gain. Above +100% is worth a look; a multiple means a bad print, an unadjusted split or a reused symbol.') }}
+        {{ qcell(r.max_down, -0.5, -0.9, invert=true, tip='Biggest one-day loss. Real crashes reach −50%; −90% and worse is usually a bad print or a delisting stub.') }}
+        {{ qcell(r.flat_pct, 20, 50, kind='pct', tip='Share of bars whose price did not move at all. High means a dead or halted listing, or sub-penny quotes where one tick is the whole price.') }}
+        {{ qcell(r.zero_vol_pct, 20, 50, kind='pct', tip='Share of bars that traded nothing. A price with no volume behind it is a quote, not a return you could have earned.') }}
+        {{ qcell(r.gap_days, 30, 180, kind='days', tip='Largest hole between consecutive bars, in calendar days. Weekends and holidays are a few days; months mean the history is stitched across a suspension.') }}
+        {{ qcell(r.ohlc_bad, 1, 1, kind='int', tip='Bars where close sits outside [low, high] — a contradiction no real bar can have. Any count above zero means the source is unreliable; the clean store repairs them all.') }}
       {% endif %}
       {% if liquid %}
         <td class="px-3 py-1.5 tabular text-xs whitespace-nowrap" data-sort-value="{{ r.adv_eur if r.adv_eur is not none else -1 }}">

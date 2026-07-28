@@ -27,6 +27,7 @@ table.sortable thead th { position: sticky; top: 0; z-index: 1; background: #f8f
    when the store is switched. */
 .tbl-fit .col-date { min-width: 78px; }
 .tbl-fit .col-bars { min-width: 58px; }
+.tbl-fit .col-q { min-width: 62px; text-align: right; }
 /* The card/box wrapping a table shrinks to the table's width (so it doesn't
    stretch full-width around a narrow table) and centers, capped at the viewport
    so a wide table scrolls inside it instead of overflowing the page. */

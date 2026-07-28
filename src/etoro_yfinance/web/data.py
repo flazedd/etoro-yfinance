@@ -25,6 +25,8 @@ def _load(path: Path) -> dict[str, Any]:
 
 
 _COVERAGE_KEYS = ("price_from", "price_to", "vol_from", "vol_to", "bars")
+# Per-series quality tells shown as columns (see prices.store_coverage).
+QUALITY_KEYS = ("max_up", "max_down", "flat_pct", "zero_vol_pct", "gap_days", "ohlc_bad")
 
 
 def _overlay_coverage(doc: dict[str, Any]) -> dict[str, Any]:
@@ -173,12 +175,16 @@ def _overlay_store(doc: dict[str, Any], store: str) -> dict[str, Any]:
             r["dropped"] = False
             r["drop_reason"] = None
             r["in_store"] = bool(r.get("bars"))
+            for k in QUALITY_KEYS:
+                r[k] = None
         return doc
     for r in rows:
         rep = reports.get(r.get("yf")) if r.get("yf") else None
         cov = (rep or {}).get(store) or {}
         r["dropped"] = bool(rep) and store == "clean" and not rep.get("admitted")
         r["drop_reason"] = rep.get("reason") if rep else None
+        for k in QUALITY_KEYS:
+            r[k] = cov.get(k)
         if rep:
             r["bars"] = cov.get("rows") or None
             for k in ("price_from", "price_to", "vol_from", "vol_to"):

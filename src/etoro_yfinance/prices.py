@@ -164,12 +164,28 @@ def quality_dir() -> Path:
 
 
 def store_coverage(df: pd.DataFrame) -> dict[str, Any]:
-    """One store's view of a series: how much of it there is and what it spans.
+    """One store's view of a series: how much of it there is, what it spans, and
+    the handful of scalars that betray a bad OHLCV series.
 
     ``rows`` counts bars, ``cells`` the non-NULL prices among them (the two
     diverge where the filter nulled a bad print). Price and volume coverage are
-    the first and last bar that actually carries one, which is what the universe
-    page shows per instrument."""
+    the first and last bar that actually carries one. The rest are quality
+    tells, each aimed at a failure mode this store actually contains:
+
+    * ``max_up`` / ``max_down`` — the extreme daily moves. A print error, an
+      unadjusted split or a reused symbol all show up here first and nowhere
+      else as clearly (TIA-USD's +68,063,638%).
+    * ``flat_pct`` — share of bars whose price did not move at all. Catches
+      dead listings, halted names and sub-penny quantization in one number;
+      an active instrument sits near zero, a stub near 100%.
+    * ``zero_vol_pct`` — share of bars that traded nothing. High means the
+      price is a quote, not a trade, so its returns are not harvestable.
+    * ``gap_days`` — the largest hole between consecutive bars. Separates a
+      continuous history from one stitched across a delisting.
+    * ``ohlc_bad`` — bars where ``close`` sits outside ``[low, high]``. A pure
+      internal contradiction: it cannot be a real bar, so any count above zero
+      means the source is unreliable (~19% of stocks, before repair).
+    """
     cov: dict[str, Any] = {"rows": len(df), "cells": 0}
     for field, col in (("price", "adj_close"), ("vol", "volume")):
         cov[f"{field}_from"] = cov[f"{field}_to"] = None
@@ -184,6 +200,47 @@ def store_coverage(df: pd.DataFrame) -> dict[str, Any]:
             cov[f"{field}_to"] = str(df.index[idx[-1]])[:10]
     cols = [c for c in _PRICE_COLS if c in df.columns]
     cov["cells"] = int(df[cols].notna().sum().sum()) if cols and len(df) else 0
+
+    cov.update(
+        max_up=None, max_down=None, flat_pct=None,
+        zero_vol_pct=None, gap_days=None, ohlc_bad=None,
+    )
+    if df.empty:
+        return cov
+
+    price = "adj_close" if "adj_close" in df.columns else "close"
+    if price in df.columns:
+        p = df[price].to_numpy(dtype="float64")
+        with np.errstate(invalid="ignore", divide="ignore"):
+            r = np.empty(len(p), dtype="float64")
+            r[0] = np.nan
+            r[1:] = p[1:] / p[:-1] - 1.0
+            fin = np.isfinite(r)
+        if fin.any():
+            cov["max_up"] = round(float(np.max(r[fin])), 4)
+            cov["max_down"] = round(float(np.min(r[fin])), 4)
+            cov["flat_pct"] = round(float(np.mean(r[fin] == 0.0) * 100), 2)
+
+    if "volume" in df.columns:
+        v = df["volume"].to_numpy(dtype="float64")
+        with np.errstate(invalid="ignore"):
+            fin = np.isfinite(v)
+        if fin.any():
+            cov["zero_vol_pct"] = round(float(np.mean(v[fin] == 0) * 100), 2)
+
+    if len(df) > 1:
+        days = pd.to_datetime(pd.Series(df.index)).diff().dt.days.to_numpy()[1:]
+        if len(days) and np.isfinite(days).any():
+            cov["gap_days"] = int(np.nanmax(days))
+
+    if {"high", "low", "close"} <= set(df.columns):
+        h, lo, c = (df[k].to_numpy(dtype="float64") for k in ("high", "low", "close"))
+        o = df["open"].to_numpy(dtype="float64") if "open" in df.columns else c
+        with np.errstate(invalid="ignore"):
+            bad = (h < np.fmax.reduce([o, c, lo]) * (1 - _OHLC_TOL)) | (
+                lo > np.fmin.reduce([o, c, h]) * (1 + _OHLC_TOL)
+            )
+        cov["ohlc_bad"] = int(np.nansum(bad))
     return cov
 
 
