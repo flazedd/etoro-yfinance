@@ -99,6 +99,14 @@ def test_metric_edge_cases() -> None:
     assert mon._stream_metrics(np.array([-1.0, 0.5]))["cagr"] == -1.0
 
 
+def test_calmar_is_cagr_over_max_drawdown() -> None:
+    r = np.array([0.1, -0.5, 0.1, 0.2, -0.05])
+    m = mon._stream_metrics(r)
+    assert m["calmar"] == pytest.approx(m["cagr"] / abs(m["maxdd"]))
+    # never drew down → the ratio is undefined, not infinite
+    assert mon._stream_metrics(np.array([0.01, 0.01, 0.01]))["calmar"] is None
+
+
 def test_sharpe_annualization() -> None:
     r = np.array([0.01, -0.005, 0.02, -0.01, 0.015])
     exp = r.mean() / r.std(ddof=1) * math.sqrt(252)
@@ -135,7 +143,7 @@ def test_vol_and_sma_variants_are_scored() -> None:
     down = list(up[-1] * (0.985 ** np.arange(1, 60)))
     gdf = mon.build_group_daily({"A": _series("2016-01-01", up + down)})
     m = mon.group_metrics(gdf)
-    for fam in ("cagr", "sharpe", "sortino", "maxdd"):
+    for fam in ("cagr", "sharpe", "sortino", "calmar", "maxdd"):
         assert m[f"{fam}_sma"] is not None
         assert m[f"{fam}_vol"] is not None
 
@@ -171,6 +179,90 @@ def test_net_metrics_credit_mm_yield_and_charge_costs() -> None:
     assert yielded["cagr_always"] == pytest.approx(0.0)
     # every metric key is present
     assert set(mon.METRIC_KEYS) <= set(yielded)
+
+
+def test_portfolio_of_one_sector_matches_that_sector() -> None:
+    # A single sector is the whole book: the strategy leg must reproduce that
+    # sector's own net metrics exactly (equal split over 1 bull sector = 100%).
+    series = _mkseries(
+        [100.0, 110.0, 121.0, 121.0, 110.0, 100.0, 105.0],
+        ["bull", "bull", "bull", "bear", "bear", "bull", "bull"],
+    )
+    p = mon.portfolio_metrics([series], "vol", mm_pct=3.0, cost_bps=20.0)
+    net = mon.sector_metrics_net(series, mm_pct=3.0, cost_bps=20.0)
+    assert p["n_sectors"] == 1
+    for fam in ("cagr", "sharpe", "sortino", "maxdd"):
+        assert p["strategy"][fam] == pytest.approx(net[f"{fam}_vol"])
+        assert p["always"][fam] == pytest.approx(net[f"{fam}_always"])
+        # with one live sector both denominators are 1 → the books coincide
+        assert p["strategy_cash"][fam] == pytest.approx(net[f"{fam}_vol"])
+
+
+def test_portfolio_splits_only_over_bull_sectors() -> None:
+    n = 6
+    bull = _mkseries([100.0 * 1.01**i for i in range(n)], ["bull"] * n)
+    bear = _mkseries([100.0 * 0.98**i for i in range(n)], ["bear"] * n)
+    p = mon.portfolio_metrics([bull, bear], "vol", mm_pct=0.0, cost_bps=0.0)
+    solo = mon.portfolio_metrics([bull], "vol", mm_pct=0.0, cost_bps=0.0)
+    assert p["n_sectors"] == 2
+    assert p["bull_now"] == 1
+    assert p["invested_now"] == pytest.approx(1.0)  # the one bull sector takes the whole book
+    assert p["strategy"]["cagr"] == pytest.approx(solo["strategy"]["cagr"])
+    # always-in holds both, so it lands between the two sector paths
+    assert p["always"]["cagr"] < solo["always"]["cagr"]
+    # the fixed-1/N book keeps the bear sector's half in cash → half the exposure
+    assert p["invested_now_cash"] == pytest.approx(0.5)
+    assert p["strategy_cash"]["cagr"] < p["strategy"]["cagr"]  # less risk on, less return
+
+
+def test_cash_denominator_de_risks_instead_of_concentrating() -> None:
+    # Three sectors; two turn bear while the third keeps rising. Bull-split hands
+    # the whole book to the survivor; fixed 1/N leaves 2/3 in cash.
+    n = 8
+    up = _mkseries([100.0 * 1.01**i for i in range(n)], ["bull"] * n)
+    down = _mkseries([100.0 * 0.97**i for i in range(n)], ["bear"] * n)
+    p = mon.portfolio_metrics([up, down, down], "vol", mm_pct=0.0, cost_bps=0.0)
+    assert p["bull_now"] == 1
+    assert p["live_now"] == 3
+    assert p["invested_now"] == pytest.approx(1.0)  # all-in on the one bull sector
+    assert p["invested_now_cash"] == pytest.approx(1 / 3, abs=1e-4)  # reported rounded to 4dp
+    # same signal, a third of the exposure → a third of the compounding
+    assert p["strategy_cash"]["cagr"] < p["strategy"]["cagr"]
+
+
+def test_portfolio_sectors_join_when_their_index_starts() -> None:
+    old = [
+        {"date": f"2020-01-{i + 1:02d}", "index": 100.0 * 1.01**i, "trend_label": "bull",
+         "exposure": 1.0}
+        for i in range(6)
+    ]
+    young = [  # starts three days late — must not weigh on the earlier days
+        {"date": f"2020-01-{i + 1:02d}", "index": 100.0 * 1.05 ** (i - 3), "trend_label": "bull",
+         "exposure": 1.0}
+        for i in range(3, 6)
+    ]
+    p = mon.portfolio_metrics([old, young], "vol", mm_pct=0.0, cost_bps=0.0)
+    solo = mon.portfolio_metrics([old], "vol", mm_pct=0.0, cost_bps=0.0)
+    assert p["date_from"] == "2020-01-01"
+    assert p["always"]["cagr"] > solo["always"]["cagr"]  # the faster young sector lifts the tail
+
+
+def test_portfolio_all_bear_sits_in_the_money_market() -> None:
+    n = 6
+    bear = _mkseries([100.0 * 0.98**i for i in range(n)], ["bear"] * n)
+    p = mon.portfolio_metrics([bear, bear], "vol", mm_pct=5.0, cost_bps=20.0)
+    assert p["bull_now"] == 0
+    assert p["invested_now"] == 0.0
+    assert p["strategy"]["cagr"] == pytest.approx(0.05, abs=1e-3)  # pure money-market yield
+    assert p["strategy"]["maxdd"] == pytest.approx(0.0)
+    assert p["strategy_cash"]["cagr"] == pytest.approx(0.05, abs=1e-3)  # both books are in cash
+    assert p["always"]["cagr"] < 0
+
+
+def test_portfolio_metrics_without_series() -> None:
+    p = mon.portfolio_metrics([None, []], "vol", 2.0, 20.0)
+    assert p["n_sectors"] == 0
+    assert p["always"] is None
 
 
 def test_net_edge_from_metrics() -> None:

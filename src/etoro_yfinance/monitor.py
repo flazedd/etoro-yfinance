@@ -49,7 +49,7 @@ VOL_CAP = 1.0  # max exposure (1.0 = no leverage; the brake can only de-risk)
 # 200-day-SMA cross — "old") and `_vol` (the vol-targeted variant — "new").
 # Higher is better for all four families (a shallower max-DD is a higher, less
 # negative number), so a filter "wins" a sector when its value exceeds always-in.
-_METRIC_FAMILIES = ("sharpe", "sortino", "cagr", "maxdd")
+_METRIC_FAMILIES = ("sharpe", "sortino", "calmar", "cagr", "maxdd")
 _METRIC_VARIANTS = ("always", "sma", "vol")
 METRIC_KEYS = tuple(f"{fam}_{v}" for fam in _METRIC_FAMILIES for v in _METRIC_VARIANTS)
 
@@ -164,6 +164,7 @@ def build_group_daily(members: dict[str, pd.Series]) -> pd.DataFrame:
     ret = pd.DataFrame(index=grid)
     for t, s in clean.items():
         ret[t] = s.sort_index().pct_change().reindex(grid)
+    ret = ret.replace([np.inf, -np.inf], np.nan)
     n_members = ret.notna().sum(axis=1)  # M_t
     group_return = ret.mean(axis=1, skipna=True)
     group_return[n_members == 0] = np.nan  # no computable return → NULL (§5.2)
@@ -180,11 +181,17 @@ def _max_drawdown(r: np.ndarray) -> float:
     return float((w / peak - 1.0).min())
 
 
+def _calmar(cagr: float, maxdd: float) -> float | None:
+    """CAGR ÷ |max drawdown| — return per unit of worst peak-to-trough pain.
+    None when the stream never drew down (the ratio is undefined, not infinite)."""
+    return None if maxdd >= 0.0 else cagr / abs(maxdd)
+
+
 def _stream_metrics(r: np.ndarray) -> dict[str, float | None]:
-    """CAGR / Sharpe / Sortino / max-drawdown for one daily-return stream."""
+    """CAGR / Sharpe / Sortino / Calmar / max-drawdown for one daily-return stream."""
     n = len(r)
     if n == 0:
-        return {"cagr": None, "sharpe": None, "sortino": None, "maxdd": None}
+        return {"cagr": None, "sharpe": None, "sortino": None, "calmar": None, "maxdd": None}
     prod = float(np.prod(1.0 + r))
     cagr = -1.0 if prod <= 0 else prod ** (TRADING_DAYS_YR / n) - 1.0
     mean = float(np.mean(r))
@@ -196,7 +203,14 @@ def _stream_metrics(r: np.ndarray) -> dict[str, float | None]:
     else:
         dd = float(np.std(neg, ddof=1))
         sortino = 0.0 if dd == 0 else mean / dd * math.sqrt(TRADING_DAYS_YR)
-    return {"cagr": cagr, "sharpe": sharpe, "sortino": sortino, "maxdd": _max_drawdown(r)}
+    maxdd = _max_drawdown(r)
+    return {
+        "cagr": cagr,
+        "sharpe": sharpe,
+        "sortino": sortino,
+        "calmar": _calmar(cagr, maxdd),
+        "maxdd": maxdd,
+    }
 
 
 def _filtered_stream(gr: np.ndarray, labels: list[str]) -> np.ndarray:
@@ -291,8 +305,8 @@ def _sector_returns(tickers: list[str]) -> tuple[pd.Series | None, int]:
     Each ticker's adj_close is repaired (CLAUDE.md), assembled into a wide
     matrix; the per-ticker return is vs its previous available day (``ffill`` +
     shift bridges non-trading gaps), then equal-weighted across the names present
-    each day. Fully vectorized over the matrix — no per-ticker Python loop for
-    the returns.
+    each day. The store is cleaned at ingestion, so nothing is repaired here.
+    Fully vectorized over the matrix — no per-ticker Python loop for the returns.
     """
     cols: dict[str, pd.Series] = {}
     for t in tickers:
@@ -487,6 +501,89 @@ def sector_metrics_net(
         for fam in _METRIC_FAMILIES:
             out[f"{fam}_{variant}"] = _num(m[fam], 6)
     return out
+
+
+def portfolio_metrics(
+    all_series: list[list[dict[str, Any]] | None],
+    variant: str,
+    mm_pct: float,
+    cost_bps: float,
+) -> dict[str, Any]:
+    """Three whole-universe books built by stacking every sector index, scored on
+    the same net basis as the table.
+
+    * ``always`` — equal weight over every sector alive that day, buy-and-hold.
+      Rebalanced daily; a sector joins the day its index starts.
+    * ``strategy`` — capital split equally over the sectors whose *previous*
+      close was bull: weight_i = position_i / (number of bull sectors), the
+      position being that sector's filter size (for ``vol``: its vol-target
+      exposure, so a sleeve is partly in cash too). The denominator shrinks as
+      sectors turn bear, so the book concentrates into whatever still trends.
+    * ``strategy_cash`` — same signal, fixed 1/N denominator: weight_i =
+      position_i / (number of sectors alive). A bear sector's slice goes to cash
+      instead of being handed to its bull peers, so the book de-risks rather
+      than concentrating — the sizing A/B against ``strategy``.
+
+    Both books credit uninvested capital the money-market yield and charge
+    ``cost_bps`` on every dollar of turnover. All-bear day → 100% money market.
+
+    Sector indices start on different dates and skip days their members did not
+    print; a sector counts only between its first and last bar, and a missing
+    bar inside that span is a 0% day with the position carried forward.
+    """
+    rets, poss = {}, {}
+    for i, series in enumerate(all_series):
+        if not series or len(series) < 2:
+            continue
+        ret, pos = _series_streams(series)
+        if variant not in pos:
+            continue
+        dates = [s["date"] for s in series]
+        rets[i], poss[i] = pd.Series(ret, index=dates), pd.Series(pos[variant], index=dates)
+    if not rets:
+        return {"n_sectors": 0, "always": None, "strategy": None, "strategy_cash": None}
+
+    r = pd.DataFrame(rets).sort_index()  # union grid; NaN where a sector has no bar
+    p = pd.DataFrame(poss).reindex(index=r.index, columns=r.columns)
+    bar = r.notna()
+    live = (bar.cumsum() > 0) & (bar[::-1].cumsum()[::-1] > 0)  # first..last bar of each sector
+    r0 = r.fillna(0.0)  # a missing bar inside the span is a flat day
+    pos_eff = p.ffill().where(live, 0.0).fillna(0.0)  # hold through gaps, flat outside the span
+
+    always = r0.where(live).mean(axis=1, skipna=True).fillna(0.0).to_numpy(dtype="float64")
+
+    n_bull = (pos_eff > 0).sum(axis=1)
+    n_live = live.sum(axis=1)
+    mm_daily = (1.0 + mm_pct / 100.0) ** (1.0 / TRADING_DAYS_YR) - 1.0
+
+    def book(denom: pd.Series) -> tuple[dict[str, float | None], float | None]:
+        """Score a book whose weights are position ÷ `denom`; the rest is cash."""
+        w = pos_eff.div(denom.replace(0, np.nan), axis=0).fillna(0.0)
+        invested = w.sum(axis=1)
+        turnover = w.sub(w.shift(1).fillna(0.0)).abs().sum(axis=1)
+        stream = (
+            (w * r0).sum(axis=1) + (1.0 - invested) * mm_daily - turnover * (cost_bps / 1e4)
+        ).to_numpy(dtype="float64")
+        m = _stream_metrics(stream)
+        return {fam: _num(m[fam], 6) for fam in _METRIC_FAMILIES}, _num(
+            float(invested.iloc[-1]), 4
+        )
+
+    m_always = _stream_metrics(always)
+    m_bull, invested_now = book(n_bull)  # split over the bull sectors only
+    m_cash, invested_now_cash = book(n_live)  # fixed 1/N, bear slices → cash
+    return {
+        "n_sectors": len(rets),
+        "always": {fam: _num(m_always[fam], 6) for fam in _METRIC_FAMILIES},
+        "strategy": m_bull,
+        "strategy_cash": m_cash,
+        "date_from": str(r.index[0]),
+        "date_to": str(r.index[-1]),
+        "bull_now": int(n_bull.iloc[-1]),
+        "live_now": int(n_live.iloc[-1]),
+        "invested_now": invested_now,
+        "invested_now_cash": invested_now_cash,
+    }
 
 
 def net_edge(

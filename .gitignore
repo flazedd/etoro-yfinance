@@ -201,6 +201,9 @@ data/eligibility_cache.json
 data/ecb_rates.parquet
 data/prices/
 data/prices_eur/
+data/prices_raw/
+data/quality/
+data/monitor/
 .build/
 data/liquidity_cache.json
 data/spread_cache.json
@@ -208,3 +211,4 @@ data/etf_category_cache.json
 data/sector_override_cache.json
 data/universe_*.json
 data/alphalab/
+

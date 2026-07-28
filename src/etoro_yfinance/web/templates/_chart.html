@@ -7,8 +7,12 @@
         {% if span %}<span class="text-slate-400"> · {{ span[0] }} → {{ span[1] }} · {{ '{:,}'.format(span[2]) }} bars</span>{% endif %}
         · scale: <b>{{ 'log' if log else 'linear' }}</b>
         <a class="text-blue-600 hover:underline"
-           hx-get="/universe/chart?t={{ ticker|urlencode }}&name={{ name|urlencode }}&scale={{ 'linear' if log else 'log' }}"
+           hx-get="/universe/chart?t={{ ticker|urlencode }}&name={{ name|urlencode }}&scale={{ 'linear' if log else 'log' }}&store={{ store|default('clean') }}"
            hx-target="#chart-modal" hx-swap="innerHTML">(switch to {{ 'linear' if log else 'log' }})</a>
+        {% if store is defined %}· data: <b class="{{ 'text-amber-600' if store == 'raw' else 'text-slate-700' }}">{{ store }}</b>
+        <a class="text-blue-600 hover:underline"
+           hx-get="/universe/chart?t={{ ticker|urlencode }}&name={{ name|urlencode }}&scale={{ 'log' if log else 'linear' }}&store={{ 'clean' if store == 'raw' else 'raw' }}"
+           hx-target="#chart-modal" hx-swap="innerHTML">(show {{ 'clean' if store == 'raw' else 'raw' }})</a>{% endif %}
         {% if ticker %}· <a class="text-blue-600 hover:underline" target="_blank" rel="noopener"
            href="https://finance.yahoo.com/quote/{{ ticker }}">Yahoo ↗</a>{% endif %}
       </div>

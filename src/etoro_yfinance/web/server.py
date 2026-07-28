@@ -77,6 +77,7 @@ def create_app() -> FastAPI:
         min_adv: str = "",
         sector: str = "",
         view: str = "",
+        store: str = datamod.DEFAULT_STORE,
     ) -> HTMLResponse:
         ctx = _universe_ctx(
             q=q,
@@ -86,6 +87,7 @@ def create_app() -> FastAPI:
             min_adv=min_adv,
             sector=sector,
             view=view,
+            store=store,
         )
         age = datamod.snapshot_age_seconds("etoro_universe_mapping.json", time.time())
         return page(
@@ -111,6 +113,7 @@ def create_app() -> FastAPI:
         min_adv: str = "",
         sector: str = "",
         view: str = "",
+        store: str = datamod.DEFAULT_STORE,
     ) -> HTMLResponse:
         ctx = _universe_ctx(
             q=q,
@@ -120,6 +123,7 @@ def create_app() -> FastAPI:
             min_adv=min_adv,
             sector=sector,
             view=view,
+            store=store,
         )
         return templates.TemplateResponse(request, "_universe_rows.html", {"oob": True, **ctx})
 
@@ -163,11 +167,19 @@ def create_app() -> FastAPI:
 
     @app.get("/universe/chart", response_class=HTMLResponse)
     def universe_chart(
-        request: Request, t: str = "", name: str = "", scale: str = "log"
+        request: Request,
+        t: str = "",
+        name: str = "",
+        scale: str = "log",
+        store: str = datamod.DEFAULT_STORE,
     ) -> HTMLResponse:
         """Modal fragment: side-by-side price+volume charts for one yfinance
         ticker — native (left) and EUR-converted (right), read from the local
-        Parquet stores. Log price by default (scale=linear switches both)."""
+        Parquet stores. Log price by default (scale=linear switches both).
+
+        `store` follows the page toggle: "raw" plots Yahoo as fetched, so the
+        bad prints the filter removed are visible side by side with the clean
+        series. There is no raw euro store, so that panel stays clean."""
         from etoro_yfinance import currency, prices
 
         from . import charts
@@ -189,7 +201,8 @@ def create_app() -> FastAPI:
             )
             return svg, span, last[0], last[1]
 
-        native = panel(prices.load_prices(t) if t else None)
+        raw = store == "raw"
+        native = panel(prices.load_prices(t, raw=raw) if t else None)
         eur = panel(prices.load_prices(t, eur=True) if t else None)
         ccy = currency.currency_for(t, None) if t else None
         return templates.TemplateResponse(
@@ -199,6 +212,7 @@ def create_app() -> FastAPI:
                 "ticker": t,
                 "name": name,
                 "log": log,
+                "store": store if store in datamod.STORES else datamod.DEFAULT_STORE,
                 "ccy": ccy or "native",
                 "svg": native[0],
                 "span": native[1],
@@ -910,19 +924,22 @@ def create_app() -> FastAPI:
         variant: str = monitor_mod.DEFAULT_FILTER, mm: float = 2.0, cost: float = 20.0
     ) -> dict[str, Any]:
         variant = _monitor_variant(variant)
-        sectors, edges = [], []
+        sectors, edges, all_series = [], [], []
         for name in monitor_mod.list_sectors():
             doc = monitor_mod.load_cache(name)  # one read; drives summary + net metrics
             summ = monitor_mod.summarize(name, doc)
-            net_metrics = monitor_mod.sector_metrics_net((doc or {}).get("series"), mm, cost)
+            series = (doc or {}).get("series")
+            net_metrics = monitor_mod.sector_metrics_net(series, mm, cost)
             if any(v is not None for v in net_metrics.values()):
                 summ["metrics"] = net_metrics  # all f/a columns + scorecard are now net
             edge = monitor_mod.net_edge(summ["metrics"], variant)
             summ["net"] = edge
             sectors.append(summ)
             edges.append(edge)
+            all_series.append(series)
         return {
             "sectors": sectors,
+            "portfolio": monitor_mod.portfolio_metrics(all_series, variant, mm, cost),
             "computing": monitor_job["running"],
             "scorecard": monitor_mod.filter_scorecard(sectors),
             "net": monitor_mod.net_summary(edges),
@@ -1056,10 +1073,15 @@ def _universe_ctx(
     min_adv: str,
     sector: str,
     view: str,
+    store: str = datamod.DEFAULT_STORE,
 ) -> dict[str, Any]:
     """The shared template context for the universe page and its HTMX row
-    refresh: filtered rows (capped), facet counts, and column-visibility flags."""
-    snap = datamod.load_etoro_universe()
+    refresh: filtered rows (capped), facet counts, and column-visibility flags.
+
+    `store` selects which price store the yfinance coverage columns describe —
+    "clean" (what the research reads) or "raw" (Yahoo as fetched)."""
+    store = store if store in datamod.STORES else datamod.DEFAULT_STORE
+    snap = datamod.load_etoro_universe(store)
     all_rows = snap.get("rows", [])
     saved = universe_mod.list_saved()
     madv = _to_float(min_adv)
@@ -1094,6 +1116,9 @@ def _universe_ctx(
         "status": status,
         "sector": sector,
         "view": view,
+        "store": store,
+        "stores": datamod.STORES,
+        "dropped_count": sum(1 for r in rows if r.get("dropped")),
         "saved_universes": saved,
         **facets,
         "validated": bool(counts.get("validated")),

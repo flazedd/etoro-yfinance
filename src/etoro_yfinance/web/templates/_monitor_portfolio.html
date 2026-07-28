@@ -1,0 +1,50 @@
+{# Whole-universe books, stacked from every sector index and scored on the same
+   net basis as the table below: equal-weight-all-sectors buy-and-hold vs the
+   filter strategy (capital split equally over the bull sectors, each sleeve
+   sized by the selected filter's position). Plain <table> — NOT `sortable`. #}
+{% if portfolio and portfolio.n_sectors and portfolio.always %}
+{% macro cell(v, base, pct) %}
+  {%- if v is none -%}<span class="text-slate-300">—</span>
+  {%- else -%}
+    {%- set tint = '' if base is none else ('text-emerald-600' if v > base else ('text-rose-600' if v < base else '')) -%}
+    <b class="{{ tint }}">{{ '%.1f%%'|format(v * 100) if pct else '%.2f'|format(v) }}</b>
+  {%- endif -%}
+{% endmacro %}
+{% macro book(label, m, base, tip) %}
+  <tr>
+    <td class="px-3 py-1 font-medium whitespace-nowrap" data-tip="{{ tip }}">{{ label }} <span class="text-slate-300">ⓘ</span></td>
+    <td class="px-3 py-1 tabular whitespace-nowrap" style="text-align:right">{{ cell(m.cagr, base.cagr if base else none, true) }}</td>
+    <td class="px-3 py-1 tabular whitespace-nowrap" style="text-align:right">{{ cell(m.sharpe, base.sharpe if base else none, false) }}</td>
+    <td class="px-3 py-1 tabular whitespace-nowrap" style="text-align:right">{{ cell(m.sortino, base.sortino if base else none, false) }}</td>
+    <td class="px-3 py-1 tabular whitespace-nowrap" style="text-align:right">{{ cell(m.calmar, base.calmar if base else none, false) }}</td>
+    <td class="px-3 py-1 tabular whitespace-nowrap" style="text-align:right">{{ cell(m.maxdd, base.maxdd if base else none, true) }}</td>
+  </tr>
+{% endmacro %}
+<div class="px-3 py-2 border-b border-slate-200 bg-slate-50">
+  <div class="text-xs font-semibold text-slate-500 mb-1">Whole-universe books
+    <span class="text-slate-400" style="font-weight:400">— {{ portfolio.n_sectors }} sector indices stacked, {{ portfolio.date_from }} → {{ portfolio.date_to }},
+      net of {{ mm }}%/yr money-market &amp; {{ cost }} bps costs · {{ portfolio.bull_now }} of {{ portfolio.live_now }} sectors bull today
+      → invested {{ (portfolio.invested_now * 100) | round | int if portfolio.invested_now is not none else '—' }}% (bull-split)
+      vs {{ (portfolio.invested_now_cash * 100) | round | int if portfolio.invested_now_cash is not none else '—' }}% (fixed 1/N)</span></div>
+  <table class="text-sm">
+    <thead class="text-slate-500 text-xs">
+      <tr>
+        <th class="px-3 py-1 font-medium" style="text-align:left">Book</th>
+        <th class="px-3 py-1 font-medium" style="text-align:right">CAGR</th>
+        <th class="px-3 py-1 font-medium" style="text-align:right">Sharpe</th>
+        <th class="px-3 py-1 font-medium" style="text-align:right">Sortino</th>
+        <th class="px-3 py-1 font-medium" style="text-align:right">Calmar</th>
+        <th class="px-3 py-1 font-medium" style="text-align:right">Max DD</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ book('All sectors, always-in', portfolio.always, none,
+              'Equal weight over every sector index alive that day, rebalanced daily and held throughout — no filter, no cash leg, no costs. The benchmark for both strategy rows.') }}
+      {{ book(filter_labels[variant] ~ ' · split over bull sectors', portfolio.strategy, portfolio.always,
+              'weight = position ÷ number of BULL sectors.&#10;&#10;Capital split equally over the sectors whose previous close was bull; each sleeve is then sized by that sector&#39;s ' ~ filter_labels[variant] ~ ' position (vol-target: the exposure %, so part of a sleeve sits in cash). The denominator shrinks as sectors turn bear, so the book concentrates into whatever still trends.&#10;&#10;Coloured green where it beats always-in.') }}
+      {{ book(filter_labels[variant] ~ ' · fixed 1/N, rest in cash', portfolio.strategy_cash, portfolio.always,
+              'weight = position ÷ number of sectors ALIVE.&#10;&#10;Same signal and sleeve sizing, fixed denominator: a bear sector&#39;s slice goes to the money market instead of being handed to its bull peers, so the book de-risks rather than concentrating. The sizing A/B against the row above.&#10;&#10;Coloured green where it beats always-in.') }}
+    </tbody>
+  </table>
+</div>
+{% endif %}

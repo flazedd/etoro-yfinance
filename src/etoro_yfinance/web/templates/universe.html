@@ -23,6 +23,8 @@
     map it to yfinance, and write <code>data/etoro_universe_mapping.json</code>.
   </div>
 {% else %}
+<div id="store-switch" class="mb-3">{% include "_store_switch.html" %}</div>
+
 {% set c = snap.counts %}
 <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-4">
   {% set cards = [
@@ -41,7 +43,7 @@
   {% endfor %}
 </div>
 
-<form class="flex flex-wrap gap-3 items-end mb-3"
+<form id="universe-filters" class="flex flex-wrap gap-3 items-end mb-3"
       hx-get="/universe/rows" hx-target="#rows-wrap" hx-trigger="input changed delay:200ms, change"
       hx-push-url="false">
   <input name="q" value="{{ q }}" placeholder="search eToro symbol / name / yfinance ticker"
@@ -57,6 +59,8 @@
     <input type="checkbox" name="show_internal" value="true" {{ 'checked' if show_internal }}>
     show internal
   </label>
+  {# Set by the price-store switch above the cards; submitted with every filter. #}
+  <input type="hidden" name="store" id="store-input" value="{{ store }}">
   <button type="button" class="chart-btn ml-auto" hx-get="/universe/new" hx-target="#chart-modal">+ create universe</button>
 </form>
 

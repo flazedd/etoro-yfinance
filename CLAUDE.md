@@ -18,6 +18,19 @@ uv run python scripts/fetch_factors.py          # ingest missing covariance fact
 
 Always run Python via `uv run python` — never bare `python`/`python3`.
 
+## Tests: unit tests only
+
+**The suite must stay fast enough to run after every edit (~2s).** Only unit
+tests belong in `tests/`: pure functions and small synthetic frames, no network,
+no real price store, no web server, no browser, no sleeping. A test that needs
+the data on disk is not a unit test — build a tmp store via `MOMENTUM_DATA_DIR`
+(see the `data_dir` fixture in `tests/test_prices.py`) or synthesise the few
+bars the case needs.
+
+Verify against real data or a running app **ad hoc from the shell**, not by
+adding a slow test — that check is for the change you are making now, and the
+suite pays its cost forever.
+
 ## What this repo is
 
 Quant research stack on the eToro tradable universe (~15k instruments mapped to
@@ -28,15 +41,46 @@ web never touches broker credentials.
 
 ## Architecture (the parts that span files)
 
-**Data layer** — `src/etoro_yfinance/prices.py`. Per-ticker Parquet files in
-`data/prices/` (native OHLCV) and `data/prices_eur/` (ECB-converted; `volume` =
-EUR turnover). `load_prices(ticker, eur=, columns=)` reads only requested
-columns. **Always run adjusted closes through `repair_adj_close(df)`**: Yahoo's
-adjustment chains are occasionally corrupt (e.g. TELIA1.HE printed a persistent
-×14 overnight jump); the repair splices out bars where the adj_close return
-diverges ≥×1.8 from the close return while close stays calm. Splits and real
-spikes are untouched. `MOMENTUM_DATA_DIR` env var relocates the data dir (tests
-use it with tmp stores).
+**Data layer** — `src/etoro_yfinance/prices.py`. Three per-ticker Parquet
+stores, **all floored at `MIN_DATE` = 1999-01-04** (the euro's first ECB fixing,
+so the three stores cover the same span):
+`data/prices_raw/` (Yahoo as fetched — the record), `data/prices/` =
+`clean_frame(raw)` (what research reads), `data/prices_eur/` = `to_eur(clean)`
+(ECB-converted; `volume` = EUR turnover). `load_prices(ticker, eur=, raw=,
+columns=)` reads only requested columns.
+
+**Quality is enforced at ingestion, not by callers.** `write_prices` fills raw
+and clean together; `clean_frame` cuts to `MIN_DATE`, drops Yahoo's *negative*
+adjustment factor (BZU.MI stored `adj_close` −95.83 against `close` 4.66, whose
+sign flip read as −103%), applies splits Yahoo left out of `adj_close` (GDC's
+1:250 landed as +20,650%), nulls bad prints via a two-sided local-median test
+(a bar ≥5× from the median *before* **and** *after* it), truncates at
+redenominations (a ×100 jump that persists = a reused symbol, e.g. ZETA-USD
+0.000060 → 1.6708), and nulls `high`/`low` that contradict `open`/`close`
+(~19% of stocks had bars where `close` sat outside the range). `repair_adj_close`
+still exists and runs inside `clean_frame`; **stored series never need it
+again**. Re-tuning a threshold means `scripts/clean_store.py --apply` (rebuild
+clean from raw) then `scripts/build_eur_series.py` — never a re-fetch.
+
+Reverse splits whose `splits` value explains the jump are deliberately left
+alone (PPCB's 1:2 stamped on a ×62,500 bar does *not* explain it, so that one
+is treated as a redenomination).
+
+**Instrument admission** — `rejection_reason(df)` drops whole series rather
+than repairing bars, so they exist in `prices_raw/` but in neither other store:
+`frozen` (≥ `MAX_FROZEN_RUN` = 60 identical closes in a row — a dead or halted
+listing whose flat stretch reads as zero volatility and flatters vol-targeting,
+Sortino and every low-vol signal) and `sub-penny` (median close < `MIN_PRICE` =
+0.01, where one tick is a whole return). Currently 444 of 9,432 rejected: 406
+frozen, 29 sub-penny, 9 empty. A ticker that goes stale later is removed from
+the clean and euro stores on its next ingest.
+
+**Every ingested series is audited.** `write_prices` writes
+`data/quality/<ticker>.json` (admitted/reason, rows and price cells raw vs
+clean, worst raw move, frozen run, median price); `scripts/data_quality.py`
+aggregates them, `--rescan` recomputes from the stores after a threshold
+change, `--rejects` lists every excluded ticker. `MOMENTUM_DATA_DIR` env var
+relocates the data dir (tests use it with tmp stores).
 
 **Universes** — `src/etoro_yfinance/universe.py`. Saved as
 `data/universe_<name>.json`; `universe.load(name)["instruments"]` gives rows

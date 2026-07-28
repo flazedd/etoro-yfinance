@@ -1,0 +1,18 @@
+{# Price-store switch — governs every yfinance column on the page and the
+   charts. The buttons live above the count cards, but the value they set rides
+   in the filter form's hidden `store` input so it is submitted with every other
+   filter. Re-rendered out-of-band with the rows so the active side stays lit. #}
+<div class="flex items-center gap-2 text-xs text-slate-500">
+  <span data-tip="Which price store the yfinance columns and charts describe.&#10;&#10;clean: what the research reads — quality filter applied, instruments it rejected are struck through.&#10;raw: Yahoo as fetched, before any repair.">price store <span class="text-slate-300">ⓘ</span></span>
+  <div class="inline-flex rounded-md border border-slate-300 overflow-hidden">
+    {% for s in stores %}
+    <button type="button"
+            onclick="document.getElementById('store-input').value='{{ s }}';
+                     htmx.trigger(document.getElementById('universe-filters'), 'change')"
+            class="px-3 py-1.5 font-medium {{ 'bg-slate-800 text-white' if store == s else 'bg-white text-slate-600 hover:bg-slate-50' }}">
+      {{ s }}{% if s == 'clean' %} <span class="{{ 'text-slate-300' if store == s else 'text-slate-400' }}">default</span>{% endif %}
+    </button>
+    {% endfor %}
+  </div>
+  {% if store == 'raw' %}<span class="text-amber-600">Yahoo as fetched — nothing repaired, nothing excluded.</span>{% endif %}
+</div>

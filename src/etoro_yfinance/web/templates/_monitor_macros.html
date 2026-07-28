@@ -31,6 +31,7 @@
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['cagr_' ~ variant] if m['cagr_' ~ variant] is not none else '' }}">{{ metric(m['cagr_' ~ variant], m['cagr_always'], true) }}</td>
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['sharpe_' ~ variant] if m['sharpe_' ~ variant] is not none else '' }}">{{ metric(m['sharpe_' ~ variant], m['sharpe_always'], false) }}</td>
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['sortino_' ~ variant] if m['sortino_' ~ variant] is not none else '' }}">{{ metric(m['sortino_' ~ variant], m['sortino_always'], false) }}</td>
+  <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['calmar_' ~ variant] if m['calmar_' ~ variant] is not none else '' }}">{{ metric(m['calmar_' ~ variant], m['calmar_always'], false) }}</td>
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ m['maxdd_' ~ variant] if m['maxdd_' ~ variant] is not none else '' }}">{{ metric(m['maxdd_' ~ variant], m['maxdd_always'], true) }}</td>
   <td class="px-3 py-2 tabular text-xs whitespace-nowrap" data-sort-value="{{ s.net.edge if s.net else '' }}">
     {% if s.net %}<span class="{{ 'text-emerald-600' if s.net.edge > 0 else 'text-rose-600' }}"

@@ -5,6 +5,8 @@
 } %}
 <div class="px-3 py-2 text-xs text-slate-500 border-b border-slate-100">
   {{ '{:,}'.format(shown) }} instruments{% if shown > rows|length %} · showing first {{ '{:,}'.format(rows|length) }} — narrow the filter{% endif %} · click a column to sort
+  · yfinance columns from the <b class="{{ 'text-amber-600' if store == 'raw' else 'text-slate-600' }}">{{ store }}</b> store{% if store == 'raw' %} (Yahoo as fetched, unrepaired){% endif %}{% if dropped_count %}
+  · <b class="text-rose-600">{{ '{:,}'.format(dropped_count) }}</b> struck through — rejected by the quality filter{% endif %}
 </div>
 {% set src_label = {'etoro':'eToro', 'yfinance':'yfinance', 'derived':'derived'} %}
 {% macro th(label, source, sort=true, numeric=false) %}
@@ -87,7 +89,11 @@
       {% endif %}
       {# ── yfinance ── #}
       <td class="px-3 py-1.5 tabular font-medium" data-sort-value="{{ (r.yf or '')|lower }}">
-        {% if r.yf %}{{ r.yf }}{% else %}<span class="text-slate-300">—</span>{% endif %}
+        {% if not r.yf %}<span class="text-slate-300">—</span>
+        {% elif r.dropped %}<span style="text-decoration:line-through" class="text-slate-400"
+             data-tip="Rejected by the quality filter ({{ r.drop_reason }}) — present in the raw store, absent from the clean and euro stores.">{{ r.yf }}</span>
+          <span class="badge bg-rose-100 text-rose-700">{{ r.drop_reason }}</span>
+        {% else %}{{ r.yf }}{% endif %}
       </td>
       {% if validated %}
         <td class="px-3 py-1.5 tabular text-xs" data-sort-value="{{ r.bars or 0 }}">
@@ -112,7 +118,7 @@
              hx-get="/universe/rules?t={{ r.instrument_id }}&name={{ (r.name or '')|urlencode }}&sym={{ (r.symbol or '')|urlencode }}"
              hx-target="#chart-modal" hx-swap="innerHTML">Rules</button>{% endif %}
         {% if r.yf %}<button class="chart-btn mr-2 align-middle" title="View price & volume chart"
-             hx-get="/universe/chart?t={{ r.yf|urlencode }}&name={{ (r.name or '')|urlencode }}"
+             hx-get="/universe/chart?t={{ r.yf|urlencode }}&name={{ (r.name or '')|urlencode }}&store={{ store }}"
              hx-target="#chart-modal" hx-swap="innerHTML">Chart</button>
         <a class="text-blue-600 hover:underline text-xs align-middle" href="https://finance.yahoo.com/quote/{{ r.yf }}" target="_blank" rel="noopener">Y↗</a>{% endif %}
       </td>
@@ -123,4 +129,6 @@
   {% endif %}
   </tbody>
 </table>
-{% if oob %}{% include "_facets_oob.html" %}{% endif %}
+{% if oob %}{% include "_facets_oob.html" %}
+<div id="store-switch" class="mb-3" hx-swap-oob="true">{% include "_store_switch.html" %}</div>
+{% endif %}

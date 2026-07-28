@@ -135,17 +135,70 @@ def _overlay_sector(doc: dict[str, Any]) -> dict[str, Any]:
     return doc
 
 
-def load_etoro_universe() -> dict[str, Any]:
+STORES = ("clean", "raw")
+DEFAULT_STORE = "clean"  # the universe page opens on what the research reads
+
+
+def load_quality() -> dict[str, Any]:
+    """Every ingested series' quality report, keyed by yfinance ticker.
+
+    Written per-ticker at ingestion by `prices.write_quality` (one small JSON
+    each, so parallel writers never clobber one another). Empty dict before the
+    first ingest, which just leaves the store columns blank."""
+    d = data_dir() / "quality"
+    if not d.is_dir():
+        return {}
+    out: dict[str, Any] = {}
+    for p in d.glob("*.json"):
+        rep = _load(p)
+        if rep.get("ticker"):
+            out[rep["ticker"]] = rep
+    return out
+
+
+def _overlay_store(doc: dict[str, Any], store: str) -> dict[str, Any]:
+    """Point the yfinance coverage columns at one of the price stores.
+
+    The snapshot's own `bars`/`price_from`/`vol_from` describe Yahoo's download
+    at mapping time — before the quality filter existed. These are what each
+    store actually holds now, so the page can be read as either the raw record
+    or what the research sees. `dropped` marks an instrument the clean store
+    rejected outright, with `drop_reason` saying why."""
+    rows = doc.get("rows")
+    if not rows:
+        return doc
+    reports = load_quality()
+    if not reports:
+        for r in rows:
+            r["dropped"] = False
+            r["drop_reason"] = None
+        return doc
+    for r in rows:
+        rep = reports.get(r.get("yf")) if r.get("yf") else None
+        cov = (rep or {}).get(store) or {}
+        r["dropped"] = bool(rep) and store == "clean" and not rep.get("admitted")
+        r["drop_reason"] = rep.get("reason") if rep else None
+        if rep:
+            r["bars"] = cov.get("rows") or None
+            for k in ("price_from", "price_to", "vol_from", "vol_to"):
+                r[k] = cov.get(k)
+    doc.setdefault("counts", {})["validated"] = True
+    return doc
+
+
+def load_etoro_universe(store: str = DEFAULT_STORE) -> dict[str, Any]:
     """The eToro universe → yfinance mapping written by
     `scripts/etoro_universe.py`: every eToro tradable instrument mapped to its
     yfinance analysis ticker (or flagged unmapped/internal). Empty dict if the
     builder hasn't run. Shape: `{generated_at, counts, exchanges, rows:[{instrument_id,
     symbol, name, type, exchange, yf, status, isin, price_from, price_to,
     vol_from, vol_to, bars}]}`. Coverage fields are overlaid live from the
-    validation cache when present.
+    validation cache when present, then repointed at the requested price store
+    (`store`: "clean" — what the research reads — or "raw").
     """
     doc = _load(data_dir() / "etoro_universe_mapping.json")
-    return _overlay_sector(_overlay_liquidity(_overlay_eligibility(_overlay_coverage(doc))))
+    doc = _overlay_sector(_overlay_liquidity(_overlay_eligibility(_overlay_coverage(doc))))
+    return _overlay_store(doc, store if store in STORES else DEFAULT_STORE)
 
 
 def load_instrument_rules(instrument_id: str) -> dict[str, Any] | None:

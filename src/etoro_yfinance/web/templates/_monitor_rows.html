@@ -14,6 +14,8 @@
 </div>
 {% endif %}
 
+{% include "_monitor_portfolio.html" %}
+
 {% if sectors and net and net.n %}
 <div class="text-xs px-3 py-2 border-b border-slate-100 text-slate-500">
   At <b>{{ mm }}%/yr</b> money-market yield and <b>{{ cost }} bps</b> costs, the
@@ -40,6 +42,7 @@
       {{ sth('CAGR f/a', num=true, tip='filtered / always-in&#10;&#10;CAGR of the 200d-MA-filtered stream vs staying invested. Sorts on filtered. Green = the filter helped, red = it hurt.') }}
       {{ sth('Sharpe f/a', num=true, tip='filtered / always-in Sharpe (rf = 0, ×√252). Sorts on filtered.') }}
       {{ sth('Sortino f/a', num=true, tip='filtered / always-in Sortino (downside deviation only). Sorts on filtered.') }}
+      {{ sth('Calmar f/a', num=true, tip='filtered / always-in Calmar (CAGR ÷ |max drawdown|) — return per unit of worst peak-to-trough pain. Sorts on filtered; higher is better. Blank when the stream never drew down.') }}
       {{ sth('Max DD f/a', num=true, tip='filtered / always-in max drawdown (worst peak-to-trough). Sorts on filtered; shallower — less negative — is better.') }}
       {{ sth('MM edge', num=true, tip='Net annual return of the selected filter (idle cash earns the money-market yield, minus transaction costs on turnover) minus buy-and-hold. ✓ positive = using the filter + money-market fund is profitable vs just holding. Set the yield & cost in the header.') }}
       <th class="px-3 py-2 font-medium">Chart</th>
